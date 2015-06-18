@@ -1,0 +1,3 @@
+Djumble: Stands for Dis-Jumble and simple means that separates a set of vectors into clusters based on a paradigm-based-clustering a.k.a Semi-Supervised Clustering.
+
+The Semi-Supervised Clustering is build here is based on Chapelle et al. publication on Hidden Markov Random Fields (HMRF) Kmeans.
