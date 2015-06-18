@@ -96,13 +96,26 @@
 	"buffers":
 	[
 		{
-			"contents": "",
 			"file": ".gitingnore",
-			"file_size": -1,
-			"file_write_time": -1,
 			"settings":
 			{
-				"buffer_size": 0,
+				"buffer_size": 22,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "README",
+			"settings":
+			{
+				"buffer_size": 296,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "djumble/hmrf_kmeans.py",
+			"settings":
+			{
+				"buffer_size": 22,
 				"line_ending": "Unix"
 			}
 		}
@@ -114,13 +127,13 @@
 	"build_varint": "",
 	"command_palette":
 	{
-		"height": 306.0,
-		"last_filter": "",
+		"height": 369.0,
+		"last_filter": "Package Control: ",
 		"selected_items":
 		[
 			[
 				"Package Control: ",
-				"Package Control: Install Package"
+				"Package Control: Disable Package"
 			],
 			[
 				"",
@@ -147,7 +160,7 @@
 				"Package Control: Install Package"
 			]
 		],
-		"width": 602.0
+		"width": 449.0
 	},
 	"console":
 	{
@@ -169,10 +182,12 @@
 	},
 	"expanded_folders":
 	[
-		"/home/dimitrios/Development_Workspace/Djumble"
+		"/home/dimitrios/Development_Workspace/Djumble",
+		"/home/dimitrios/Development_Workspace/Djumble/djumble"
 	],
 	"file_history":
 	[
+		"/home/dimitrios/.config/sublime-text-3/Packages/Anaconda/Anaconda.sublime-settings",
 		"/home/dimitrios/Development_Workspace/scikit-learn/sklearn/decomposition/pca.py",
 		"/usr/lib/python2.7/dist-packages/sklearn/decomposition/pca.py",
 		"/home/dimitrios/Development_Workspace/DoGSWrapper/src/RFSE_KI04_4C_jaccard.py",
@@ -299,12 +314,11 @@
 		"/home/dimitrios/Synergy-Crawler/KI-04/Kfolds_Vocabularies_4grams/kfold_trn_0.idx",
 		"/home/dimitrios/Development_Workspace/html2vectors/src/html2vect/base/html2terms.py",
 		"/home/dimitrios/Development_Workspace/html2vectors/src/html2vect/base/convert/tfdtools.py",
-		"/home/dimitrios/Development_Workspace/html2vectors/src/html2vect/sparse/cngrams.py",
-		"/home/dimitrios/Synergy-Crawler/KI-04/Kfolds_Vocabularies_4grams/kfold_trn_1.idx"
+		"/home/dimitrios/Development_Workspace/html2vectors/src/html2vect/sparse/cngrams.py"
 	],
 	"find":
 	{
-		"height": 25.0
+		"height": 35.0
 	},
 	"find_in_files":
 	{
@@ -466,7 +480,7 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 2,
 			"sheets":
 			[
 				{
@@ -475,19 +489,81 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 0,
+						"buffer_size": 22,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								22,
+								22
 							]
 						],
 						"settings":
 						{
+							"side_bar_folders_auto_load_folder": 1,
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "README",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 296,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								296,
+								296
+							]
+						],
+						"settings":
+						{
+							"side_bar_folders_auto_load_folder": 1,
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "djumble/hmrf_kmeans.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 22,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								22,
+								22
+							]
+						],
+						"settings":
+						{
+							"rulers":
+							[
+								100
+							],
 							"side_bar_folders_auto_load_folder": 1,
 							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
