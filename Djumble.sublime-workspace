@@ -4,6 +4,22 @@
 		"selected_items":
 		[
 			[
+				"rand",
+				"random	statement"
+			],
+			[
+				"ran",
+				"random_sample	function"
+			],
+			[
+				"r",
+				"random	module"
+			],
+			[
+				"mat",
+				"matrix	module"
+			],
+			[
 				"d",
 				"dtype"
 			],
@@ -96,33 +112,62 @@
 	"buffers":
 	[
 		{
-			"file": ".gitingnore",
-			"settings":
-			{
-				"buffer_size": 22,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "README",
-			"settings":
-			{
-				"buffer_size": 296,
-				"line_ending": "Unix"
-			}
-		},
-		{
 			"file": "djumble/hmrf_kmeans.py",
 			"settings":
 			{
-				"buffer_size": 22,
+				"buffer_size": 3680,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "djumble/vonmises_sampling.py",
+			"settings":
+			{
+				"buffer_size": 1014,
+				"line_ending": "Unix",
+				"name": "import numpy as np"
+			}
+		},
+		{
+			"file": "djumble/vonmisesfisher_sampling.py",
+			"settings":
+			{
+				"buffer_size": 325,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/dimitrios/Development_Workspace/DoGSWrapper/src/wrappedmodels/rfse.py",
+			"settings":
+			{
+				"buffer_size": 10277,
 				"line_ending": "Unix"
 			}
 		}
 	],
-	"build_system": "",
+	"build_system": "Packages/Python/Python.sublime-build",
 	"build_system_choices":
 	[
+		[
+			[
+				[
+					"Anaconda Python Builder",
+					""
+				],
+				[
+					"Packages/Python/Python.sublime-build",
+					""
+				],
+				[
+					"Packages/Python/Python.sublime-build",
+					"Syntax Check"
+				]
+			],
+			[
+				"Packages/Python/Python.sublime-build",
+				""
+			]
+		]
 	],
 	"build_varint": "",
 	"command_palette":
@@ -187,6 +232,14 @@
 	],
 	"file_history":
 	[
+		"/home/dimitrios/Development_Workspace/networkx/networkx/classes/ordered.py",
+		"/home/dimitrios/Development_Workspace/networkx/networkx/classes/function.py",
+		"/home/dimitrios/Development_Workspace/networkx/networkx/classes/graph.py",
+		"/etc/udev/rules.d/51-android.rules",
+		"/home/dimitrios/Documents/MyPublications:Journals-Conferences/CLEF2015_Short/CLEF2015_Short.tex",
+		"/home/dimitrios/Development_Workspace/Djumble/README",
+		"/home/dimitrios/Development_Workspace/Djumble/.gitingnore",
+		"/home/dimitrios/Development_Workspace/WEGA/src/analytics/docmetrix.py",
 		"/home/dimitrios/.config/sublime-text-3/Packages/Anaconda/Anaconda.sublime-settings",
 		"/home/dimitrios/Development_Workspace/scikit-learn/sklearn/decomposition/pca.py",
 		"/usr/lib/python2.7/dist-packages/sklearn/decomposition/pca.py",
@@ -306,15 +359,7 @@
 		"/home/dimitrios/Development_Workspace/webgenreidentification/src/ploting_deprecated/crossplot_PR_CUR_IV_EnsblAlgo_Bagging_n_EnsblOCSVM.py",
 		"/home/dimitrios/Desktop/Sublime Text 2/sublime_plugin.py",
 		"/home/dimitrios/Development_Workspace/webgenreidentification/src/ploting/PR_curves_to_11_standard_recall_levels.py",
-		"/home/dimitrios/Synergy-Crawler/KI-04/Kfolds_Vocabularies_4grams/Corpus_tags_shorted.lst",
-		"/home/dimitrios/Synergy-Crawler/KI-04/Kfolds_Vocabularies_4grams/Corpus_filename_shorted.lst",
-		"/home/dimitrios/Development_Workspace/webgenreidentification/src/crossval_experiments_OC-SVM.py",
-		"/home/dimitrios/Development_Workspace/webgenreidentification/src/crossval_experiments_Koppels_method.py",
-		"/home/dimitrios/Synergy-Crawler/KI-04/Kfolds_Vocabularies_4grams/kfold_crv_0.idx",
-		"/home/dimitrios/Synergy-Crawler/KI-04/Kfolds_Vocabularies_4grams/kfold_trn_0.idx",
-		"/home/dimitrios/Development_Workspace/html2vectors/src/html2vect/base/html2terms.py",
-		"/home/dimitrios/Development_Workspace/html2vectors/src/html2vect/base/convert/tfdtools.py",
-		"/home/dimitrios/Development_Workspace/html2vectors/src/html2vect/sparse/cngrams.py"
+		"/home/dimitrios/Synergy-Crawler/KI-04/Kfolds_Vocabularies_4grams/Corpus_tags_shorted.lst"
 	],
 	"find":
 	{
@@ -332,6 +377,10 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"),",
+			"ndf",
+			"node_dict_factory",
+			"9",
 			"\"",
 			",",
 			"\"",
@@ -455,11 +504,7 @@
 			"params_path",
 			"pkl_voc_filename",
 			"tf_d",
-			"Matrix",
-			"cls_gnr_tgs",
-			"trn",
-			"self.TF_TT",
-			"ODLO_THERMALWEAR_KIDS"
+			"Matrix"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -480,82 +525,24 @@
 	"groups":
 	[
 		{
-			"selected": 2,
+			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": ".gitingnore",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 22,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								22,
-								22
-							]
-						],
-						"settings":
-						{
-							"side_bar_folders_auto_load_folder": 1,
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "README",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 296,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								296,
-								296
-							]
-						],
-						"settings":
-						{
-							"side_bar_folders_auto_load_folder": 1,
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
 					"file": "djumble/hmrf_kmeans.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 22,
+						"buffer_size": 3680,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								22,
-								22
+								2886,
+								2886
 							]
 						],
 						"settings":
@@ -565,13 +552,107 @@
 								100
 							],
 							"side_bar_folders_auto_load_folder": 1,
-							"syntax": "Packages/Text/Plain text.tmLanguage"
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1615.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "djumble/vonmises_sampling.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1014,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								728,
+								728
+							]
+						],
+						"settings":
+						{
+							"auto_name": "import numpy as np",
+							"side_bar_folders_auto_load_folder": 1,
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "djumble/vonmisesfisher_sampling.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 325,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								324,
+								324
+							]
+						],
+						"settings":
+						{
+							"side_bar_folders_auto_load_folder": 1,
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/home/dimitrios/Development_Workspace/DoGSWrapper/src/wrappedmodels/rfse.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10277,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								9234,
+								9234
+							]
+						],
+						"settings":
+						{
+							"side_bar_folders_auto_load_folder": 1,
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3009.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
 					"type": "text"
 				}
 			]
@@ -669,7 +750,7 @@
 	"show_minimap": true,
 	"show_open_files": true,
 	"show_tabs": true,
-	"side_bar_visible": true,
+	"side_bar_visible": false,
 	"side_bar_width": 264.0,
 	"status_bar_visible": true,
 	"template_settings":
