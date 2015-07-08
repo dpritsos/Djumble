@@ -9,20 +9,116 @@ import random as rnd
 import matplotlib.pyplot as plt
 
 
-def HMRFKmeans(x_arr, constr, const_violat_w, dist_measure):
+def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_noparam,
+               distor_measure, distor_params, w_constr_viol_mtrx, dparmas_chang_rate):
     """HMRF Kmeans: A Semi-supervised clustering algorithm based on Hidden Markov Random Fields
         Clustering model optimised by Expectation Maximisation (EM) algorithm with Hard clustering
         constraints, i.e. a Kmeans Semi-supervised clustering variant.
     """
 
-    k_centroids = init_cluster()
+    # Initializing clustering
+    # mu_neib_idxs_lst_lst = FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons,
+    #                                           cannot_lnk_cons, dmeasure_noparam)
+    # mu_neib_idxs_lst_lst = ConsolidateAL(mu_neib_idxs_lst_lst, x_data_arr,
+    #                                      must_lnk_cons, dmeasure_noparam)
+    # print mu_neib_idxs_lst_lst
+    # 0/0
+    # print mu_neib_idxs_lst_lst 
+    mu_neib_idxs_lst_lst = [[0],
+                            [550],
+                            [1100]]
+    mu_lst = MuCosDMPar(x_data_arr, mu_neib_idxs_lst_lst, distor_params)
+    # mu_lst = MuCos(x_data_arr, mu_neib_idxs_lst_lst)
+    #for mu in mu_lst:
+    #    plt.plot(mu[:, 0], mu[:, 1], '*', markersize=30)
+    #plt.show()
+
+    # EM algorithm execution.
+    # While no convergence yet or X times.
+    for conv_step in range(30):
+
+        # The E-Step ######
+        found_midx = -1
+        no_change_loop_c = 0
+        while no_change_loop_c < 2:
+            
+            non_changes_count = 0
+
+            # Calculating the new Neighbourhoods/Clusters.
+            for x_idx in np.random.randint(0, x_data_arr.shape[0], size=x_data_arr.shape[0]):
+                mu_neib_idx = ICM(x_idx, x_data_arr, mu_lst, mu_neib_idxs_lst_lst,
+                                  must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx,
+                                  distor_params)
+                # print mu_neib_idx
+
+                # Remove x form all Clusters.
+                for midx, mu_neib_idxs_lst in enumerate(mu_neib_idxs_lst_lst):
+
+                    try:
+                        mu_neib_idxs_lst_lst[midx].remove(x_idx)
+                        found_midx = midx
+                    except:
+                        pass
+
+                if found_midx == mu_neib_idx:
+                    non_changes_count += 1
+
+                # Assign cluster to the proper neighbourhood/cluster under ICM algorithm decision.
+                mu_neib_idxs_lst_lst[mu_neib_idx].append(x_idx)
+
+            if non_changes_count == x_data_arr.shape[0]:
+                no_change_loop_c += 1
+
+        # print mu_neib_idxs_lst_lst
+
+        # The M-Step #######
+
+        # Recalculating centroids.
+        mu_lst = MuCosDMPar(x_data_arr, mu_neib_idxs_lst_lst, distor_params)
+        print mu_lst
+
+        # Re-estimating distortion measure parameters.
+        distor_params = UpdateDistorParams(distor_params, dparmas_chang_rate, x_data_arr, mu_lst,
+                                           mu_neib_idxs_lst_lst, must_lnk_cons,
+                                           cannot_lnk_cons, w_constr_viol_mtrx,)
+
+    # Returning the Centroids, Clusters/Neighbourhoods, distortion parameters,
+    # constraint violations matrix.
+    return mu_lst, mu_neib_idxs_lst_lst, distor_params, w_constr_viol_mtrx
 
 
-def ICM():
-    """ICM: Iterated Conditional Modes (for the E-Step)
+def ICM(x_idx, x_data_arr, mu_lst, mu_neib_idxs_lst_lst,
+        must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params):
+    """ ICM: Iterated Conditional Modes (for the E-Step)
+
+        After all points are assigned, they are randomly re-ordered, and
+        the assignment process is repeated. This process proceeds until no
+        point changes its cluster assignment between two successive iterations.
+
     """
+    last_jobj = 999999.0
+    same_jobj_c = 0
 
-    pass
+    for i, (mu, mu_neib_idxs_lst) in enumerate(zip(mu_lst, mu_neib_idxs_lst_lst)):
+
+        j_obj = JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_lst,
+                          must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params)
+
+        if j_obj < last_jobj:
+            last_jobj = j_obj
+            neib_idx = i
+
+        #print "OJB"
+        print "OBj", j_obj, "IDX", i
+        #print "OJB\n\n"
+
+        # if j_obj == last_jobj:
+        #     same_jobj_c += 1
+        # else:
+        #     same_jobj_c = 0
+
+    # Returning the i index, i.e. the neighbourhood/cluster where x point should be assigned into.
+    return neib_idx
 
 
 def FarFirstWeighted(x_data_arr, k_expect, must_lnk_con, cannnot_lnk_con, CosDist):
@@ -59,13 +155,11 @@ def FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons, cannnot_lnk_cons, di
     # Initialising for finding the farthest x array index form all N neighbourhoods.
 
     all_neibs = []
-
     while neib_c < k_expect and len(all_neibs) < data_num:
 
         max_dist = 0
-
         # Getting the farthest x from all neighbourhoods.
-        for i, x in enumerate(x_data_arr):
+        for i in np.random.randint(0, x_data_arr.shape[0], size=x_data_arr.shape[0]/10):
 
             all_neibs = [idx for neib in neibs_lsts for idx in neib]
 
@@ -73,7 +167,7 @@ def FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons, cannnot_lnk_cons, di
 
                     if i not in all_neibs:
 
-                        dist = distor_measure(x_data_arr[neib_x_idx], x)
+                        dist = distor_measure(x_data_arr[neib_x_idx], x_data_arr[i])
 
                         if dist > max_dist:
                             max_dist = dist
@@ -83,6 +177,7 @@ def FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons, cannnot_lnk_cons, di
         must_link_neib_indx = None
         if farthest_x_idx in must_lnk_cons.keys():
             for ml_idx in must_lnk_cons[farthest_x_idx]:
+                print "ML", ml_idx
                 for n_idx, neib in enumerate(neibs_lsts):
                     if ml_idx in neib:
                         must_link_neib_indx = n_idx
@@ -91,6 +186,7 @@ def FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons, cannnot_lnk_cons, di
         cannot_link = False
         if farthest_x_idx in cannnot_lnk_cons.keys():
             for cl_idx in cannnot_lnk_cons[farthest_x_idx]:
+                print "CL", cl_idx
                 for neib in neibs_lsts:
                     if cl_idx in neib:
                         cannot_link = True
@@ -114,21 +210,17 @@ def FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons, cannnot_lnk_cons, di
 def ConsolidateAL(neibs_lsts, x_data_arr, must_lnk_cons, distor_measure):
     """
     """
-
-    #
-    data_num = x_data_arr.shape[0]
-
     # Estimating centroids.
-
     # print np.mean(x_data_arr[[1,2,3], :], axis=0)
     neibs_mu = [np.mean(x_data_arr[neib, :], axis=0) for neib in neibs_lsts]
 
     cnt = 0
-    for rnd_idx in range(data_num):
+
+    # I think that randomization factor is required  replacing --> # range(data_num):
+    for rnd_idx in np.random.randint(0, x_data_arr.shape[0], size=x_data_arr.shape[0]):
 
         cnt += 1
 
-        # rnd_idx = np.random.randint(0, data_num)
         # Ascending order.
         srted_dists_neib_idx = np.argsort(
             [distor_measure(mu, x_data_arr[rnd_idx, :])[0, 0] for mu in neibs_mu],
@@ -141,7 +233,7 @@ def ConsolidateAL(neibs_lsts, x_data_arr, must_lnk_cons, distor_measure):
                     if ml_idx in neibs_lsts[neib_idx] and rnd_idx not in neibs_lsts[neib_idx]:
                         neibs_lsts[neib_idx].append(rnd_idx)
 
-    print neibs_lsts
+    return neibs_lsts
 
 
 def InitClustering():
@@ -158,7 +250,7 @@ def CosDistPar(x1, x2, distor_params):
     x2 = sp.matrix(x2)
     A = sp.diag(distor_params)
 
-    return 1 - (x1 * A * x2.T / (np.sqrt(x1 * A * x1.T) * np.sqrt(x2 * A * x2.T)))
+    return 1 - (x1 * A * x2.T / (np.sqrt(np.abs(x1 * A * x1.T)) * np.sqrt(np.abs(x2 * A * x2.T))))
 
 
 def CosDist(x1, x2):
@@ -170,7 +262,7 @@ def CosDist(x1, x2):
     x1 = sp.matrix(x1)
     x2 = sp.matrix(x2)
 
-    return 1 - (x1 * x2.T / (np.sqrt(x1 * x1.T) * np.sqrt(x2 * x2.T)))
+    return 1 - (x1 * x2.T / (np.sqrt(np.abs(x1 * x1.T)) * np.sqrt(np.abs(x2 * x2.T))))
 
 
 def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_lst,
@@ -220,7 +312,24 @@ def MuCosDMPar(x_data_arr, neibs_idxs_lsts, distor_params):
         xi_neib_sum = sp.matrix(xi_neib_sum)
 
         # Calculating denominator ||Σ xi||(A)
-        parametrized_norm_xi = np.sqrt(xi_neib_sum * A * xi_neib_sum.T)
+        parametrized_norm_xi = np.sqrt(np.abs(xi_neib_sum * A * xi_neib_sum.T))
+
+        mu_lst.append(xi_neib_sum / parametrized_norm_xi)
+
+    return mu_lst
+
+
+def MuCos(x_data_arr, neibs_idxs_lsts):
+    """
+    """
+    mu_lst = list()
+    for neibs_idxlst in neibs_idxs_lsts:
+
+        xi_neib_sum = np.sum(x_data_arr[neibs_idxlst, :], axis=0)
+        xi_neib_sum = sp.matrix(xi_neib_sum)
+
+        # Calculating denominator ||Σ xi||
+        parametrized_norm_xi = np.sqrt(np.abs(xi_neib_sum * xi_neib_sum.T))
 
         mu_lst.append(xi_neib_sum / parametrized_norm_xi)
 
@@ -228,7 +337,7 @@ def MuCosDMPar(x_data_arr, neibs_idxs_lsts, distor_params):
 
 
 def UpdateDistorParams(distor_params, chang_rate, x_data_arr, mu_lst,
-                       neib_idxs_lst, must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx,):
+                       neib_idxs_lst, must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx):
     """
     """
     # #### HERE IS THE TRICKY THING #### #
@@ -236,7 +345,7 @@ def UpdateDistorParams(distor_params, chang_rate, x_data_arr, mu_lst,
     # i is for x
     # j is for μ of the neib where x is into
 
-    for a_idx, a in distor_params:
+    for a_idx, a in enumerate(distor_params):
 
         # Calculating Partial Derivative of D(xi, mu).
         xm_pderiv = 0.0
@@ -273,17 +382,28 @@ def UpdateDistorParams(distor_params, chang_rate, x_data_arr, mu_lst,
 def PartialDerivative(a_idx, x1, x2, distor_params):
     """
     """
-
     A = sp.diag(distor_params)
     x1 = sp.matrix(x1)
     x2 = sp.matrix(x2)
 
-    # Calculating parametrized Norms ||Σ xi||(A)
-    x1_pnorm = np.sqrt(x1 * A * x1.T)
-    x2_pnorm = np.sqrt(x1 * A * x1.T)
+    #print 'A', A
 
-    return ((x1[a_idx] * x2[a_idx] * x1_pnorm * x1_pnorm) - x1 * A * x2.T *
-            ((np.square(x1[a_idx]) * x2_pnorm + np.square(x2[a_idx]) * x1_pnorm) /
+    # Calculating parametrized Norms ||Σ xi||(A)
+    x1_pnorm = np.sqrt(np.abs(x1 * A * x1.T))
+    x2_pnorm = np.sqrt(np.abs(x2 * A * x2.T))
+
+    #print 'Derivative:'
+    # print (x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x1_pnorm)
+    # print x1 * A * x2.T
+    # print (np.square(x1[0, a_idx]) * x2_pnorm + np.square(x2[0, a_idx]) * x1_pnorm)
+    # print (2 * x1_pnorm * x2_pnorm)
+    # print np.square(x1_pnorm) * np.square(x2_pnorm)
+    # print ((x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x1_pnorm) - x1 * A * x2.T *
+    #       ((np.square(x1[0, a_idx]) * x2_pnorm + np.square(x2[0, a_idx]) * x1_pnorm) /
+    #       (2 * x1_pnorm * x2_pnorm))) / (np.square(x1_pnorm) * np.square(x2_pnorm))
+
+    return ((x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x1_pnorm) - x1 * A * x2.T *
+            ((np.square(x1[0, a_idx]) * x2_pnorm + np.square(x2[0, a_idx]) * x1_pnorm) /
             (2 * x1_pnorm * x2_pnorm))) / (np.square(x1_pnorm) * np.square(x2_pnorm))
 
 
@@ -294,22 +414,26 @@ if __name__ == '__main__':
     # dA = np.array([0.9, 0.1, 0.3, 1], dtype=np.float32)
     # print CosDistPar(x1, x2, dA)
 
-    # sps.vonmises.rvs(kappa, loc=0, scale=1, size=1)
+    x_data_2d_arr1 = sps.vonmises.rvs(1200.489, loc=(0.5+0.3, 0.5+0.0), scale=1, size=(500, 2))
+    x_data_2d_arr2 = sps.vonmises.rvs(1200.489, loc=(0.5+0.0, 0.5+0.1), scale=1, size=(500, 2))
+    x_data_2d_arr3 = sps.vonmises.rvs(1200.489, loc=(0.5+0.4, 0.5+0.3), scale=1, size=(500, 2))
 
-    x_data_2d_arr1 = np.random.vonmises(0.1, 1000, size=(20, 2))
-    x_data_2d_arr2 = np.random.vonmises(0.5, 1000, size=(20, 2))
-    x_data_2d_arr3 = np.random.vonmises(0.3, 1000, size=(20, 2))
-
-    # x_data_2d_arr3 = np.random.vonmises(0.9, 0.3, size=(20, 2))
+    # x_data_2d_arr1 = np.random.vonmises(0.5, 100, size=(20, 2))
+    # x_data_2d_arr2 = np.random.vonmises(0.5, 1000, size=(20, 2))
+    # x_data_2d_arr3 = np.random.vonmises(0.5, 10000, size=(20, 2))
 
     x_data_2d_arr = np.vstack((x_data_2d_arr1, x_data_2d_arr2, x_data_2d_arr3))
 
-    plt.plot(x_data_2d_arr1[:, 0], x_data_2d_arr1[:, 1], '*')
-    plt.plot(x_data_2d_arr2[:, 0], x_data_2d_arr2[:, 1], '>')
-    plt.plot(x_data_2d_arr3[:, 0], x_data_2d_arr2[:, 1], '>')
-    # plt.plot(x_data_2d_arr2, '^')
-    # plt.plot(x_data_2d_arr3, '>')
-    plt.show()
+    for xy in x_data_2d_arr1:
+        plt.text(xy[0], xy[1], str(1),  color="black", fontsize=20)
+    for xy in x_data_2d_arr2:
+        plt.text(xy[0], xy[1], str(2),  color="green", fontsize=20)
+    for xy in x_data_2d_arr3:
+        plt.text(xy[0], xy[1], str(3),  color="blue", fontsize=20)
+    # plt.text(x_data_2d_arr2[:, 0], x_data_2d_arr2[:, 1], str(2),  color="red", fontsize=12)
+    # plt.text(x_data_2d_arr3[:, 0], x_data_2d_arr3[:, 1], str(3),  color="red", fontsize=12)
+    # plt.show()
+    # 0/0
 
     must_lnk_con = {
         1: [5, 3, 6, 8],
@@ -318,34 +442,44 @@ if __name__ == '__main__':
         3: [1, 7],
         6: [1, 5],
         7: [3],
-        21: [25, 28, 39],
-        25: [21, 35, 28],
-        28: [21, 25],
-        35: [25],
-        37: [39],
-        39: [21, 37]
+        521: [525, 528, 539],
+        525: [521, 535, 528],
+        528: [521, 525],
+        535: [525],
+        537: [539],
+        539: [521, 537]
     }
 
-    cannnot_lnk_con = {
-        1: [21, 25, 28, 35, 37, 39],
-        5: [21, 25, 28, 35],
-        8: [21, 25, 28, 35, 37, 39],
-        3: [21, 35, 37, 39],
-        6: [21, 25, 28, 35, 37, 39],
-        7: [21, 25, 28, 35, 37, 39],
-        21: [1, 5, 8, 3, 6, 7],
-        25: [1, 3, 6, 7],
-        28: [1, 5, 8, 3, 6, 7],
-        35: [1, 5, 8, 3, 6, 7],
-        37: [1, 5, 8, 3],
-        39: [1, 5, 8, 3, 6, 7]
+    cannot_lnk_con = {
+        1: [521, 525, 528, 535, 537, 539],
+        5: [521, 525, 528, 35],
+        8: [521, 525, 528, 535, 537, 539],
+        3: [521, 535, 537, 539],
+        6: [521, 525, 528, 535, 537, 539],
+        7: [521, 525, 528, 535, 537, 539],
+        521: [1, 5, 8, 3, 6, 7],
+        525: [1, 3, 6, 7],
+        528: [1, 5, 8, 3, 6, 7],
+        535: [1, 5, 8, 3, 6, 7],
+        537: [1, 5, 8, 3],
+        539: [1, 5, 8, 3, 6, 7]
     }
 
     k_expect = 3
 
-    neibs_lsts = FarFirstCosntraint(x_data_2d_arr, k_expect, must_lnk_con, cannnot_lnk_con, CosDist)
+    res = HMRFKmeans(k_expect, x_data_2d_arr, must_lnk_con, cannot_lnk_con, CosDist,
+                     CosDistPar, np.array([0.5, 0.5]), np.random.uniform(1.0, 1.0, size=(1500, 1500)),
+                     dparmas_chang_rate=0.01)
 
-    print neibs_lsts
+    for mu_idx, neib_idxs in enumerate(res[1]):
+        # print res[0][mu_idx][:, 0], res[0][mu_idx][:, 1]
+        # plt.plot(res[0][mu_idx][:, 0], res[0][mu_idx][:, 1], '*', markersize=30)
+        #  if mu_idx == 2:
+        #    break
+        print mu_idx+1, len(neib_idxs), np.sort(neib_idxs)
+        for xy in x_data_2d_arr[neib_idxs]:
+            plt.text(xy[0], xy[1], str(mu_idx+1), color='red', fontsize=15)
+        # plt.plot(x_data_2d_arr2, '^')
+        # plt.plot(x_data_2d_arr3, '>')
 
-    print ConsolidateAL(neibs_lsts, x_data_2d_arr, must_lnk_con, CosDist)
-
+    plt.show()
