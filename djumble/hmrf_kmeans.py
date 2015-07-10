@@ -33,40 +33,20 @@ def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_no
     for conv_step in range(30):
 
         # The E-Step ######
-        no_change_cnt = 0
-        while no_change_cnt < 2:
 
-            # Calculating the new Neighbourhoods/Clusters.
-            for x_idx in np.random.randint(0, x_data_arr.shape[0], size=x_data_arr.shape[0]):
-
-                mu_neib_idx = ICM(x_idx, x_data_arr, mu_lst, mu_neib_idxs_set_lst,
-                                  must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx,
-                                  distor_params)
-
-                if x_idx not in mu_neib_idxs_set_lst[mu_neib_idx]:
-
-                    # Remove x form all Clusters.
-                    for midx, mu_neib_idxs_set in enumerate(mu_neib_idxs_set_lst):
-                        # mu_neib_idxs_set.discard(x_idx)
-                        mu_neib_idxs_set_lst[midx].discard(x_idx)
-
-                    mu_neib_idxs_set_lst[mu_neib_idx].add(x_idx)
-
-                    no_change = False
-
-                else:
-                    no_change = True
-
-            if no_change:
-                no_change_cnt += 1
+        # Assigning every data-set point to the proper cluster/neighbourhood upon distortion...
+        # ...parameters and centroids of the current iteration.
+        mu_neib_idxs_set_lst = ICM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
+                                   must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx,
+                                   distor_params)
 
         # The M-Step #######
 
-        # Recalculating centroids.
+        # Recalculating centroids upon the new clusters set-up.
         mu_lst = MuCosDMPar(x_data_arr, mu_neib_idxs_set_lst, distor_params)
         print mu_lst
 
-        # Re-estimating distortion measure parameters.
+        # Re-estimating distortion measure parameters upon the new clusters set-up.
         distor_params = UpdateDistorParams(distor_params, dparmas_chang_rate, x_data_arr, mu_lst,
                                            mu_neib_idxs_set_lst, must_lnk_cons,
                                            cannot_lnk_cons, w_constr_viol_mtrx,)
@@ -76,7 +56,7 @@ def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_no
     return mu_lst, mu_neib_idxs_set_lst, distor_params, w_constr_viol_mtrx
 
 
-def ICM(x_idx, x_data_arr, mu_lst, mu_neib_idxs_set_lst,
+def ICM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
         must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params):
     """ ICM: Iterated Conditional Modes (for the E-Step)
 
@@ -85,19 +65,43 @@ def ICM(x_idx, x_data_arr, mu_lst, mu_neib_idxs_set_lst,
         point changes its cluster assignment between two successive iterations.
 
     """
-    last_jobj = 999999.0
+    no_change_cnt = 0
+    while no_change_cnt < 2:
 
-    for i, (mu, mu_neib_idxs_set) in enumerate(zip(mu_lst, mu_neib_idxs_set_lst)):
+        # Calculating the new Neighbourhoods/Clusters.
+        for x_idx in np.random.randint(0, x_data_arr.shape[0], size=x_data_arr.shape[0]):
 
-        j_obj = JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
-                          must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params)
+            last_jobj = 999999.0
 
-        if j_obj < last_jobj:
-            last_jobj = j_obj
-            neib_idx = i
+            for i, (mu, mu_neib_idxs_set) in enumerate(zip(mu_lst, mu_neib_idxs_set_lst)):
 
-    # Returning the i index, i.e. the neighbourhood/cluster where x point should be assigned into.
-    return neib_idx
+                j_obj = JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
+                                  must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx,
+                                  distor_params)
+
+                if j_obj < last_jobj:
+                    last_jobj = j_obj
+                    mu_neib_idx = i
+
+            if x_idx not in mu_neib_idxs_set_lst[mu_neib_idx]:
+
+                # Remove x form all Clusters.
+                for midx, mu_neib_idxs_set in enumerate(mu_neib_idxs_set_lst):
+                    # mu_neib_idxs_set.discard(x_idx)
+                    mu_neib_idxs_set_lst[midx].discard(x_idx)
+
+                mu_neib_idxs_set_lst[mu_neib_idx].add(x_idx)
+
+                no_change = False
+
+            else:
+                no_change = True
+
+        if no_change:
+            no_change_cnt += 1
+
+    # Returning mu_neib_idxs_set_lst.
+    return mu_neib_idxs_set_lst
 
 
 def FarFirstWeighted(x_data_arr, k_expect, must_lnk_con, cannnot_lnk_con, CosDist):
@@ -223,7 +227,8 @@ def CosDistPar(x1, x2, distor_params):
 
     x1 = sp.matrix(x1)
     x2 = sp.matrix(x2)
-    A = sp.diag(distor_params)
+    A = sp.sparse.dia_matrix((distor_params, [0]), shape=(distor_params.shape[0], distor_params.shape[0])) 
+    # A = sp.diag(distor_params)
 
     return 1 - (x1 * A * x2.T / (np.sqrt(np.abs(x1 * A * x1.T)) * np.sqrt(np.abs(x2 * A * x2.T))))
 
@@ -278,7 +283,8 @@ def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
 def MuCosDMPar(x_data_arr, neibs_idxs_lsts, distor_params):
     """
     """
-    A = sp.diag(distor_params)
+    A = sp.sparse.dia_matrix((distor_params, [0]), shape=(distor_params.shape[0], distor_params.shape[0]))
+    # A = sp.diag(distor_params)
 
     mu_lst = list()
     for neibs_idxlst in neibs_idxs_lsts:
@@ -286,7 +292,8 @@ def MuCosDMPar(x_data_arr, neibs_idxs_lsts, distor_params):
         xi_neib_sum = np.sum(x_data_arr[list(neibs_idxlst), :], axis=0)
         xi_neib_sum = sp.matrix(xi_neib_sum)
 
-        # Calculating denominator ||Σ xi||(A)
+    
+     #     # Calculating denominator ||Σ xi||(A)
         parametrized_norm_xi = np.sqrt(np.abs(xi_neib_sum * A * xi_neib_sum.T))
 
         mu_lst.append(xi_neib_sum / parametrized_norm_xi)
@@ -357,25 +364,14 @@ def UpdateDistorParams(distor_params, chang_rate, x_data_arr, mu_lst,
 def PartialDerivative(a_idx, x1, x2, distor_params):
     """
     """
-    A = sp.diag(distor_params)
+    A = sp.sparse.dia_matrix((distor_params, [0]), shape=(distor_params.shape[0], distor_params.shape[0]))
+    # A = sp.diag(distor_params)
     x1 = sp.matrix(x1)
     x2 = sp.matrix(x2)
-
-    #print 'A', A
 
     # Calculating parametrized Norms ||Σ xi||(A)
     x1_pnorm = np.sqrt(np.abs(x1 * A * x1.T))
     x2_pnorm = np.sqrt(np.abs(x2 * A * x2.T))
-
-    #print 'Derivative:'
-    # print (x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x1_pnorm)
-    # print x1 * A * x2.T
-    # print (np.square(x1[0, a_idx]) * x2_pnorm + np.square(x2[0, a_idx]) * x1_pnorm)
-    # print (2 * x1_pnorm * x2_pnorm)
-    # print np.square(x1_pnorm) * np.square(x2_pnorm)
-    # print ((x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x1_pnorm) - x1 * A * x2.T *
-    #       ((np.square(x1[0, a_idx]) * x2_pnorm + np.square(x2[0, a_idx]) * x1_pnorm) /
-    #       (2 * x1_pnorm * x2_pnorm))) / (np.square(x1_pnorm) * np.square(x2_pnorm))
 
     return ((x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x1_pnorm) - x1 * A * x2.T *
             ((np.square(x1[0, a_idx]) * x2_pnorm + np.square(x2[0, a_idx]) * x1_pnorm) /
@@ -384,16 +380,11 @@ def PartialDerivative(a_idx, x1, x2, distor_params):
 
 if __name__ == '__main__':
 
-    # x1 = np.array([0.1, 0.7, 0.2, 0.8], dtype=np.float32)
-    # x2 = np.array([0.2, 0.5, 0.2, 0.2], dtype=np.float32)
-    # dA = np.array([0.9, 0.1, 0.3, 1], dtype=np.float32)
-    # print CosDistPar(x1, x2, dA)
-
     print "Creating Sample"
-    x_data_2d_arr1 = sps.vonmises.rvs(1200.489, loc=tuple(np.random.uniform(0.0, 1.0, size=10000)), scale=1, size=(500, 10000))
-    x_data_2d_arr2 = sps.vonmises.rvs(1200.489, loc=tuple(np.random.uniform(0.0, 1.0, size=10000)), scale=1, size=(500, 10000))
-    x_data_2d_arr3 = sps.vonmises.rvs(1200.489, loc=tuple(np.random.uniform(0.0, 1.0, size=10000)), scale=1, size=(500, 10000))
-
+    x_data_2d_arr1 = sps.vonmises.rvs(1200.489, loc=(0.7, 0.2), scale=1, size=(500, 2))
+    x_data_2d_arr2 = sps.vonmises.rvs(1200.489, loc=(0.6, 0.6), scale=1, size=(500, 2))
+    x_data_2d_arr3 = sps.vonmises.rvs(1200.489, loc=(0.2, 0.3), scale=1, size=(500, 2))
+    # tuple(np.random.normal(0.0, 10.0, size=2))
     # x_data_2d_arr1 = np.random.vonmises(0.5, 100, size=(20, 2))
     # x_data_2d_arr2 = np.random.vonmises(0.5, 1000, size=(20, 2))
     # x_data_2d_arr3 = np.random.vonmises(0.5, 10000, size=(20, 2))
@@ -444,8 +435,8 @@ if __name__ == '__main__':
     k_expect = 3
     print "Runnint Kmeans"
     res = HMRFKmeans(k_expect, x_data_2d_arr, must_lnk_con, cannot_lnk_con, CosDist,
-                     CosDistPar, np.random.uniform(1.0, 1.0, size=10000),
-                     np.random.uniform(1.0, 1.0, size=(1500, 1500)),
+                     CosDistPar, np.random.uniform(0.0, 1.0, size=2),
+                     np.random.uniform(0.0, 1.0, size=(1500, 1500)),
                      dparmas_chang_rate=0.01)
 
     for mu_idx, neib_idxs in enumerate(res[1]):
