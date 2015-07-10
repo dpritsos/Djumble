@@ -143,7 +143,7 @@
 			"file": "djumble/hmrf_kmeans.py",
 			"settings":
 			{
-				"buffer_size": 17158,
+				"buffer_size": 17279,
 				"line_ending": "Unix"
 			}
 		},
@@ -405,6 +405,19 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"np.sqrt",
+			"sqrt(",
+			"np.sqrt(",
+			"np.abs",
+			"(x2 * A * x2.T)",
+			"(x1 * A * x1.T)",
+			"T",
+			"x1 * A * x1.T",
+			"01",
+			"np.sqrt(",
+			"conv_step",
+			"np.abs",
+			"[",
 			", ",
 			"fontsize",
 			"markersize",
@@ -519,20 +532,7 @@
 			"roc_curve",
 			"auc",
 			"roc_curve",
-			"truth_d",
-			"roc_curve",
-			"i",
-			"I",
-			"i",
-			"r",
-			"R",
-			"nrst_smooth_pr",
-			"sub2",
-			"20",
-			"crv_idxs",
-			"Axes3D",
-			"barh",
-			"genre_tag"
+			"truth_d"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -562,15 +562,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 17158,
+						"buffer_size": 17279,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1135,
-								1135
+								8592,
+								8599
 							]
 						],
 						"settings":
@@ -584,8 +584,8 @@
 							"tab_size": 4,
 							"translate_tabs_to_spaces": true
 						},
-						"translation.x": -0.0,
-						"translation.y": 102.0,
+						"translation.x": 0.0,
+						"translation.y": 3793.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -619,7 +619,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
@@ -680,7 +680,7 @@
 						"translation.y": 3009.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 2,
 					"type": "text"
 				}
 			]
@@ -719,7 +719,7 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 472.0
+		"height": 554.0
 	},
 	"output.find_results":
 	{

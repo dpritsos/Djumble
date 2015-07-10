@@ -17,77 +17,66 @@ def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_no
     """
 
     # Initializing clustering
-    # mu_neib_idxs_lst_lst = FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons,
+    # neibs_sets = FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons,
     #                                           cannot_lnk_cons, dmeasure_noparam)
-    # mu_neib_idxs_lst_lst = ConsolidateAL(mu_neib_idxs_lst_lst, x_data_arr,
+    # mu_neib_idxs_set_lst = ConsolidateAL(neibs_sets, x_data_arr,
     #                                      must_lnk_cons, dmeasure_noparam)
-    # print mu_neib_idxs_lst_lst
+    # print mu_neib_idxs_set_lst.
     # 0/0
-    # print mu_neib_idxs_lst_lst 
-    mu_neib_idxs_lst_lst = [[0],
-                            [550],
-                            [1100]]
-    mu_lst = MuCosDMPar(x_data_arr, mu_neib_idxs_lst_lst, distor_params)
-    # mu_lst = MuCos(x_data_arr, mu_neib_idxs_lst_lst)
-    #for mu in mu_lst:
-    #    plt.plot(mu[:, 0], mu[:, 1], '*', markersize=30)
-    #plt.show()
+    mu_neib_idxs_set_lst = [set([0]),
+                            set([550]),
+                            set([1100])]
+    mu_lst = MuCosDMPar(x_data_arr, mu_neib_idxs_set_lst, distor_params)
 
     # EM algorithm execution.
     # While no convergence yet or X times.
     for conv_step in range(30):
 
         # The E-Step ######
-        found_midx = -1
-        no_change_loop_c = 0
-        while no_change_loop_c < 2:
-            
-            non_changes_count = 0
+        no_change_cnt = 0
+        while no_change_cnt < 2:
 
             # Calculating the new Neighbourhoods/Clusters.
             for x_idx in np.random.randint(0, x_data_arr.shape[0], size=x_data_arr.shape[0]):
-                mu_neib_idx = ICM(x_idx, x_data_arr, mu_lst, mu_neib_idxs_lst_lst,
+
+                mu_neib_idx = ICM(x_idx, x_data_arr, mu_lst, mu_neib_idxs_set_lst,
                                   must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx,
                                   distor_params)
-                # print mu_neib_idx
 
-                # Remove x form all Clusters.
-                for midx, mu_neib_idxs_lst in enumerate(mu_neib_idxs_lst_lst):
+                if x_idx not in mu_neib_idxs_set_lst[mu_neib_idx]:
 
-                    try:
-                        mu_neib_idxs_lst_lst[midx].remove(x_idx)
-                        found_midx = midx
-                    except:
-                        pass
+                    # Remove x form all Clusters.
+                    for midx, mu_neib_idxs_set in enumerate(mu_neib_idxs_set_lst):
+                        # mu_neib_idxs_set.discard(x_idx)
+                        mu_neib_idxs_set_lst[midx].discard(x_idx)
 
-                if found_midx == mu_neib_idx:
-                    non_changes_count += 1
+                    mu_neib_idxs_set_lst[mu_neib_idx].add(x_idx)
 
-                # Assign cluster to the proper neighbourhood/cluster under ICM algorithm decision.
-                mu_neib_idxs_lst_lst[mu_neib_idx].append(x_idx)
+                    no_change = False
 
-            if non_changes_count == x_data_arr.shape[0]:
-                no_change_loop_c += 1
+                else:
+                    no_change = True
 
-        # print mu_neib_idxs_lst_lst
+            if no_change:
+                no_change_cnt += 1
 
         # The M-Step #######
 
         # Recalculating centroids.
-        mu_lst = MuCosDMPar(x_data_arr, mu_neib_idxs_lst_lst, distor_params)
+        mu_lst = MuCosDMPar(x_data_arr, mu_neib_idxs_set_lst, distor_params)
         print mu_lst
 
         # Re-estimating distortion measure parameters.
         distor_params = UpdateDistorParams(distor_params, dparmas_chang_rate, x_data_arr, mu_lst,
-                                           mu_neib_idxs_lst_lst, must_lnk_cons,
+                                           mu_neib_idxs_set_lst, must_lnk_cons,
                                            cannot_lnk_cons, w_constr_viol_mtrx,)
 
     # Returning the Centroids, Clusters/Neighbourhoods, distortion parameters,
     # constraint violations matrix.
-    return mu_lst, mu_neib_idxs_lst_lst, distor_params, w_constr_viol_mtrx
+    return mu_lst, mu_neib_idxs_set_lst, distor_params, w_constr_viol_mtrx
 
 
-def ICM(x_idx, x_data_arr, mu_lst, mu_neib_idxs_lst_lst,
+def ICM(x_idx, x_data_arr, mu_lst, mu_neib_idxs_set_lst,
         must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params):
     """ ICM: Iterated Conditional Modes (for the E-Step)
 
@@ -97,25 +86,15 @@ def ICM(x_idx, x_data_arr, mu_lst, mu_neib_idxs_lst_lst,
 
     """
     last_jobj = 999999.0
-    same_jobj_c = 0
 
-    for i, (mu, mu_neib_idxs_lst) in enumerate(zip(mu_lst, mu_neib_idxs_lst_lst)):
+    for i, (mu, mu_neib_idxs_set) in enumerate(zip(mu_lst, mu_neib_idxs_set_lst)):
 
-        j_obj = JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_lst,
+        j_obj = JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
                           must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params)
 
         if j_obj < last_jobj:
             last_jobj = j_obj
             neib_idx = i
-
-        #print "OJB"
-        print "OBj", j_obj, "IDX", i
-        #print "OJB\n\n"
-
-        # if j_obj == last_jobj:
-        #     same_jobj_c += 1
-        # else:
-        #     same_jobj_c = 0
 
     # Returning the i index, i.e. the neighbourhood/cluster where x point should be assigned into.
     return neib_idx
@@ -140,14 +119,14 @@ def FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons, cannnot_lnk_cons, di
     """
 
     # Initiating the list of array indices for all forthcoming neighbourhoods Np.
-    neibs_lsts = [[]]
+    neibs_sets = [set([])]
 
     data_num = x_data_arr.shape[0]
 
     # Adding a random point in the neighbourhood N0.
     rnd_idx = np.random.randint(0, data_num)
 
-    neibs_lsts[0].append(rnd_idx)
+    neibs_sets[0].add(rnd_idx)
     neib_c = 1
 
     farthest_x_idx = data_num + 99  # Not sure for this initialization.
@@ -161,7 +140,7 @@ def FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons, cannnot_lnk_cons, di
         # Getting the farthest x from all neighbourhoods.
         for i in np.random.randint(0, x_data_arr.shape[0], size=x_data_arr.shape[0]/10):
 
-            all_neibs = [idx for neib in neibs_lsts for idx in neib]
+            all_neibs = [idx for neib in neibs_sets for idx in neib]
 
             for neib_x_idx in all_neibs:
 
@@ -175,44 +154,44 @@ def FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons, cannnot_lnk_cons, di
 
         # Looking for Must-Link
         must_link_neib_indx = None
-        if farthest_x_idx in must_lnk_cons.keys():
+        if farthest_x_idx in must_lnk_cons:
             for ml_idx in must_lnk_cons[farthest_x_idx]:
                 print "ML", ml_idx
-                for n_idx, neib in enumerate(neibs_lsts):
+                for n_idx, neib in enumerate(neibs_sets):
                     if ml_idx in neib:
                         must_link_neib_indx = n_idx
 
         # Looking for Cannot-Link
         cannot_link = False
-        if farthest_x_idx in cannnot_lnk_cons.keys():
+        if farthest_x_idx in cannnot_lnk_cons:
             for cl_idx in cannnot_lnk_cons[farthest_x_idx]:
                 print "CL", cl_idx
-                for neib in neibs_lsts:
+                for neib in neibs_sets:
                     if cl_idx in neib:
                         cannot_link = True
 
         # Putting the x in the proper N neighbourhood.
         if must_link_neib_indx:
 
-            neibs_lsts[must_link_neib_indx].append(farthest_x_idx)
+            neibs_sets[must_link_neib_indx].add(farthest_x_idx)
 
         elif cannot_link:
 
             neib_c += 1
-            neibs_lsts.append([farthest_x_idx])
+            neibs_sets.append(set([farthest_x_idx]))
 
         else:
-            neibs_lsts[neib_c-1].append(farthest_x_idx)
+            neibs_sets[neib_c-1].add(farthest_x_idx)
 
-    return neibs_lsts
+    return neibs_sets
 
 
-def ConsolidateAL(neibs_lsts, x_data_arr, must_lnk_cons, distor_measure):
+def ConsolidateAL(neibs_sets, x_data_arr, must_lnk_cons, distor_measure):
     """
     """
     # Estimating centroids.
     # print np.mean(x_data_arr[[1,2,3], :], axis=0)
-    neibs_mu = [np.mean(x_data_arr[neib, :], axis=0) for neib in neibs_lsts]
+    neibs_mu = [np.mean(x_data_arr[neib, :], axis=0) for neib in neibs_sets]
 
     cnt = 0
 
@@ -228,16 +207,12 @@ def ConsolidateAL(neibs_lsts, x_data_arr, must_lnk_cons, distor_measure):
         )
 
         for neib_idx in srted_dists_neib_idx:
-            if rnd_idx in must_lnk_cons.keys():
+            if rnd_idx in must_lnk_cons:
                 for ml_idx in must_lnk_cons[rnd_idx]:
-                    if ml_idx in neibs_lsts[neib_idx] and rnd_idx not in neibs_lsts[neib_idx]:
-                        neibs_lsts[neib_idx].append(rnd_idx)
+                    if ml_idx in neibs_sets[neib_idx] and rnd_idx not in neibs_sets[neib_idx]:
+                        neibs_sets[neib_idx].append(rnd_idx)
 
-    return neibs_lsts
-
-
-def InitClustering():
-    pass
+    return neibs_sets
 
 
 def CosDistPar(x1, x2, distor_params):
@@ -265,7 +240,7 @@ def CosDist(x1, x2):
     return 1 - (x1 * x2.T / (np.sqrt(np.abs(x1 * x1.T)) * np.sqrt(np.abs(x2 * x2.T))))
 
 
-def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_lst,
+def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
               must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params):
     """JObjCosDM: J Objective function for Cosine Distortion Measure. It cannot very generic
         because the gradient decent (partial derivative) calculation should be applied which they
@@ -281,8 +256,8 @@ def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_lst,
 
     # Calculating Must-Link violation cost.
     ml_cost = 0
-    if x_idx in must_lnk_cons.keys():
-        for x_muneib_idx in mu_neib_idxs_lst:
+    if x_idx in must_lnk_cons:
+        for x_muneib_idx in mu_neib_idxs_set:
             if x_muneib_idx in must_lnk_cons[x_idx]:
                 ml_cost += w_constr_viol_mtrx[x_idx, x_muneib_idx] *\
                            CosDistPar(x_data_arr[x_idx, :], x_data_arr[x_muneib_idx, :],
@@ -290,8 +265,8 @@ def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_lst,
 
     # Calculating Cannot-Link violation cost.
     cl_cost = 0.0
-    if x_idx in cannot_lnk_cons.keys():
-        for x_muneib_idx in mu_neib_idxs_lst:
+    if x_idx in cannot_lnk_cons:
+        for x_muneib_idx in mu_neib_idxs_set:
             if x_muneib_idx in cannot_lnk_cons[x_idx]:
                 ml_cost += w_constr_viol_mtrx[x_idx, x_muneib_idx] *\
                            (1 - CosDistPar(x_data_arr[x_idx, :], x_data_arr[x_muneib_idx, :],
@@ -308,7 +283,7 @@ def MuCosDMPar(x_data_arr, neibs_idxs_lsts, distor_params):
     mu_lst = list()
     for neibs_idxlst in neibs_idxs_lsts:
 
-        xi_neib_sum = np.sum(x_data_arr[neibs_idxlst, :], axis=0)
+        xi_neib_sum = np.sum(x_data_arr[list(neibs_idxlst), :], axis=0)
         xi_neib_sum = sp.matrix(xi_neib_sum)
 
         # Calculating denominator ||Σ xi||(A)
@@ -356,7 +331,7 @@ def UpdateDistorParams(distor_params, chang_rate, x_data_arr, mu_lst,
         # Calculating Partial Derivative of D(xi, xj) of Must-Link Constraints.
         mlcost_pderiv = 0.0
         for x_idx in range(x_data_arr.shape[0]):
-            if x_idx in must_lnk_cons.keys():
+            if x_idx in must_lnk_cons:
                 for x_neib_idx in [idx for neib in neib_idxs_lst for idx in neib]:
                     if x_neib_idx in must_lnk_cons[x_idx]:
                         mlcost_pderiv += w_constr_viol_mtrx[x_idx, x_neib_idx] *\
@@ -366,7 +341,7 @@ def UpdateDistorParams(distor_params, chang_rate, x_data_arr, mu_lst,
         # Calculating Partial Derivative of D(xi, xj) of Cannot-Link Constraints.
         clcost_pderiv = 0.0
         for x_idx in range(x_data_arr.shape[0]):
-            if x_idx in cannot_lnk_cons.keys():
+            if x_idx in cannot_lnk_cons:
                 for x_neib_idx in [idx for neib in neib_idxs_lst for idx in neib]:
                     if x_neib_idx in cannot_lnk_cons[x_idx]:
                         clcost_pderiv += w_constr_viol_mtrx[x_idx, x_neib_idx] *\
@@ -414,9 +389,10 @@ if __name__ == '__main__':
     # dA = np.array([0.9, 0.1, 0.3, 1], dtype=np.float32)
     # print CosDistPar(x1, x2, dA)
 
-    x_data_2d_arr1 = sps.vonmises.rvs(1200.489, loc=(0.5+0.3, 0.5+0.0), scale=1, size=(500, 2))
-    x_data_2d_arr2 = sps.vonmises.rvs(1200.489, loc=(0.5+0.0, 0.5+0.1), scale=1, size=(500, 2))
-    x_data_2d_arr3 = sps.vonmises.rvs(1200.489, loc=(0.5+0.4, 0.5+0.3), scale=1, size=(500, 2))
+    print "Creating Sample"
+    x_data_2d_arr1 = sps.vonmises.rvs(1200.489, loc=tuple(np.random.uniform(0.0, 1.0, size=10000)), scale=1, size=(500, 10000))
+    x_data_2d_arr2 = sps.vonmises.rvs(1200.489, loc=tuple(np.random.uniform(0.0, 1.0, size=10000)), scale=1, size=(500, 10000))
+    x_data_2d_arr3 = sps.vonmises.rvs(1200.489, loc=tuple(np.random.uniform(0.0, 1.0, size=10000)), scale=1, size=(500, 10000))
 
     # x_data_2d_arr1 = np.random.vonmises(0.5, 100, size=(20, 2))
     # x_data_2d_arr2 = np.random.vonmises(0.5, 1000, size=(20, 2))
@@ -466,9 +442,10 @@ if __name__ == '__main__':
     }
 
     k_expect = 3
-
+    print "Runnint Kmeans"
     res = HMRFKmeans(k_expect, x_data_2d_arr, must_lnk_con, cannot_lnk_con, CosDist,
-                     CosDistPar, np.array([0.5, 0.5]), np.random.uniform(1.0, 1.0, size=(1500, 1500)),
+                     CosDistPar, np.random.uniform(1.0, 1.0, size=10000),
+                     np.random.uniform(1.0, 1.0, size=(1500, 1500)),
                      dparmas_chang_rate=0.01)
 
     for mu_idx, neib_idxs in enumerate(res[1]):
@@ -477,7 +454,7 @@ if __name__ == '__main__':
         #  if mu_idx == 2:
         #    break
         print mu_idx+1, len(neib_idxs), np.sort(neib_idxs)
-        for xy in x_data_2d_arr[neib_idxs]:
+        for xy in x_data_2d_arr[list(neib_idxs)]:
             plt.text(xy[0], xy[1], str(mu_idx+1), color='red', fontsize=15)
         # plt.plot(x_data_2d_arr2, '^')
         # plt.plot(x_data_2d_arr3, '>')
