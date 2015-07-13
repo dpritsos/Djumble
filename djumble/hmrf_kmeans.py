@@ -104,10 +104,166 @@ def ICM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
     return mu_neib_idxs_set_lst
 
 
-def FarFirstWeighted(x_data_arr, k_expect, must_lnk_con, cannnot_lnk_con, CosDist):
+def CosDistPar(x1, x2, distor_params):
+    """CosDistPar: Cosine Distance with distortion parameters based on 'Soft Cosine Measure' where
+        a weighting schema is the distortion parameters diagonal matrix A. Note that A matrix
+        (diagonal) is expected as vector argument in this function.
+    """
+
+    x1 = sp.matrix(x1)
+    x2 = sp.matrix(x2)
+    A = sp.sparse.dia_matrix((distor_params, [0]),
+                             shape=(distor_params.shape[0], distor_params.shape[0]))
+    # A = sp.diag(distor_params)
+
+    return 1 - (x1 * A * x2.T / (np.sqrt(np.abs(x1 * A * x1.T)) * np.sqrt(np.abs(x2 * A * x2.T))))
+
+
+def CosDist(x1, x2):
+    """
+        Note: I the above function is equivalent if A is set to be the I identity matrix.
+
+    """
+
+    x1 = sp.matrix(x1)
+    x2 = sp.matrix(x2)
+
+    return 1 - (x1 * x2.T / (np.sqrt(np.abs(x1 * x1.T)) * np.sqrt(np.abs(x2 * x2.T))))
+
+
+def MuCosDMPar(x_data_arr, neibs_idxs_lsts, distor_params):
     """
     """
-    pass
+    A = sp.sparse.dia_matrix((distor_params, [0]),
+                             shape=(distor_params.shape[0], distor_params.shape[0]))
+    # A = sp.diag(distor_params)
+
+    mu_lst = list()
+    for neibs_idxlst in neibs_idxs_lsts:
+
+        xi_neib_sum = np.sum(x_data_arr[list(neibs_idxlst), :], axis=0)
+        xi_neib_sum = sp.matrix(xi_neib_sum)
+
+        # Calculating denominator ||Σ xi||(A)
+        parametrized_norm_xi = np.sqrt(np.abs(xi_neib_sum * A * xi_neib_sum.T))
+
+        mu_lst.append(xi_neib_sum / parametrized_norm_xi)
+
+    return mu_lst
+
+
+def MuCos(x_data_arr, neibs_idxs_lsts):
+    """
+    """
+    mu_lst = list()
+    for neibs_idxlst in neibs_idxs_lsts:
+
+        xi_neib_sum = np.sum(x_data_arr[neibs_idxlst, :], axis=0)
+        xi_neib_sum = sp.matrix(xi_neib_sum)
+
+        # Calculating denominator ||Σ xi||
+        parametrized_norm_xi = np.sqrt(np.abs(xi_neib_sum * xi_neib_sum.T))
+
+        mu_lst.append(xi_neib_sum / parametrized_norm_xi)
+
+    return mu_lst
+
+
+def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
+              must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params):
+    """JObjCosDM: J Objective function for Cosine Distortion Measure. It cannot very generic
+        because the gradient decent (partial derivative) calculation should be applied which they
+        are totally dependent on the distortion measure, here Cosine Distance.
+
+    """
+
+    "Phi_max depends on the distortion measure"
+
+    # #### NOT BEEN DEBUGED YET! #### #
+
+    d = CosDistPar(x_data_arr[x_idx, :], mu, distor_params)
+
+    # Calculating Must-Link violation cost.
+    ml_cost = 0
+    if x_idx in must_lnk_cons:
+        for x_muneib_idx in mu_neib_idxs_set:
+            if x_muneib_idx in must_lnk_cons[x_idx]:
+                ml_cost += w_constr_viol_mtrx[x_idx, x_muneib_idx] *\
+                           CosDistPar(x_data_arr[x_idx, :], x_data_arr[x_muneib_idx, :],
+                                      distor_params)
+
+    # Calculating Cannot-Link violation cost.
+    cl_cost = 0.0
+    if x_idx in cannot_lnk_cons:
+        for x_muneib_idx in mu_neib_idxs_set:
+            if x_muneib_idx in cannot_lnk_cons[x_idx]:
+                ml_cost += w_constr_viol_mtrx[x_idx, x_muneib_idx] *\
+                           (1 - CosDistPar(x_data_arr[x_idx, :], x_data_arr[x_muneib_idx, :],
+                                           distor_params))
+
+    return d + ml_cost + cl_cost
+
+
+def UpdateDistorParams(distor_params, chang_rate, x_data_arr, mu_lst,
+                       neib_idxs_lst, must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx):
+    """
+    """
+    # #### HERE IS THE TRICKY THING #### #
+    # I think this is the last hard thing to figure out!
+    # i is for x
+    # j is for μ of the neib where x is into
+
+    for a_idx, a in enumerate(distor_params):
+
+        # Calculating Partial Derivative of D(xi, mu).
+        xm_pderiv = 0.0
+        for mu, neib_idxs in zip(mu_lst, neib_idxs_lst):
+            for x_neib_idx in neib_idxs:
+                xm_pderiv += PartialDerivative(a_idx, x_data_arr[x_neib_idx], mu, distor_params)
+
+        # [idx for neib in neib_idxs_lst for idx in neib]
+        # Calculating Partial Derivative of D(xi, xj) of Must-Link Constraints.
+        mlcost_pderiv = 0.0
+        for x_idx in range(x_data_arr.shape[0]):
+            if x_idx in must_lnk_cons:
+                for x_neib_idx in [idx for neib in neib_idxs_lst for idx in neib]:
+                    if x_neib_idx in must_lnk_cons[x_idx]:
+                        mlcost_pderiv += w_constr_viol_mtrx[x_idx, x_neib_idx] *\
+                            PartialDerivative(a_idx, x_data_arr[x_idx],
+                                              x_data_arr[x_neib_idx], distor_params)
+
+        # Calculating Partial Derivative of D(xi, xj) of Cannot-Link Constraints.
+        clcost_pderiv = 0.0
+        for x_idx in range(x_data_arr.shape[0]):
+            if x_idx in cannot_lnk_cons:
+                for x_neib_idx in [idx for neib in neib_idxs_lst for idx in neib]:
+                    if x_neib_idx in cannot_lnk_cons[x_idx]:
+                        clcost_pderiv += w_constr_viol_mtrx[x_idx, x_neib_idx] *\
+                            PartialDerivative(a_idx, x_data_arr[x_idx],
+                                              x_data_arr[x_neib_idx], distor_params)
+
+        # Changing the a dimension of A = np.diag(distortions-measure-parameters)
+        distor_params[a_idx] = a + chang_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv)
+
+    return distor_params
+
+
+def PartialDerivative(a_idx, x1, x2, distor_params):
+    """
+    """
+    A = sp.sparse.dia_matrix((distor_params, [0]),
+                             shape=(distor_params.shape[0], distor_params.shape[0]))
+    # A = sp.diag(distor_params)
+    x1 = sp.matrix(x1)
+    x2 = sp.matrix(x2)
+
+    # Calculating parametrized Norms ||Σ xi||(A)
+    x1_pnorm = np.sqrt(np.abs(x1 * A * x1.T))
+    x2_pnorm = np.sqrt(np.abs(x2 * A * x2.T))
+
+    return ((x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x1_pnorm) - x1 * A * x2.T *
+            ((np.square(x1[0, a_idx]) * x2_pnorm + np.square(x2[0, a_idx]) * x1_pnorm) /
+            (2 * x1_pnorm * x2_pnorm))) / (np.square(x1_pnorm) * np.square(x2_pnorm))
 
 
 def FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons, cannnot_lnk_cons, distor_measure):
@@ -219,163 +375,10 @@ def ConsolidateAL(neibs_sets, x_data_arr, must_lnk_cons, distor_measure):
     return neibs_sets
 
 
-def CosDistPar(x1, x2, distor_params):
-    """CosDistPar: Cosine Distance with distortion parameters based on 'Soft Cosine Measure' where
-        a weighting schema is the distortion parameters diagonal matrix A. Note that A matrix
-        (diagonal) is expected as vector argument in this function.
-    """
-
-    x1 = sp.matrix(x1)
-    x2 = sp.matrix(x2)
-    A = sp.sparse.dia_matrix((distor_params, [0]), shape=(distor_params.shape[0], distor_params.shape[0])) 
-    # A = sp.diag(distor_params)
-
-    return 1 - (x1 * A * x2.T / (np.sqrt(np.abs(x1 * A * x1.T)) * np.sqrt(np.abs(x2 * A * x2.T))))
-
-
-def CosDist(x1, x2):
-    """
-        Note: I the above function is equivalent if A is set to be the I identity matrix.
-
-    """
-
-    x1 = sp.matrix(x1)
-    x2 = sp.matrix(x2)
-
-    return 1 - (x1 * x2.T / (np.sqrt(np.abs(x1 * x1.T)) * np.sqrt(np.abs(x2 * x2.T))))
-
-
-def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
-              must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params):
-    """JObjCosDM: J Objective function for Cosine Distortion Measure. It cannot very generic
-        because the gradient decent (partial derivative) calculation should be applied which they
-        are totally dependent on the distortion measure, here Cosine Distance.
-
-    """
-
-    "Phi_max depends on the distortion measure"
-
-    # #### NOT BEEN DEBUGED YET! #### #
-
-    d = CosDistPar(x_data_arr[x_idx, :], mu, distor_params)
-
-    # Calculating Must-Link violation cost.
-    ml_cost = 0
-    if x_idx in must_lnk_cons:
-        for x_muneib_idx in mu_neib_idxs_set:
-            if x_muneib_idx in must_lnk_cons[x_idx]:
-                ml_cost += w_constr_viol_mtrx[x_idx, x_muneib_idx] *\
-                           CosDistPar(x_data_arr[x_idx, :], x_data_arr[x_muneib_idx, :],
-                                      distor_params)
-
-    # Calculating Cannot-Link violation cost.
-    cl_cost = 0.0
-    if x_idx in cannot_lnk_cons:
-        for x_muneib_idx in mu_neib_idxs_set:
-            if x_muneib_idx in cannot_lnk_cons[x_idx]:
-                ml_cost += w_constr_viol_mtrx[x_idx, x_muneib_idx] *\
-                           (1 - CosDistPar(x_data_arr[x_idx, :], x_data_arr[x_muneib_idx, :],
-                                           distor_params))
-
-    return d + ml_cost + cl_cost
-
-
-def MuCosDMPar(x_data_arr, neibs_idxs_lsts, distor_params):
+def FarFirstWeighted(x_data_arr, k_expect, must_lnk_con, cannnot_lnk_con, CosDist):
     """
     """
-    A = sp.sparse.dia_matrix((distor_params, [0]), shape=(distor_params.shape[0], distor_params.shape[0]))
-    # A = sp.diag(distor_params)
-
-    mu_lst = list()
-    for neibs_idxlst in neibs_idxs_lsts:
-
-        xi_neib_sum = np.sum(x_data_arr[list(neibs_idxlst), :], axis=0)
-        xi_neib_sum = sp.matrix(xi_neib_sum)
-
-    
-     #     # Calculating denominator ||Σ xi||(A)
-        parametrized_norm_xi = np.sqrt(np.abs(xi_neib_sum * A * xi_neib_sum.T))
-
-        mu_lst.append(xi_neib_sum / parametrized_norm_xi)
-
-    return mu_lst
-
-
-def MuCos(x_data_arr, neibs_idxs_lsts):
-    """
-    """
-    mu_lst = list()
-    for neibs_idxlst in neibs_idxs_lsts:
-
-        xi_neib_sum = np.sum(x_data_arr[neibs_idxlst, :], axis=0)
-        xi_neib_sum = sp.matrix(xi_neib_sum)
-
-        # Calculating denominator ||Σ xi||
-        parametrized_norm_xi = np.sqrt(np.abs(xi_neib_sum * xi_neib_sum.T))
-
-        mu_lst.append(xi_neib_sum / parametrized_norm_xi)
-
-    return mu_lst
-
-
-def UpdateDistorParams(distor_params, chang_rate, x_data_arr, mu_lst,
-                       neib_idxs_lst, must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx):
-    """
-    """
-    # #### HERE IS THE TRICKY THING #### #
-    # I think this is the last hard thing to figure out!
-    # i is for x
-    # j is for μ of the neib where x is into
-
-    for a_idx, a in enumerate(distor_params):
-
-        # Calculating Partial Derivative of D(xi, mu).
-        xm_pderiv = 0.0
-        for mu, neib_idxs in zip(mu_lst, neib_idxs_lst):
-            for x_neib_idx in neib_idxs:
-                xm_pderiv += PartialDerivative(a_idx, x_data_arr[x_neib_idx], mu, distor_params)
-
-        # Calculating Partial Derivative of D(xi, xj) of Must-Link Constraints.
-        mlcost_pderiv = 0.0
-        for x_idx in range(x_data_arr.shape[0]):
-            if x_idx in must_lnk_cons:
-                for x_neib_idx in [idx for neib in neib_idxs_lst for idx in neib]:
-                    if x_neib_idx in must_lnk_cons[x_idx]:
-                        mlcost_pderiv += w_constr_viol_mtrx[x_idx, x_neib_idx] *\
-                            PartialDerivative(a_idx, x_data_arr[x_idx],
-                                              x_data_arr[x_neib_idx], distor_params)
-
-        # Calculating Partial Derivative of D(xi, xj) of Cannot-Link Constraints.
-        clcost_pderiv = 0.0
-        for x_idx in range(x_data_arr.shape[0]):
-            if x_idx in cannot_lnk_cons:
-                for x_neib_idx in [idx for neib in neib_idxs_lst for idx in neib]:
-                    if x_neib_idx in cannot_lnk_cons[x_idx]:
-                        clcost_pderiv += w_constr_viol_mtrx[x_idx, x_neib_idx] *\
-                            PartialDerivative(a_idx, x_data_arr[x_idx],
-                                              x_data_arr[x_neib_idx], distor_params)
-
-        # Changing the a dimension of A = np.diag(distortions-measure-parameters)
-        distor_params[a_idx] = a + chang_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv)
-
-    return distor_params
-
-
-def PartialDerivative(a_idx, x1, x2, distor_params):
-    """
-    """
-    A = sp.sparse.dia_matrix((distor_params, [0]), shape=(distor_params.shape[0], distor_params.shape[0]))
-    # A = sp.diag(distor_params)
-    x1 = sp.matrix(x1)
-    x2 = sp.matrix(x2)
-
-    # Calculating parametrized Norms ||Σ xi||(A)
-    x1_pnorm = np.sqrt(np.abs(x1 * A * x1.T))
-    x2_pnorm = np.sqrt(np.abs(x2 * A * x2.T))
-
-    return ((x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x1_pnorm) - x1 * A * x2.T *
-            ((np.square(x1[0, a_idx]) * x2_pnorm + np.square(x2[0, a_idx]) * x1_pnorm) /
-            (2 * x1_pnorm * x2_pnorm))) / (np.square(x1_pnorm) * np.square(x2_pnorm))
+    pass
 
 
 if __name__ == '__main__':
