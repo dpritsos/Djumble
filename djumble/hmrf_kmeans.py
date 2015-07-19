@@ -1,5 +1,5 @@
 # The following comment enables the use of utf-8 within the script.
-# coding=utf-8
+# -*- coding: utf-8 -*-
 
 import numpy as np
 import scipy as sp
@@ -66,8 +66,8 @@ def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_no
     return mu_lst, mu_neib_idxs_set_lst, distor_params, w_constr_viol_mtrx
 
 
-def ICM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
-        must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params):
+def ICM(x_data_arr, mu_lst, mu_neib_idxs_set_lst, must_lnk_cons, cannot_lnk_cons,
+        w_constr_viol_mtrx, distor_params):
     """ ICM: Iterated Conditional Modes (for the E-Step)
 
         After all points are assigned, they are randomly re-ordered, and
@@ -88,6 +88,9 @@ def ICM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
                 j_obj = JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
                                   must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx,
                                   distor_params)
+
+                # if j_obj > 0.9:
+                #     print j_obj
 
                 if j_obj < last_jobj:
                     last_jobj = j_obj
@@ -211,6 +214,9 @@ def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
                            (1 - CosDistPar(x_data_arr[x_idx, :], x_data_arr[x_cons, :],
                                            distor_params))
 
+    # if d > 0.9 or ml_cost > 0.9 or cl_cost > 0.9:
+    #     print d, "+", ml_cost, "+", cl_cost
+
     return d + ml_cost + cl_cost
 
 
@@ -308,9 +314,10 @@ def PartialDerivative(a_idx, x1, x2, distor_params):
     x1_pnorm = np.sqrt(np.abs(x1 * A * x1.T))
     x2_pnorm = np.sqrt(np.abs(x2 * A * x2.T))
 
-    return ((x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x1_pnorm) - x1 * A * x2.T *
-            ((np.square(x1[0, a_idx]) * x2_pnorm + np.square(x2[0, a_idx]) * x1_pnorm) /
-            (2 * x1_pnorm * x2_pnorm))) / (np.square(x1_pnorm) * np.square(x2_pnorm))
+    return ((x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x1_pnorm) - (x1 * A * x2.T *
+            ((np.square(x1[0, a_idx]) * np.square(x2_pnorm) +
+              np.square(x2[0, a_idx]) * np.square(x1_pnorm)) /
+             (2 * x1_pnorm * x2_pnorm)))) / (np.square(x1_pnorm) * np.square(x2_pnorm))
 
 
 def FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons, cannnot_lnk_cons, distor_measure):
@@ -432,6 +439,11 @@ if __name__ == '__main__':
     x_data_2d_arr1 = sps.vonmises.rvs(1200.489, loc=(0.7, 0.2), scale=1, size=(500, 2))
     x_data_2d_arr2 = sps.vonmises.rvs(1200.489, loc=(0.6, 0.6), scale=1, size=(500, 2))
     x_data_2d_arr3 = sps.vonmises.rvs(1200.489, loc=(0.2, 0.3), scale=1, size=(500, 2))
+
+    x_data_2d_arr1 = x_data_2d_arr1 / x_data_2d_arr1.max()
+    x_data_2d_arr2 = x_data_2d_arr2 / x_data_2d_arr2.max()
+    x_data_2d_arr3 = x_data_2d_arr3 / x_data_2d_arr3.max()
+
     # tuple(np.random.normal(0.0, 10.0, size=2))
     # x_data_2d_arr1 = np.random.vonmises(0.5, 100, size=(20, 2))
     # x_data_2d_arr2 = np.random.vonmises(0.5, 1000, size=(20, 2))
