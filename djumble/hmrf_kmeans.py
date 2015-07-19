@@ -29,7 +29,10 @@ def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_no
 
     # EM algorithm execution.
     # While no convergence yet or X times.
-    for conv_step in range(30):
+    last_gobj = 999999999999.0
+    for conv_step in range(100):
+
+        print conv_step
 
         # The E-Step ######
 
@@ -56,9 +59,14 @@ def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_no
                                   distor_params)
 
         # Terminating upon Global JObej on condition.
-        if glob_jobj < 0.001:
+        # It suppose that global JObjective monotonically decreases, am I right?
+        if last_gobj - glob_jobj < 0.000:
+            raise Exception("Global JObjective difference returned a negative value.")
+
+        if last_gobj - glob_jobj < 0.001:
             break
         else:
+            last_gobj = glob_jobj
             print glob_jobj
 
     # Returning the Centroids, Clusters/Neighbourhoods, distortion parameters,
@@ -88,9 +96,6 @@ def ICM(x_data_arr, mu_lst, mu_neib_idxs_set_lst, must_lnk_cons, cannot_lnk_cons
                 j_obj = JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
                                   must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx,
                                   distor_params)
-
-                # if j_obj > 0.9:
-                #     print j_obj
 
                 if j_obj < last_jobj:
                     last_jobj = j_obj
@@ -198,7 +203,6 @@ def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
     ml_cost = 0.0
     if x_idx in must_lnk_cons:
         for x_cons in must_lnk_cons[x_idx]:
-            # for x_muneib_idx in :
             if x_cons not in mu_neib_idxs_set:
                 ml_cost += w_constr_viol_mtrx[x_idx, x_cons] *\
                            CosDistPar(x_data_arr[x_idx, :], x_data_arr[x_cons, :],
@@ -208,14 +212,10 @@ def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
     cl_cost = 0.0
     if x_idx in cannot_lnk_cons:
         for x_cons in cannot_lnk_cons[x_idx]:
-            # for  x_muneib in mu_neib_idxs_set:
             if x_cons in mu_neib_idxs_set:
                 cl_cost += w_constr_viol_mtrx[x_idx, x_cons] *\
                            (1 - CosDistPar(x_data_arr[x_idx, :], x_data_arr[x_cons, :],
                                            distor_params))
-
-    # if d > 0.9 or ml_cost > 0.9 or cl_cost > 0.9:
-    #     print d, "+", ml_cost, "+", cl_cost
 
     return d + ml_cost + cl_cost
 
@@ -226,31 +226,33 @@ def GlobJObjCosDM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
     """
 
     sum_d = 0.0
-    for x in x_data_arr:
-        for mu in mu_lst:
-            sum_d += CosDistPar(x, mu, distor_params)
+    for mu, neib_idxs in zip(mu_lst, mu_neib_idxs_set_lst):
+        for x_neib_idx in neib_idxs:
+            sum_d += CosDistPar(x_data_arr[x_neib_idx], mu, distor_params)
 
     # Calculating Must-Link violation cost.
     ml_cost = 0.0
-    for neib_set in mu_neib_idxs_set_lst:
-        for x_neib_idx in neib_set:
-            if x_neib_idx in must_lnk_cons:
-                for x_cons in must_lnk_cons[x_neib_idx]:
-                    if x_cons not in neib_set:
-                        ml_cost += w_constr_viol_mtrx[x_neib_idx, x_cons] *\
-                                   CosDistPar(x_data_arr[x_neib_idx, :], x_data_arr[x_cons, :],
-                                              distor_params)
+    ml_visited = set()
+    for x_con_i, x_con_jz in must_lnk_cons.iteritems():
+        for x_con_j in x_con_jz:
+            for neib_set in mu_neib_idxs_set_lst:
+                if x_con_i in neib_set and x_con_j not in neib_set and x_con_i not in ml_visited:
+                    ml_visited.add(x_con_i)
+                    ml_cost += w_constr_viol_mtrx[x_con_i, x_con_j] *\
+                        CosDistPar(x_data_arr[x_con_i, :], x_data_arr[x_con_j, :],
+                                   distor_params)
 
     # Calculating Cannot-Link violation cost.
     cl_cost = 0.0
-    for neib_set in mu_neib_idxs_set_lst:
-        for x_neib_idx in neib_set:
-            if x_neib_idx in cannot_lnk_cons:
-                for x_cons in cannot_lnk_cons[x_neib_idx]:
-                    if x_cons in neib_set:
-                        cl_cost += w_constr_viol_mtrx[x_neib_idx, x_cons] *\
-                                (1 - CosDistPar(x_data_arr[x_neib_idx, :], x_data_arr[x_cons, :],
-                                 distor_params))
+    cl_visited = set()
+    for x_con_i, x_con_jz in cannot_lnk_cons.iteritems():
+        for x_con_j in x_con_jz:
+            for neib_set in mu_neib_idxs_set_lst:
+                if x_con_i in neib_set and x_con_j not in neib_set and x_con_i not in cl_visited:
+                    cl_visited.add(x_con_i)
+                    cl_cost += w_constr_viol_mtrx[x_con_i, x_con_j] *\
+                        (1 - CosDistPar(x_data_arr[x_con_i, :], x_data_arr[x_con_j, :],
+                         distor_params))
 
     return sum_d + ml_cost + cl_cost
 
@@ -275,25 +277,28 @@ def UpdateDistorParams(distor_params, chang_rate, x_data_arr, mu_lst,
         # [idx for neib in neib_idxs_lst for idx in neib]
         # Calculating Partial Derivative of D(xi, xj) of Must-Link Constraints.
         mlcost_pderiv = 0.0
-        for x_idx in range(x_data_arr.shape[0]):
-            if x_idx in must_lnk_cons:
-                for x_neib_idx in [idx for neib in neib_idxs_lst for idx in neib
-                                   if idx not in must_lnk_cons[x_idx] and x_idx in neib]:
-                    # if x_neib_idx in must_lnk_cons[x_idx]:
-                    mlcost_pderiv += w_constr_viol_mtrx[x_idx, x_neib_idx] *\
-                        PartialDerivative(a_idx, x_data_arr[x_idx],
-                                          x_data_arr[x_neib_idx], distor_params)
+        ml_visited = set()
+        for x_con_i, x_con_jz in must_lnk_cons.iteritems():
+            for x_con_j in x_con_jz:
+                for neib_set in neib_idxs_lst:
+                    if x_con_i in neib_set and x_con_j not in neib_set and\
+                            x_con_i not in ml_visited:
+                        ml_visited.add(x_con_j)
+                        mlcost_pderiv += w_constr_viol_mtrx[x_con_i, x_con_j] *\
+                            PartialDerivative(a_idx, x_data_arr[x_con_i], x_data_arr[x_con_j],
+                                              distor_params)
 
         # Calculating Partial Derivative of D(xi, xj) of Cannot-Link Constraints.
         clcost_pderiv = 0.0
-        for x_idx in range(x_data_arr.shape[0]):
-            if x_idx in cannot_lnk_cons:
-                for x_neib_idx in [idx for neib in neib_idxs_lst for idx in neib
-                                   if x_neib_idx in cannot_lnk_cons[x_idx] and x_idx in neib]:
-                    # if x_neib_idx in cannot_lnk_cons[x_idx]:
-                    clcost_pderiv += w_constr_viol_mtrx[x_idx, x_neib_idx] *\
-                        PartialDerivative(a_idx, x_data_arr[x_idx],
-                                          x_data_arr[x_neib_idx], distor_params)
+        cl_visited = set()
+        for x_con_i, x_con_jz in cannot_lnk_cons.iteritems():
+            for x_con_j in x_con_jz:
+                for neib_set in neib_idxs_lst:
+                    if x_con_i in neib_set and x_con_j in neib_set and x_con_i not in cl_visited:
+                        cl_visited.add(x_con_i)
+                        clcost_pderiv += w_constr_viol_mtrx[x_con_i, x_con_j] *\
+                            PartialDerivative(a_idx, x_data_arr[x_con_i], x_data_arr[x_con_j],
+                                              distor_params)
 
         # Changing the a dimension of A = np.diag(distortions-measure-parameters)
         distor_params[a_idx] = a + chang_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv)
@@ -332,12 +337,12 @@ def FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons, cannnot_lnk_cons, di
 
     """
 
-    # Initiating the list of array indices for all forthcoming neighbourhoods Np.
+    # Initiating the list of array indices for all forthcoming neighborhoods Np.
     neibs_sets = [set([])]
 
     data_num = x_data_arr.shape[0]
 
-    # Adding a random point in the neighbourhood N0.
+    # Adding a random point in the neighborhood N0.
     rnd_idx = np.random.randint(0, data_num)
 
     neibs_sets[0].add(rnd_idx)
@@ -345,13 +350,13 @@ def FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons, cannnot_lnk_cons, di
 
     farthest_x_idx = data_num + 99  # Not sure for this initialization.
 
-    # Initialising for finding the farthest x array index form all N neighbourhoods.
+    # Initializing for finding the farthest x array index form all N neighborhoods.
 
     all_neibs = []
     while neib_c < k_expect and len(all_neibs) < data_num:
 
         max_dist = 0
-        # Getting the farthest x from all neighbourhoods.
+        # Getting the farthest x from all neighborhoods.
         for i in np.random.randint(0, x_data_arr.shape[0], size=x_data_arr.shape[0]/10):
 
             all_neibs = [idx for neib in neibs_sets for idx in neib]
@@ -382,7 +387,7 @@ def FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons, cannnot_lnk_cons, di
                     if cl_idx in neib:
                         cannot_link = True
 
-        # Putting the x in the proper N neighbourhood.
+        # Putting the x in the proper N neighborhood.
         if must_link_neib_indx:
 
             neibs_sets[must_link_neib_indx].add(farthest_x_idx)
@@ -436,13 +441,9 @@ def FarFirstWeighted(x_data_arr, k_expect, must_lnk_con, cannnot_lnk_con, CosDis
 if __name__ == '__main__':
 
     print "Creating Sample"
-    x_data_2d_arr1 = sps.vonmises.rvs(1200.489, loc=(0.7, 0.2), scale=1, size=(500, 2))
-    x_data_2d_arr2 = sps.vonmises.rvs(1200.489, loc=(0.6, 0.6), scale=1, size=(500, 2))
-    x_data_2d_arr3 = sps.vonmises.rvs(1200.489, loc=(0.2, 0.3), scale=1, size=(500, 2))
-
-    x_data_2d_arr1 = x_data_2d_arr1 / x_data_2d_arr1.max()
-    x_data_2d_arr2 = x_data_2d_arr2 / x_data_2d_arr2.max()
-    x_data_2d_arr3 = x_data_2d_arr3 / x_data_2d_arr3.max()
+    x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=(0.7, 0.2), scale=1, size=(500, 2))
+    x_data_2d_arr2 = sps.vonmises.rvs(1200.0, loc=(0.6, 0.6), scale=1, size=(500, 2))
+    x_data_2d_arr3 = sps.vonmises.rvs(1200.0, loc=(0.2, 0.3), scale=1, size=(500, 2))
 
     # tuple(np.random.normal(0.0, 10.0, size=2))
     # x_data_2d_arr1 = np.random.vonmises(0.5, 100, size=(20, 2))
