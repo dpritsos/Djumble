@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_noparam,
                distor_measure, distor_params, w_constr_viol_mtrx, dparmas_chang_rate):
     """HMRF Kmeans: A Semi-supervised clustering algorithm based on Hidden Markov Random Fields
-        Clustering model optimised by Expectation Maximisation (EM) algorithm with Hard clustering
+        Clustering model optimized by Expectation Maximization (EM) algorithm with Hard clustering
         constraints, i.e. a Kmeans Semi-supervised clustering variant.
     """
 
