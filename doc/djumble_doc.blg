@@ -3,44 +3,46 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: djumble_doc.aux
 The style file: splncs03.bst
 Database file #1: djumble_doc.bib
+Warning--empty booktitle in chapelle2006semi_hmrf_kmeans
 You've used 3 entries,
             2785 wiz_defined-function locations,
             601 strings with 4901 characters,
-and the built_in function-call counts, 1433 in all, are:
-= -- 112
+and the built_in function-call counts, 1835 in all, are:
+= -- 161
 > -- 46
-< -- 1
+< -- 3
 + -- 20
 - -- 16
-* -- 82
-:= -- 199
-add.period$ -- 5
+* -- 106
+:= -- 234
+add.period$ -- 6
 call.type$ -- 3
-change.case$ -- 16
+change.case$ -- 17
 chr.to.int$ -- 0
-cite$ -- 3
-duplicate$ -- 125
-empty$ -- 142
+cite$ -- 4
+duplicate$ -- 155
+empty$ -- 175
 format.name$ -- 18
-if$ -- 313
+if$ -- 415
 int.to.chr$ -- 0
 int.to.str$ -- 3
-missing$ -- 27
+missing$ -- 29
 newline$ -- 14
 num.names$ -- 6
-pop$ -- 53
+pop$ -- 58
 preamble$ -- 1
 purify$ -- 13
 quote$ -- 0
-skip$ -- 37
+skip$ -- 59
 stack$ -- 0
-substring$ -- 64
-swap$ -- 56
-text.length$ -- 1
+substring$ -- 123
+swap$ -- 79
+text.length$ -- 3
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 8
-warning$ -- 0
-while$ -- 12
+type$ -- 10
+warning$ -- 1
+while$ -- 18
 width$ -- 4
-write$ -- 33
+write$ -- 35
+(There was 1 warning)

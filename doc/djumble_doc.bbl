@@ -9,10 +9,11 @@ Basu, S., Bilenko, M., Mooney, R.J.: A probabilistic framework for
   ACM (2004)
 
 \bibitem{bishop2006_EM_general_view}
-Bishop, C.: Pattern Recognition and Machine Learning. Springer (2006)
+Bishop, C.: Pattern Recognition and Machine Learning, pp. 439--447. Springer
+  (2006)
 
 \bibitem{chapelle2006semi_hmrf_kmeans}
-Chapelle, O., Scholkopf, B., Zien, A., et~al.: Semi-supervised learning. The
-  MIT Press (2006)
+Chapelle, O., Scholkopf, B., Zien, A., et~al.: Semi-supervised learning. pp.
+  73--102. The MIT Press (2006)
 
 \end{thebibliography}
