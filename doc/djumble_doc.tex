@@ -11,6 +11,9 @@
 \usepackage{etex}
 \usepackage{listings}
 \usepackage{float}
+\usepackage[section]{placeins}
+\usepackage[ruled,linesnumbered,resetcount,algochapter]{algorithm2e}
+
 
 \title{Semi-supervised Hidden Markov Random Fields (HMRF) Kmeans. Theory to Implementation\\}
 \author{Dimitrios Pritsos and Efstathios Stamatatos}
@@ -64,54 +67,92 @@ Where $X=\{\mathbf{x}_{i}\}_{i=1}^{N}$ is the set of \emph{observable random var
 
 Due to the relatively complex marginal distributions, like $P(X|\Theta)$, over observed data points where they are computationally intractable, there is a common practice to incorporate \emph{latent or hidden variables} in order to express the conditional probability calculation more tractable over the expanded space of observed and latent variables. In eq.\ref{eq:em_log_likelihood} $L$ is the set of hidden (or latent) variables over $X$ observable data points \cite{bishop2006_EM_general_view}.
 
-###################### l should become a vector \mathbf{l} because can have several possible probabiliies for each of the K states (K clusters). In the hard-clustering set-up is just a value in {1,...,K}############ FIX IT IN THE WHOLE DOC
+Therefor \emph{a hidden field} $L=\{\mathbf{l}_{i}\}_{i=1}^{N}$ random variables, \emph{whose values are unobservable}. In the clustering framework, the set of hidden variables are the unobserved cluster labels on the
+points, indicating cluster assignments. Every hidden variable $\mathbf{l}_{i}$ takes values from the set ${1, . . . , N}$, which are the labels of the clusters.
 
-Therefor \emph{a hidden field} $L=\{l_{i}\}_{i=1}^{N}$ random variables, \emph{whose values are unobservable}. In the clustering framework, the set of hidden variables are the unobserved cluster labels on the
-points, indicating cluster assignments. Every hidden variable $l_{i}$ takes values from the set ${1, . . . , N}$, which are the labels of the clusters.
-
-Now every random data point $\mathbf{x}$ can be generated from a conditional probability distribution $P(\mathfb{x}_{i}|l_{i})$ determined by the corresponding hidden variable $l_{i}$. Note that we know a-priory that the random data points $X$ are conditionally independent given the hidden variables $L$. Thus $P(X|L) = \prod_{\mathbf{x}_{i}\in X}P(\mathbf{x}_{i}|l_{i})$.
+Now every random data point $\mathbf{x}$ can be generated from a conditional probability distribution $P(\mathfb{x}_{i}|\mathbf{l}_{i})$ determined by the corresponding hidden variable $\mathbf{l}_{i}$. Note that we know a-priory that the random data points $X$ are conditionally independent given the hidden variables $L$. Thus $P(X|L) = \prod_{\mathbf{x}_{i}\in X}P(\mathbf{x}_{i}|\mathbf{l}_{i})$. Note that $\mathbf{l}_{i}$ can be either a vector or a singleton depending on the algorithm setting, either for soft-clustering or for hard-clustering respectively. Thus value and vector for $\mathbf{l}_{i}$ will be used interchangeably in this text.
 
 The set of $\left\{X,Z\right\}$ is \emph{the complete data set}, while the $\left\{X\right\}$ is \epmh{the incomplete data set}. The likelihood function for the complete data set simply takes the form $lnp(X,Z|\Theta)$ as shown in eq.\ref{eq:em_log_likelihood}, and theoretically that maximization of this complete data log likelihood function is straightforward. However, in practice we are not given the complete data set, but only the incomplete data points $X$. Thus, our only knowledge of for the values of the latent (hidden) variables in $L$ is given by the posterior distribution $p(Z|X,\Theta)$. Because we don't have available the complete-data log likelihood, we consider instead its expected value under the posterior distribution of the latent (hidden) variables.
 
 In eq.\ref{eq:em_log_likelihood} and in fig.\ref{fig:hmrf_em} there are some parameters $\Theta$ which are governing the initial and the final schema of the PDF's mixture. These are the parameters we have to find computationally and where in employee EM algorithm (alg.\ref{alg:em_generic}) with the following general and distribution inexpedient (i.e. irrespectively where the PDF's are Gaussian, Von Mises Fisher etc). In particular with EM we are interactively finding the proper set of $\Theta$ parameters by calculating the expected posterior distribution $P(L|X,\Theta)$ of the latent (hidden) variables $L$.
 
 \begin{algorithm}[H]\label{alg:em_generic}
-\KwData{$X$ observable data points.
-		$L$ the hidden field of (latent) variables with $\left\{1,...,K \right\}$ possible states.
-		$K$ possible states for the latent variables which is the K number of clusters we expect to be exist.
-		$\Theta$ an initial state about the PDF mixture model.
+\KwData{\\
+		\hspace{.01\textwidth} $\mathbf{X}$ observable data points.\\
+		\hspace{.01\textwidth} $\mathbf{K}$ possible states clusters we expect to be existing in the data-set.\\
+		\hspace{.01\textwidth} $\mathbf{L}_{i=1}^K$ the hidden field variables (or vectors) with values $\left\{1,...,\mathbf{K}\right\}$ or $(0,1]$\\
+		\hspace{.01\textwidth} $\mathbf{\Theta}$ an initial state about the PDF mixture model.\\
 		}
-\KwResult{$l = \{\mathbf{p}_{k}\}_{k=1}^{K}$ where $\mathbf{p}$ can be either $\left\{0,1\right\}$ or $(0,1]$
- 		  depending on the soft-clustering of hard-clustering set-up.
-		  $\Theta$ the final set of parameters ###########################33 STOPPED HERER############################
+\KwResult{\\
+		  \hspace{.01\textwidth} $\mathbf{l} = \{\mathbf{p}_{k}\}_{k=1}^{K}$ where $\mathbf{p}$ can be either $\left\{0,1\right\}$ or $(0,1]$
+ 		  depending on the soft-clustering of hard-clustering set-up.\\
+		  \hspace{.01\textwidth} $\mathbf{\Theta}$ the final set of parameters after the Probability Density Functions Mixture.
 		 }
-\For{each genre $g$ in $G$}{
-  Average known web-pages $W_{g}$ of genre $g$ to build one centroid vector $c$ representing $C_{g}$ class\;
-\Repeat{$I$ times}{
-  \textbf{a.}Randomly choose some fraction $F$ of the full feature set $V$\;
-  \textbf{b.}Find top match of unknown page $W$ in centroid vectors $c$ using \textbf{some $\mathbf{Similarity(c,w)}$ measure}\;
-}
-}
-\For{each genre $g$ in $G$}{
-  $Score(g) \equiv$ proportion of times the $w$ unknown page top matches with $C_{g}$\;
+Choose an Initial setting for $\mathbf{\Theta}^{OLD}$;\\
+\While{$I$ iterations reached}{
+	\textbf{1. E-step }Evaluate $P(\mathbf{L}|\mathbf{X},\mathbf{\Theta}^{OLD})$\;\\
+	\textbf{2. M-step }Evaluate $\mathbf{\Theta^{NEW}}$\ given by (a) and (b);\\
+	\hspace{.1\textwidth} \textbf{a.} $\mathbf{\Theta}^{NEW}=\arg_{\mathbf{\Theta}}\max\Omega(\mathbf{\Theta},\mathbf{\Theta}^{OLD})$\;\\
+	\hspace{.1\textwidth} \textbf{b.} $\Omega(\mathbf{\Theta},\mathbf{\Theta}^{OLD})=\sum_{\mathbf{L}}P(\mathbf{L|X},\mathbf{\Theta}^{OLD})lnP(\mathbf{X,L},\mathbf{\Theta})$\;\\
 
-\eIf{max Score(g) $> \boldsymbol\sigma$ decision threshold}{
-	  $argmax(\,Score(g)\,) \equiv C_{g}$, i.e. $w \in C_{g}$\;
+	\eIf{log likelihood convergence reached}{
+		Breaking the loop and Ending the Clustering\;
+	}{
+		$\mathbf{\Theta}^{OLD}\leftarrow\mathbf{\Theta}$\;
+	}
 }
-{
-		$w \in \emptyset$, i.e. "Don't Know" or OTHER\;
-}
-}
-\caption{The \emph{Random Feature Sub-spacing Ensemble} algorithm.}
+
+\caption{The generic for of Expectation Maximization either for both Soft- and Hard-clustering }
 \end{algorithm}
+
+The EM algorithm can also be used to find MAP (maximum a-posterior) solutions in case we have a good knowledge about the prior distribution $P(\mathbf{\Theta})$ over the parameters $\mathbf{\Theta}$. In this case the E-step remains the same as in the maximum likelihood case, while in the \emph{M-step (b)} the $\Omega(\mathbf{\Theta},\mathbf{\Theta}^{OLD})+lnP(\mathbf{\Theta})$.
+
+\textbf{In HMRF-Kmeans derivation process} we are starting with the PDF mixture we would like to maximize by exploring the EM for the reasons explained above, as shown in eq.\ref{eq:hmrm_em_pdf}.
+
+\begin{equation}
+	P(\mathbf{X,L,\Theta}|\mathbf{M,C})=P(\mathbf{\Theta}|\mathbf{M,C})P(\mathbf{L}|\mathbf{\Theta,M,L})P(\mathbf{X}|\mathbf{L,\Theta,M,C})
+\label{eq:hmrm_em_pdf}
+\end{equation}
+
+Where the set of vector are the same as in alg.\ref{alg:em_generic} but this time the constraints set of the fig.\ref{fig:hmrf_em} have been included, i.e. Mast-link and Cannot-link constraints set $\left\{\mathbf{M,C}\right\}$. Moreover, as the graphical model is describing the constraints are independent from $\mathbf{X}$ and parameters $\mathbf{\Theta}$ are, also, independent from the constraints set. Thus:
+
+\begin{equation}
+	P(\mathbf{L}|\mathbf{\Theta,M,L})P(\mathbf{X}|\mathbf{L,\Theta,M,C})=P(\mathbf{X}|\mathbf{L,M,C})
+\label{eq:hmrm_em_X_MC_interdependency}
+\end{equation}
+
+\begin{equation}
+	P(\mathbf{\Theta}|\mathbf{M,C})=P(\mathbf{\Theta})
+\label{eq:hmrm_em_Theta_MC_interdependency}
+\end{equation}
+
+Considering $\mathbf{X}$ observable data-set is convient due to compuational issues to simplify the algorithm by assuming the vectors $\mathbf{x}$ are \emph{mutually impediment}, thus:
+
+\begin{equation}
+	P(\mathbf{X}|\mathbf{L,\Theta})=\prod_{i=1}^{N}P(\mathbf{x}_{i}|\mathbf{l}_{i},\mathbf{M,L})
+\label{eq:hmrm_em_X_mutually_interdependency}
+\end{equation}
+
+Consequentially, from equations \ref{eq:hmrm_em_pdf}, \ref{eq:hmrm_em_X_MC_interdependency}, \ref{eq:hmrm_em_Theta_MC_interdependency} and \ref{eq:hmrm_em_X_mutually_interdependency} we are getting the following MAP which it should be maximize.
+
+\begin{equation}
+	P(\mathbf{X,L,\Theta}|\mathbf{M,C})=P(\mathbf{\Theta})P(\mathbf{L}|\mathbf{\Theta,M,L})\prod_{i=1}^{N}P(\mathbf{x}_{i}|\mathbf{l}_{i},\mathbf{M,L})
+\label{eq:hmrm_em_MAP_or_MAX_Liklihood}
+\end{equation}
+
+At this step of the clustering method building process we have to decide weather the clustering would be soft or hard. This decision has two consequences. Firstly, is related to the $\mathbf{L}$ latent variables type and range of values as shown in alg.\ref{alg:em_generic}, i.e. whether $\mathbf{l}$ will be a variable or a vector of variables and whether its values will be probability estimates or {0,1} depending whether of not a data-point is belonging to the cluster $\mathbf{k}_{i}$. Secondly, is related whether the algorithm will be probabilistic based or distance based, i.e. whether a MAP will be maximized or an objective function with a specific distance measure (a.k.a distortion function/measure) will be minimized.
+
+In our case go for the \emph{distortion function} path, as the Kmeans term of the algorithm implies. As explained above since we are focusing on IR domain problems we are going to show the complete algorithm building process for the cosine similarity as the distortion function of our choice.
+
+Each hidden random variable $\mathbf{l}_i$ has an associated set of neighbors $\mathbf{\Gamma}_{i}\subset\mathbf{N}$. The must-link and cannot-link constraints define the neighborhood over the hidden labels, such that the neighbors of a point $x_{i}$ are all points that must-linked and/or cannot-inked with. The \emph{random field defined over the hidden variables} is a \emph{Markov Random Field}, where the PDF of the hidden variables \emph{obeys the following Markov property}:
+
+∀i, Pr(li |L − {li }) = Pr(li |{l j : l j ∈ N i })
+ (1)
+
+The above paragraph justifies the name for the algorithm HMRF and is the ......
+
 
 \bibliographystyle{splncs03}
 \bibliography{djumble_doc}
 
 \end{document}
-
-The EM algorithm can also be used to find MAP (maximum posterior) solutions
- for models in which a prior p(θ) is defined over the parameters. In this case the E
-step remains the same as in the maximum likelihood case, whereas in the M step the
-quantity to be maximized is given by Q(θ, θ old ) + ln p(θ). Suitable choices for the
-prior will remove the singularities of the kind illustrated in Figure 9.7.

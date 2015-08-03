@@ -1,13 +1,13 @@
 # Fdb version 3
-["bibtex djumble_doc"] 1438334080 "djumble_doc.aux" "djumble_doc.bbl" "djumble_doc" 1438334154
+["bibtex djumble_doc"] 1438600590 "djumble_doc.aux" "djumble_doc.bbl" "djumble_doc" 1438603496
   "./splncs03.bst" 1245050222 33098 4ef5df5462ae7c3cec476a39dec1b7bb ""
-  "djumble_doc.aux" 1438334153 1131 83b8f8442adecf1a4efbc21cf6ebdeb8 ""
+  "djumble_doc.aux" 1438603495 1578 5149d0e9028023ce9909cfa2a3db5988 ""
   "djumble_doc.bcf" 0 -1 0 ""
   "djumble_doc.bib" 1438331332 13161 71a37487cfeec525d713d67e993ce48e ""
   (generated)
   "djumble_doc.blg"
   "djumble_doc.bbl"
-["pdflatex"] 1438334153 "djumble_doc.tex" "djumble_doc.pdf" "djumble_doc" 1438334154
+["pdflatex"] 1438603494 "djumble_doc.tex" "djumble_doc.pdf" "djumble_doc" 1438603496
   "/etc/texmf/web2c/texmf.cnf" 1415902660 1101 af7716885e081ab43982cab7b4672c1a ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
@@ -89,6 +89,7 @@
   "/usr/share/texlive/texmf-dist/tex/generic/pgfplots/util/pgfplotscolormap.code.tex" 1380839021 28279 4430bda0a2b8dd284da3ebb8b63fb636 ""
   "/usr/share/texlive/texmf-dist/tex/generic/pgfplots/util/pgfplotsutil.code.tex" 1380839021 64411 03143f188d8dd6d5f5f6557dae23687a ""
   "/usr/share/texlive/texmf-dist/tex/generic/pgfplots/util/pgfplotsutil.verb.code.tex" 1312159636 3286 c17079ba50483e1ac1721268ea016041 ""
+  "/usr/share/texlive/texmf-dist/tex/latex/algorithm2e/algorithm2e.sty" 1357515851 138649 9b25c6203fed00aa0591833fc72e9128 ""
   "/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty" 1359763108 5949 3f3fd50a8cc94c3d4cbf4fc66cd3df1c ""
   "/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty" 1359763108 13829 94730e64147574077f8ecfea9bb69af4 ""
   "/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd" 1359763108 961 6518c6525a34feb5e8250ffa91731cff ""
@@ -99,6 +100,7 @@
   "/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty" 1362954379 4082 502152465aedb8f6a3c4b0b7c0fa8ae5 ""
   "/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty" 1362954379 2637 846ebe982d3549c7ede7ce135456f54a ""
   "/usr/share/texlive/texmf-dist/tex/latex/base/article.cls" 1254151887 20571 b8bd218bf2e18b4f5817ee643cd9c515 ""
+  "/usr/share/texlive/texmf-dist/tex/latex/base/ifthen.sty" 1254151887 5022 2ec7815b07dc68e65542e23a180bc839 ""
   "/usr/share/texlive/texmf-dist/tex/latex/base/inputenc.sty" 1254151887 4388 1cb2ca8d423695bd22ea8d126c276f33 ""
   "/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd" 1254151887 2109 c400bd6c901edc4a09e4d53fcffd3b3c ""
   "/usr/share/texlive/texmf-dist/tex/latex/base/omsenc.dfu" 1254151887 1868 39c80c053f689193a1ca9a83d05b2744 ""
@@ -129,8 +131,11 @@
   "/usr/share/texlive/texmf-dist/tex/latex/pdftex-def/pdftex.def" 1306616590 55368 3c8a0d99822330f2dfabc0dfb09ce897 ""
   "/usr/share/texlive/texmf-dist/tex/latex/pgfplots/pgfplots.sty" 1380839021 3198 af7657724c4bf0a455309e5afa101eab ""
   "/usr/share/texlive/texmf-dist/tex/latex/pgfplots/pgfplotstable.sty" 1351287374 1274 08f4de1017e09508c177197fa9d9fca6 ""
+  "/usr/share/texlive/texmf-dist/tex/latex/placeins/placeins.sty" 1137110565 4087 636308456f60d2b31cbf97867db5708d ""
+  "/usr/share/texlive/texmf-dist/tex/latex/relsize/relsize.sty" 1369619135 15542 c4cc3164fe24f2f2fbb06eb71b1da4c4 ""
   "/usr/share/texlive/texmf-dist/tex/latex/tools/array.sty" 1254151720 13146 3e38b06d6e7ca62ce1bdb63b0d6148a5 ""
   "/usr/share/texlive/texmf-dist/tex/latex/tools/multicol.sty" 1312409015 26766 56c30c5bea3083b5a0d6fc2ce0063096 ""
+  "/usr/share/texlive/texmf-dist/tex/latex/tools/xspace.sty" 1312409015 4405 b7f0681f78908bf1aa3cd73228e9fd38 ""
   "/usr/share/texlive/texmf-dist/web2c/texmf.cnf" 1392645748 31083 1dfd8bf685ce0009c40532fedf8a7c53 ""
   "/usr/share/texmf/tex/generic/pgf/basiclayer/pgfcore.code.tex" 1304191498 1006 b103be0bfc8c1682ff1fa9760697a329 ""
   "/usr/share/texmf/tex/generic/pgf/basiclayer/pgfcorearrows.code.tex" 1304191498 17851 c112f6fe3b1889f91d54568be38c934d ""
@@ -201,9 +206,9 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1392645748 31083 1dfd8bf685ce0009c40532fedf8a7c53 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1415902731 1346346 7f2b8b715a9ddb095afe3697a6ba02b5 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1410948179 3822874 eccfb62f9ee6f8a8defba0e099c02e3d ""
-  "djumble_doc.aux" 1438334153 1131 83b8f8442adecf1a4efbc21cf6ebdeb8 ""
-  "djumble_doc.bbl" 1438334080 657 3329f12a407f3e94247c2f77ba7f0b66 "bibtex djumble_doc"
-  "djumble_doc.tex" 1438334151 6831 7b48fc7d0917acadab21bec0e10dcd71 ""
+  "djumble_doc.aux" 1438603495 1578 5149d0e9028023ce9909cfa2a3db5988 ""
+  "djumble_doc.bbl" 1438600590 657 3329f12a407f3e94247c2f77ba7f0b66 "bibtex djumble_doc"
+  "djumble_doc.tex" 1438603493 14220 5dbc0f1be13ed3602ef77c1b5d001d0f ""
   "figures/SemiSupervised_HMRF_EM_Graphical_Model-eps-converted-to.pdf" 1438334079 16078 262db9cdbe17a9144a74fd227a015dab ""
   "figures/SemiSupervised_HMRF_EM_Graphical_Model.eps" 1438331851 33624 a568d93b157520196782941f0d709fd5 ""
   "llncs.cls" 1380273272 42849 e98f9316a296920ae82de0017d2b1604 ""

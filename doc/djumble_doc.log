@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.9.17)  31 JUL 2015 12:15
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.9.17)  3 AUG 2015 15:04
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -774,33 +774,87 @@ Package: float 2001/11/08 v1.3d Float enhancements (AL)
 \float@box=\box71
 \@float@everytoks=\toks45
 \@floatcapt=\box72
+) (/usr/share/texlive/texmf-dist/tex/latex/placeins/placeins.sty
+Package: placeins 2005/04/18  v 2.2
+) (/usr/share/texlive/texmf-dist/tex/latex/algorithm2e/algorithm2e.sty
+Package: algorithm2e 2013/01/06 v5.00 algorithms environments
+\c@AlgoLine=\count172
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/ifthen.sty
+Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
+) (/usr/share/texlive/texmf-dist/tex/latex/tools/xspace.sty
+Package: xspace 2009/10/20 v1.13 Space after command names (DPC,MH)
+) (/usr/share/texlive/texmf-dist/tex/latex/relsize/relsize.sty
+Package: relsize 2013/03/29 ver 4.1
+)
+********************************************************
+Package `algorithm2e' Release 5.0 -- january 06 2013 --
+- algorithm2e-announce@lirmm.fr mailing list for announcement about releases
+- algorithm2e-discussion@lirmm.fr mailing list for discussion about package
+subscribe by emailing sympa@lirmm.fr with 'subscribe <list> <firstname name>'
+- Author: Christophe Fiorio (cfiorio@um2.fr)
+********************************************************
+\skiptotal=\skip50
+\skiplinenumber=\skip51
+\skiprule=\skip52
+\skiphlne=\skip53
+\skiptext=\skip54
+\skiplength=\skip55
+\algomargin=\skip56
+\skipalgocfslide=\skip57
+\algowidth=\dimen212
+\inoutsize=\dimen213
+\inoutindent=\dimen214
+\interspacetitleruled=\dimen215
+Normal \dimen register pool exhausted, switching to extended pool.
+\interspacealgoruled=\dimen256
+\interspacetitleboxruled=\dimen257
+\algocf@inoutbox=\box73
+\algocf@inputbox=\box74
+\AlCapSkip=\skip58
+\AlCapHSkip=\skip59
+\algoskipindent=\skip60
+\algocf@nlbox=\box75
+\algocf@hangingbox=\box76
+\algocf@untilbox=\box77
+\algocf@skipuntil=\skip61
+\algocf@capbox=\box78
+\algoheightruledefault=\skip62
+\algoheightrule=\skip63
+\algotitleheightruledefault=\skip64
+\algotitleheightrule=\skip65
+\c@algocfline=\count173
+\c@algocfproc=\count174
+\c@algocf=\count175
+\algocf@algoframe=\box79
+\algocf@algobox=\box80
 ) (./djumble_doc.aux)
 \openout1 = `djumble_doc.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
  (/usr/share/texlive/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count172
-\scratchdimen=\dimen212
-\scratchbox=\box73
-\nofMPsegments=\count173
-\nofMParguments=\count174
+\scratchcounter=\count176
+\scratchdimen=\dimen258
+\scratchbox=\box81
+\nofMPsegments=\count177
+\nofMParguments=\count178
 \everyMPshowfont=\toks46
-\MPscratchCnt=\count175
-\MPscratchDim=\dimen213
-\MPnumerator=\count176
-\makeMPintoPDFobject=\count177
+\MPscratchCnt=\count179
+\MPscratchDim=\dimen259
+\MPnumerator=\count180
+\makeMPintoPDFobject=\count181
 \everyMPtoPDFconversion=\toks47
 ) (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
 Package: pdftexcmds 2011/11/29 v0.20 Utility functions of pdfTeX for LuaTeX (HO)
@@ -827,45 +881,45 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 )) ABD: EveryShipout initializing macros
 
 Package pgfplots Warning: running in backwards compatibility mode (unsuitable tick labels; missing features). Consider writing \pgfplotsset{compat=1.9} into your preamble.
- on input line 19.
+ on input line 22.
 
-\c@lstlisting=\count178
-LaTeX Font Info:    Try loading font information for U+msa on input line 21.
+\c@lstlisting=\count182
+LaTeX Font Info:    Try loading font information for U+msa on input line 24.
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 21.
+LaTeX Font Info:    Try loading font information for U+msb on input line 24.
  (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 21.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 24.
  (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <9> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 21.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 24.
 
 
-./djumble_doc.tex:23: LaTeX Error: Environment abstrat undefined.
+./djumble_doc.tex:26: LaTeX Error: Environment abstrat undefined.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.23 \begin{abstrat}
+l.26 \begin{abstrat}
                     
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
 or  <return>  to continue without it.
 
 
-./djumble_doc.tex:25: LaTeX Error: \begin{document} ended by \end{abstrat}.
+./djumble_doc.tex:28: LaTeX Error: \begin{document} ended by \end{abstrat}.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.25 \end{abstrat}
+l.28 \end{abstrat}
                   
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
@@ -874,7 +928,7 @@ or  <return>  to continue without it.
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (0.32043pt too wide) in paragraph at lines 41--42
+Overfull \hbox (0.32043pt too wide) in paragraph at lines 44--45
 \OT1/cmr/m/n/10 Kmeans in the IR do-main frame-work, it has to be noted that this Semi-supervised
  []
 
@@ -885,38 +939,129 @@ Package epstopdf Info: Source file: <figures/SemiSupervised_HMRF_EM_Graphical_Mo
 (epstopdf)                    date: 2015-07-31 12:14:39
 (epstopdf)                    size: 16078 bytes
 (epstopdf)             Command: <repstopdf --outfile=figures/SemiSupervised_HMRF_EM_Graphical_Model-eps-converted-to.pdf figures/SemiSupervised_HMRF_EM_Graphical_Model.eps>
-(epstopdf)             \includegraphics on input line 50.
+(epstopdf)             \includegraphics on input line 53.
 Package epstopdf Info: Output file is already uptodate.
 <figures/SemiSupervised_HMRF_EM_Graphical_Model-eps-converted-to.pdf, id=14, 533.995pt x 445.665pt>
 File: figures/SemiSupervised_HMRF_EM_Graphical_Model-eps-converted-to.pdf Graphic file (type pdf)
  <use figures/SemiSupervised_HMRF_EM_Graphical_Model-eps-converted-to.pdf>
-Package pdftex.def Info: figures/SemiSupervised_HMRF_EM_Graphical_Model-eps-converted-to.pdf used on input line 50.
+Package pdftex.def Info: figures/SemiSupervised_HMRF_EM_Graphical_Model-eps-converted-to.pdf used on input line 53.
 (pdftex.def)             Requested size: 213.59421pt x 178.26283pt.
  [2 <./figures/SemiSupervised_HMRF_EM_Graphical_Model-eps-converted-to.pdf>]
-./djumble_doc.tex:70: Undefined control sequence.
-l.70 ...tional probability distribution $P(\mathfb
-                                                  {x}_{i}|l_{i})$ determined...
+./djumble_doc.tex:73: Undefined control sequence.
+l.73 ...tional probability distribution $P(\mathfb
+                                                  {x}_{i}|\mathbf{l}_{i})$ d...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
 misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-(./djumble_doc.bbl) [3] (./djumble_doc.aux) ) 
+./djumble_doc.tex:75: Undefined control sequence.
+l.75 ...et}, while the $\left\{X\right\}$ is \epmh
+                                                  {the incomplete data set}....
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+
+./djumble_doc.tex:103: LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.103 }
+       
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+
+./djumble_doc.tex:103: LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.103 }
+       
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+
+./djumble_doc.tex:103: LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.103 }
+       
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+
+Underfull \vbox (badness 6461) has occurred while \output is active []
+
+ [3] [4]
+
+./djumble_doc.tex:149: Package inputenc Error: Unicode char \u8:∀ not set up for use with LaTeX.
+
+See the inputenc package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.149 ∀
+         i, Pr(li |L − {li }) = Pr(li |{l j : l j ∈ N i })
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+
+./djumble_doc.tex:149: Package inputenc Error: Unicode char \u8:− not set up for use with LaTeX.
+
+See the inputenc package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.149 ∀i, Pr(li |L −
+                         {li }) = Pr(li |{l j : l j ∈ N i })
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+
+./djumble_doc.tex:149: Package inputenc Error: Unicode char \u8:∈ not set up for use with LaTeX.
+
+See the inputenc package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.149 ...(li |L − {li }) = Pr(li |{l j : l j ∈
+                                                   N i })
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+(./djumble_doc.bbl) [5] (./djumble_doc.aux) ) 
 Here is how much of TeX's memory you used:
- 20637 strings out of 493304
- 475315 string characters out of 6139871
- 602489 words of memory out of 5000000
- 23652 multiletter control sequences out of 15000+600000
+ 22065 strings out of 493304
+ 495538 string characters out of 6139871
+ 639949 words of memory out of 5000000
+ 25063 multiletter control sequences out of 15000+600000
  8684 words of font info for 33 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 70i,7n,76p,863b,609s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 70i,15n,76p,863b,609s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texl
 ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on djumble_doc.pdf (3 pages, 174175 bytes).
+Output written on djumble_doc.pdf (5 pages, 199061 bytes).
 PDF statistics:
- 96 PDF objects out of 1000 (max. 8388607)
- 66 compressed objects within 1 object stream
+ 102 PDF objects out of 1000 (max. 8388607)
+ 70 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  18 words of extra memory for PDF output out of 10000 (max. 10000000)
 
