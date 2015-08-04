@@ -70,7 +70,7 @@ Due to the relatively complex marginal distributions, like $P(X|\Theta)$, over o
 Therefor \emph{a hidden field} $L=\{\mathbf{l}_{i}\}_{i=1}^{N}$ random variables, \emph{whose values are unobservable}. In the clustering framework, the set of hidden variables are the unobserved cluster labels on the
 points, indicating cluster assignments. Every hidden variable $\mathbf{l}_{i}$ takes values from the set ${1, . . . , N}$, which are the labels of the clusters.
 
-Now every random data point $\mathbf{x}$ can be generated from a conditional probability distribution $P(\mathfb{x}_{i}|\mathbf{l}_{i})$ determined by the corresponding hidden variable $\mathbf{l}_{i}$. Note that we know a-priory that the random data points $X$ are conditionally independent given the hidden variables $L$. Thus $P(X|L) = \prod_{\mathbf{x}_{i}\in X}P(\mathbf{x}_{i}|\mathbf{l}_{i})$. Note that $\mathbf{l}_{i}$ can be either a vector or a singleton depending on the algorithm setting, either for soft-clustering or for hard-clustering respectively. Thus value and vector for $\mathbf{l}_{i}$ will be used interchangeably in this text.
+Now every random data point $\mathbf{x}$ can be generated from a conditional probability distribution $P(\mathfb{x}_{i}|\mathbf{l}_{i})$ determined by the corresponding hidden variable $\mathbf{l}_{i}$. Note that we know a-priory that the random data points $X$ are conditionally independent given the hidden variables $L$. Thus $P(X|L) = \prod_{\mathbf{x}_{i} \in X}P(\mathbf{x}_{i}|\mathbf{l}_{i})$. Note that $\mathbf{l}_{i}$ can be either a vector or a singleton depending on the algorithm setting, either for soft-clustering or for hard-clustering respectively. Thus value and vector for $\mathbf{l}_{i}$ will be used interchangeably in this text.
 
 The set of $\left\{X,Z\right\}$ is \emph{the complete data set}, while the $\left\{X\right\}$ is \epmh{the incomplete data set}. The likelihood function for the complete data set simply takes the form $lnp(X,Z|\Theta)$ as shown in eq.\ref{eq:em_log_likelihood}, and theoretically that maximization of this complete data log likelihood function is straightforward. However, in practice we are not given the complete data set, but only the incomplete data points $X$. Thus, our only knowledge of for the values of the latent (hidden) variables in $L$ is given by the posterior distribution $p(Z|X,\Theta)$. Because we don't have available the complete-data log likelihood, we consider instead its expected value under the posterior distribution of the latent (hidden) variables.
 
@@ -136,7 +136,7 @@ Considering $\mathbf{X}$ observable data-set is convient due to compuational iss
 Consequentially, from equations \ref{eq:hmrm_em_pdf}, \ref{eq:hmrm_em_X_MC_interdependency}, \ref{eq:hmrm_em_Theta_MC_interdependency} and \ref{eq:hmrm_em_X_mutually_interdependency} we are getting the following MAP which it should be maximize.
 
 \begin{equation}
-	P(\mathbf{X,L,\Theta}|\mathbf{M,C})=P(\mathbf{\Theta})P(\mathbf{L}|\mathbf{\Theta,M,L})\prod_{i=1}^{N}P(\mathbf{x}_{i}|\mathbf{l}_{i},\mathbf{M,L})
+	P(\mathbf{X,L,\Theta}|\mathbf{M,C})=P(\mathbf{\Theta})P(\mathbf{L}|\mathbf{\Theta,M,C})\prod_{i=1}^{N}P(\mathbf{x}_{i}|\mathbf{l}_{i},\mathbf{M,L})
 \label{eq:hmrm_em_MAP_or_MAX_Liklihood}
 \end{equation}
 
@@ -144,12 +144,51 @@ At this step of the clustering method building process we have to decide weather
 
 In our case go for the \emph{distortion function} path, as the Kmeans term of the algorithm implies. As explained above since we are focusing on IR domain problems we are going to show the complete algorithm building process for the cosine similarity as the distortion function of our choice.
 
-Each hidden random variable $\mathbf{l}_i$ has an associated set of neighbors $\mathbf{\Gamma}_{i}\subset\mathbf{N}$. The must-link and cannot-link constraints define the neighborhood over the hidden labels, such that the neighbors of a point $x_{i}$ are all points that must-linked and/or cannot-inked with. The \emph{random field defined over the hidden variables} is a \emph{Markov Random Field}, where the PDF of the hidden variables \emph{obeys the following Markov property}:
+Each hidden random variable $\mathbf{l}_i$ has an associated set of neighbors $\mathbf{\Gamma}_{i}\subset\mathbf{L}$. The must-link and cannot-link constraints define the neighborhood over the hidden labels, such that the neighbors of a point $x_{i}$ are all points that must-linked and/or cannot-inked with. The \emph{random field defined over the hidden variables} is a \emph{Markov Random Field}, where the PDF of the hidden variables \emph{obeys the following Markov property}:
 
-∀i, Pr(li |L − {li }) = Pr(li |{l j : l j ∈ N i })
- (1)
+\begin{equation}
+	\forall i,P(\mathbf{l}_{i}|\mathbf{L-}\{\mathbf{l}_{i}\},\mathbf{\Theta},\mathbf{M},\mathbf{C})=P(\mathbf{l}_{i}|\{\mathbf{\Gamma}_{i},\mathbf{\Theta},\mathbf{M},\mathbf{C}\})
+\label{eq:markov_property}
+\end{equation}
 
-The above paragraph justifies the name for the algorithm HMRF and is the ......
+Therefore, the probability distribution of $\mathbf{l}$ labels is only dependent on the must-link and cannot-link constraints on $\mathbf{x}$ data-points. The above paragraph justifies the name for the algorithm as HMRF and letting us assume any a-piory PDF for an arbitrary label setup.
+
+Since, by the \emph{Hammersley-Clifford theorem}, the a-prior PDF of a particular label setup can be expressed as a Gibbs distribution eq.\ref{eq:constraints_Gibbs_pdf}, which conveniently belongs to the exponential distributions family, as we will see later.
+
+\begin{equation}
+	P(\mathbf{L}|\mathbf{\Theta},\mathbf{M},\mathbf{C})=\frac{1}{Z_{1}}\exp(-\sum_{\mathbf{\Gamma}_{i}\in\Gamma}V_{\Gamma_{i}}(\mathbf{L}))
+\label{eq:constraints_Gibbs_pdf}
+\end{equation}
+
+Where $V_{\Gamma_{i}}$ is the \emph{potential function}, as it called when the clustering model is \emph{hard} type \textbf{(NOTE: Potential Function also found this in the Bishops Book and I think this term is used in Kmeans case and not in the probabilistic EM)}, for each neighborhood of labels defined by the $\{M,C\}$ sets of constraints.
+
+Since the constraints should probably been given as pairs then eq.\ref{eq:constraints_Gibbs_pdf} will become eq.\ref{eq:constraints_Gibbs_pdf_pairwise}.\textbf{(NOTE:A question here is constraint A=(2,50) will be the same as B=(50,2), will both be present etc. Should the constraints be a Graph, a Matrix or a set of pairs? (Impementation Language Performance VS Math/Computational Performance))}.
+
+\begin{equation}
+	P(\mathbf{L}|\mathbf{\Theta},\mathbf{M},\mathbf{C})=\frac{1}{Z_{1}}\exp(-\sum_{i}\sum_{j}V(i,j))
+\label{eq:constraints_Gibbs_pdf_pairwise}
+\end{equation}
+
+\begin{equation}
+	V(i,j)=
+	\begin{cases}
+		f_{\mathbf{M}}(x_{i},x_{j}) & \text{if }(x_{i},x_{j})\in\mathbf{M}\\
+		f_{\mathbf{C}}(x_{i},x_{j}) & \text{if }(x_{i},x_{j})\in\mathbf{C}\\
+		0 & \text{otherwise}
+	\end{cases}
+\label{eq:constraints_potential_function}
+\end{equation}
+
+Where $f_{\mathbf{M}}$ and $f_{\mathbf{C}}$ are positive value cost functions for the must-link and cannot-link constraints violation. Clearly, eq.\ref{eq:constraints_Gibbs_pdf_pairwise} is discouraging the violation of the constraints by reducing the value of joint probability MAP in eq.\ref{eq:hmrm_em_MAP_or_MAX_Liklihood}.
+
+Maximizing the joint HMRF probability in eq.\ref{eq:hmrm_em_MAP_or_MAX_Liklihood} (left part of the equation), is equivalent to jointly maximizing the likelihood of generating data points from the model and the probability of label assignments that respect the constraints, while regularizing the model parameters. The essential part of the right side of the equation the conditional probability $P(\mathbf{X}|\mathbf{L},\mathbf{M},\mathbf{C})$, equivalent to eq.\ref{eq:hmrm_em_X_MC_interdependency}. Firstly, because its PDF will define our prior assumption about the PDF mixture of the data-set. Secondly, because the same PDF should be used as the constraints potential function $V$, thus, penalty functions $f$. Finally, because its PDF will ultimately define the parametrized (by $\Theta$ parameters) \emph{distortion measure}.
+
+Using the convenience in the assumption of a regular exponential distributions for the observed data points $X$ and a regular Bregman divergences, the PDF of the observed data would be in eq.
+p(x i |yi , Θ) =
+ ZΘ
+ exp −dA(xi , μh ) ,
+ (5.8)
+where dA (xi , μyi ) is the Bregman divergence between xi and μyi, corresponding to the exponential density p, and ZΘ is the normalizer (kati function legete ).
 
 
 \bibliographystyle{splncs03}

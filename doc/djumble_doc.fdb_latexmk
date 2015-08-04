@@ -1,13 +1,13 @@
 # Fdb version 3
-["bibtex djumble_doc"] 1438600590 "djumble_doc.aux" "djumble_doc.bbl" "djumble_doc" 1438603496
+["bibtex djumble_doc"] 1438690145 "djumble_doc.aux" "djumble_doc.bbl" "djumble_doc" 1438690147
   "./splncs03.bst" 1245050222 33098 4ef5df5462ae7c3cec476a39dec1b7bb ""
-  "djumble_doc.aux" 1438603495 1578 5149d0e9028023ce9909cfa2a3db5988 ""
+  "djumble_doc.aux" 1438690146 1767 e6c6c9697dfdb58acdc8249e4fcc5615 ""
   "djumble_doc.bcf" 0 -1 0 ""
   "djumble_doc.bib" 1438331332 13161 71a37487cfeec525d713d67e993ce48e ""
   (generated)
-  "djumble_doc.blg"
   "djumble_doc.bbl"
-["pdflatex"] 1438603494 "djumble_doc.tex" "djumble_doc.pdf" "djumble_doc" 1438603496
+  "djumble_doc.blg"
+["pdflatex"] 1438690146 "djumble_doc.tex" "djumble_doc.pdf" "djumble_doc" 1438690147
   "/etc/texmf/web2c/texmf.cnf" 1415902660 1101 af7716885e081ab43982cab7b4672c1a ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
@@ -206,13 +206,13 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1392645748 31083 1dfd8bf685ce0009c40532fedf8a7c53 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1415902731 1346346 7f2b8b715a9ddb095afe3697a6ba02b5 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1410948179 3822874 eccfb62f9ee6f8a8defba0e099c02e3d ""
-  "djumble_doc.aux" 1438603495 1578 5149d0e9028023ce9909cfa2a3db5988 ""
-  "djumble_doc.bbl" 1438600590 657 3329f12a407f3e94247c2f77ba7f0b66 "bibtex djumble_doc"
-  "djumble_doc.tex" 1438603493 14220 5dbc0f1be13ed3602ef77c1b5d001d0f ""
+  "djumble_doc.aux" 1438690146 1767 e6c6c9697dfdb58acdc8249e4fcc5615 ""
+  "djumble_doc.bbl" 1438690146 657 3329f12a407f3e94247c2f77ba7f0b66 "bibtex djumble_doc"
+  "djumble_doc.tex" 1438690137 17306 f414f1066654e085f2e30f99a0eca9d1 ""
   "figures/SemiSupervised_HMRF_EM_Graphical_Model-eps-converted-to.pdf" 1438334079 16078 262db9cdbe17a9144a74fd227a015dab ""
   "figures/SemiSupervised_HMRF_EM_Graphical_Model.eps" 1438331851 33624 a568d93b157520196782941f0d709fd5 ""
   "llncs.cls" 1380273272 42849 e98f9316a296920ae82de0017d2b1604 ""
   (generated)
+  "djumble_doc.aux"
   "djumble_doc.pdf"
   "djumble_doc.log"
-  "djumble_doc.aux"
