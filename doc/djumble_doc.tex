@@ -183,12 +183,58 @@ Where $f_{\mathbf{M}}$ and $f_{\mathbf{C}}$ are positive value cost functions fo
 
 Maximizing the joint HMRF probability in eq.\ref{eq:hmrm_em_MAP_or_MAX_Liklihood} (left part of the equation), is equivalent to jointly maximizing the likelihood of generating data points from the model and the probability of label assignments that respect the constraints, while regularizing the model parameters. The essential part of the right side of the equation the conditional probability $P(\mathbf{X}|\mathbf{L},\mathbf{M},\mathbf{C})$, equivalent to eq.\ref{eq:hmrm_em_X_MC_interdependency}. Firstly, because its PDF will define our prior assumption about the PDF mixture of the data-set. Secondly, because the same PDF should be used as the constraints potential function $V$, thus, penalty functions $f$. Finally, because its PDF will ultimately define the parametrized (by $\Theta$ parameters) \emph{distortion measure}.
 
-Using the convenience in the assumption of a regular exponential distributions for the observed data points $X$ and a regular Bregman divergences, the PDF of the observed data would be in eq.
-p(x i |yi , Θ) =
- ZΘ
- exp −dA(xi , μh ) ,
- (5.8)
-where dA (xi , μyi ) is the Bregman divergence between xi and μyi, corresponding to the exponential density p, and ZΘ is the normalizer (kati function legete ).
+Using the convenience in the assumption of a regular exponential distributions for the observed data points $X$ and a regular Bregman divergences, the PDF of the observed data would be in eq.\ref{eq:PDF_with_distortion_measure}.
+
+\begin{equation}
+	P(\mathbf{x}_{i}|\mathbf{l}_{i},\mathbf{\Theta})=\frac{1}{Z_{2}}\exp(-D_{\mathbf{A}}(x_{i},\mathbf{\mu}_{\mathbf{l}_{i}}))
+\label{eq:PDF_with_distortion_measure}
+\end{equation}
+
+where $D_{\mathbf{A}}(\mathbf{x}_{i} , \mathbf{x}_{\mathbf{l}_{i}})$ is the Bregman divergence, i.e. distortion measure, between $\mathbf{x}_i$ and $\mathbf{\mu}_{\mathbf{l}_{i}}$. Where $\mathbf{l}_i$ is indicating that the distance is measured for an arbitrary $\mathbf{x}_{i}$ is from the cluster centroid (or cluster's PDF expected value) when the point and the centroid a under the same cluster PDF \textbf{(NOTE: This is my conclusion and no one in literature give any specification related to the $\mu$ notation)}. $Z_{2}$ is the normalizing term (a.k.a \emph{partition function}).
+
+As explained above in general EM algorithm description, we are at the step where we have to assume the PDF mixture of the observable data. In the semi-supervised case the a-piori distribution assumption will be the same, over the observable data-set $\mathbf{X}$ and the observable constraints sets $\mathbf{M,C}$. Thus, in our case, for the IR problems based on the literature, we assume for both the data-set and the constraints sets von-Mises Fisher (vMF) distribution with unit concentration parameter, which is equivalent to the spherical Gaussian distribution \cite{basu2004probabilistic,chapelle2006semi_hmrf_kmeans}. In order to make PDF of eq.\ref{eq:PDF_with_distortion_measure} to be equivalent to vMF the distortion parameter $D_{\mathbf{A}}$ will be replaced with the \emph{parametrized cosine distance} as defined in eq.\ref{eq:parametrized_cos_sim} by the parameters matrix $\mathbf{A}$.
+
+\begin{equation}
+	D_{cos_{\mathbf{A}}}(\mathbf{x}_{i},\mathbf{x}_{j})=\frac{\mathbf{x}_{i}^{T}\mathbf{A}\mathbf{x}_{j}}{\Vert\mathbf{x}_{i}\Vert_{\mathbf{A}}\Vert\mathbf{x}_{j}\Vert_{\mathbf{A}}}
+	\label{eq:parametrized_cos_sim}
+\end{equation}
+
+Where $\Vert\mathbf{x}_{i}\Vert_{\mathbf{A}}=\sqrt{\mathbf{\Vert x}_{i}^{T}\mathbf{A}\mathbf{x}_{j}\Vert}$, \textbf{(NOTE: In \cite{basu2004probabilistic} under square root there is no norm, but in practice the product sometimes drops under zero and breaks the code run.)}
+
+In the eq.\ref{eq:hmrm_em_MAP_or_MAX_Liklihood} (right side of the equation) we have defined the conditional probabilities for the observed $X$ and the $L$, where the second is conditioned under the constraints ${M,C}$. The presence of the $P(\mathbf{\Theta})$ is occurring due to the explicit presence of the joint distribution in eq.\ref{eq:hmrm_em_MAP_or_MAX_Liklihood} (left side of the equation) and the graphical model in fig.\ref{fig:hmrf_em}. This is enabling us to decide whether or not we want to apply our a-piori knowledge about the distribution of the parameters. This can be omitted when $\mathbf{\Theta}$ parameters are not explicitly present, as in \cite{basu2004probabilistic}, thus no prior assumptions about the parameters distribution is required or can be applied.
+
+Depending on the prior distribution, parameters $\mathbf{\Theta}$ are separated in two sets $\mathbf{\Theta}=\{\mathbf{A},\mathbf{M}\}$, where the second one is the expected values of the mixture's PDF(s) and $\mathbf{A}$ is the rest of the required parameters.
+
+\begin{equation}
+	P(\mathbf{\Theta})=P(\mathbf{A})P(\mathbf{Mu})
+\label{eq:ptheta}
+\end{equation}
+
+
+\subsection{Putting all together}
+
+The objective of the semi-supervised HMRF Kmeans is to maximize the MAP as defined in eq.\ref{eq:hmrm_em_MAP_or_MAX_Liklihood} with the parts of this equation to be analyses in eq.\ref{eq:constraints_Gibbs_pdf} eq.\ref{eq:constraints_Gibbs_pdf} and eq.\ref{eq:ptheta} . Putting all these equations together we have eq.\ref{eq:final_MAP}.
+
+\begin{equation}
+	P(\mathbf{X,L,\Theta}|\mathbf{M,C})=P(\mathbf{A})P(\mathbf{Mu})(\frac{1}{Z_{1}}\exp(-\sum_{\mathbf{\Gamma}_{i}\in\Gamma}V_{\Gamma_{i}}(\mathbf{L})))\prod_{i=1}^{N}\frac{1}{Z_{2}}\exp(-D_{\mathbf{A}}(x_{i},\mathbf{\mu}_{\mathbf{l}_{i}}))
+\label{eq:final_MAP}
+\end{equation}
+
+
+Our early decision was the hard-clustering setup for the algorithm thus my explaining the logarithmic properties from eq.\ref{eq:final_MAP} we are getting eq.\ref{eq:MAP_to_Objective}.
+
+\begin{equation}
+	lnP(\mathbf{X,L,\Theta}|\mathbf{M,C})=lnP(\mathbf{A})+lnP(\mathbf{Mu})-\sum_{\mathbf{\Gamma}_{i}\in\Gamma}V_{\Gamma_{i}}(\mathbf{L})+\sum_{i=1}^{N}D_{\mathbf{A}}(x_{i},\mathbf{\mu}_{\mathbf{l}_{i}})+lnZ_{1}+NlnZ_{2}
+\label{eq:MAP_to_Objective}
+\end{equation}
+
+Equation eq.\ref{eq:MAP_to_Objective} is now called the \emph{Objective Function} and the goal of the algorithm is to minimize its output, which is equivalent to the MAP maximization. Expressing it in words the minimization process of eq.\ref{eq:MAP_to_Objective} is equivalent to the the iterative process in order to find the proper clustering configuration where each arbitrary data-point is the closest to the mean value of the cluster it will belong into at the end. Moreover, the constraints violation will also be minimized.
+
+Before we proceed in replacing the exact violation $V$ and distortion measure $D$ functions with the parameterized cosine similarity we are considering the rest of the equation starting with the normalizing components $Z_{1}$ and $Z_{2}$. In additions to consider the distributions of the PDF mixture parameters $A$ and $Mu$.
+
+The normalizing components of observable data points and the hidden variables distributions are depended on the prior PDF assumption. In case of Gaussian ditriobution thier vaule can be calculated in a \emph{closed form} (NOTE:Sure excatly this is) while for all the other case we have to employee an \emph{approximation method}. In our case where cosine similarity is must be used an approximate inference method is required which can be very expensice coputationally. In this case we can assume that $Z$ and $Z$ are constant but not eq.\ref{eq:MAP_to_Objective} will no longer be an joint probablitiy. However, empirically it has been shown that this objective funcitons will work properly and the alogorithm will manage to convege in a local minimum \cite{basu2004probabilistic}. However, if in some applications it is important to preserve the semantics of the underlying joint probability model, then the normalizers Z and ZΘ must be estimated by approximate inference methods.
+
+ 
 
 
 \bibliographystyle{splncs03}
