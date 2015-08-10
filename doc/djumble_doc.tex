@@ -89,7 +89,7 @@ In eq.\ref{eq:em_log_likelihood} and in fig.\ref{fig:hmrf_em} there are some par
 		  \hspace{.01\textwidth} $\mathbf{\Theta}$ the final set of parameters after the Probability Density Functions Mixture.
 		 }
 Choose an Initial setting for $\mathbf{\Theta}^{OLD}$;\\
-\While{$I$ iterations reached}{
+\While{$I$ iterations not reached}{
 	\textbf{1. E-step }Evaluate $P(\mathbf{L}|\mathbf{X},\mathbf{\Theta}^{OLD})$\;\\
 	\textbf{2. M-step }Evaluate $\mathbf{\Theta^{NEW}}$\ given by (a) and (b);\\
 	\hspace{.1\textwidth} \textbf{a.} $\mathbf{\Theta}^{NEW}=\arg_{\mathbf{\Theta}}\max\Omega(\mathbf{\Theta},\mathbf{\Theta}^{OLD})$\;\\
@@ -133,7 +133,7 @@ Considering $\mathbf{X}$ observable data-set is convient due to compuational iss
 \label{eq:hmrm_em_X_mutually_interdependency}
 \end{equation}
 
-Consequentially, from equations \ref{eq:hmrm_em_pdf}, \ref{eq:hmrm_em_X_MC_interdependency}, \ref{eq:hmrm_em_Theta_MC_interdependency} and \ref{eq:hmrm_em_X_mutually_interdependency} we are getting the following MAP which it should be maximize.
+Consequentially, from equations \ref{eq:hmrm_em_pdf}, \ref{eq:hmrm_em_X_MC_interdependency}, \ref{eq:hmrm_em_Theta_MC_interdependency} and \ref{eq:hmrm_em_X_mutually_interdependency} we are getting the following MAP which it should be maximized.
 
 \begin{equation}
 	P(\mathbf{X,L,\Theta}|\mathbf{M,C})=P(\mathbf{\Theta})P(\mathbf{L}|\mathbf{\Theta,M,C})\prod_{i=1}^{N}P(\mathbf{x}_{i}|\mathbf{l}_{i},\mathbf{M,L})
@@ -199,7 +199,7 @@ As explained above in general EM algorithm description, we are at the step where
 	\label{eq:parametrized_cos_sim}
 \end{equation}
 
-Where $\Vert\mathbf{x}_{i}\Vert_{\mathbf{A}}=\sqrt{\mathbf{\Vert x}_{i}^{T}\mathbf{A}\mathbf{x}_{j}\Vert}$, \textbf{(NOTE: In \cite{basu2004probabilistic} under square root there is no norm, but in practice the product sometimes drops under zero and breaks the code run.)}
+Where $\Vert\mathbf{x}_{i}\Vert_{\mathbf{A}}=\sqrt{\mathbf{\mid x}_{i}^{T}\mathbf{A}\mathbf{x}_{j} \mid}$, \textbf{(NOTE: In \cite{basu2004probabilistic} under square root there is no norm, but in practice the product sometimes drops under zero and breaks the code run.)}
 
 In the eq.\ref{eq:hmrm_em_MAP_or_MAX_Liklihood} (right side of the equation) we have defined the conditional probabilities for the observed $X$ and the $L$, where the second is conditioned under the constraints ${M,C}$. The presence of the $P(\mathbf{\Theta})$ is occurring due to the explicit presence of the joint distribution in eq.\ref{eq:hmrm_em_MAP_or_MAX_Liklihood} (left side of the equation) and the graphical model in fig.\ref{fig:hmrf_em}. This is enabling us to decide whether or not we want to apply our a-piori knowledge about the distribution of the parameters. This can be omitted when $\mathbf{\Theta}$ parameters are not explicitly present, as in \cite{basu2004probabilistic}, thus no prior assumptions about the parameters distribution is required or can be applied.
 
@@ -224,18 +224,127 @@ The objective of the semi-supervised HMRF Kmeans is to maximize the MAP as defin
 Our early decision was the hard-clustering setup for the algorithm thus my explaining the logarithmic properties from eq.\ref{eq:final_MAP} we are getting eq.\ref{eq:MAP_to_Objective}.
 
 \begin{equation}
-	lnP(\mathbf{X,L,\Theta}|\mathbf{M,C})=lnP(\mathbf{A})+lnP(\mathbf{Mu})-\sum_{\mathbf{\Gamma}_{i}\in\Gamma}V_{\Gamma_{i}}(\mathbf{L})+\sum_{i=1}^{N}D_{\mathbf{A}}(x_{i},\mathbf{\mu}_{\mathbf{l}_{i}})+lnZ_{1}+NlnZ_{2}
+	\begin{split}
+		\ln P(\mathbf{X,L,\Theta}|\mathbf{M,C})=\sum_{\mathbf{\Gamma}_{i}\in\Gamma}V_{\Gamma_{i}}(\mathbf{L})+\sum_{i=1}^{N}D_{\mathbf{A}}(x_{i},\mathbf{\mu}_{\mathbf{l}_{i}})+ \\
+		\ln Z_{1}+N\ln Z_{2}+\ln P(\mathbf{A})+\ln P(\mathbf{Mu})
+	\end{split}
 \label{eq:MAP_to_Objective}
 \end{equation}
 
 Equation eq.\ref{eq:MAP_to_Objective} is now called the \emph{Objective Function} and the goal of the algorithm is to minimize its output, which is equivalent to the MAP maximization. Expressing it in words the minimization process of eq.\ref{eq:MAP_to_Objective} is equivalent to the the iterative process in order to find the proper clustering configuration where each arbitrary data-point is the closest to the mean value of the cluster it will belong into at the end. Moreover, the constraints violation will also be minimized.
 
-Before we proceed in replacing the exact violation $V$ and distortion measure $D$ functions with the parameterized cosine similarity we are considering the rest of the equation starting with the normalizing components $Z_{1}$ and $Z_{2}$. In additions to consider the distributions of the PDF mixture parameters $A$ and $Mu$.
+Before we proceed in replacing the exact violation $V$ and distortion measure $D$ functions with the parameterized cosine similarity we are considering the rest of the equation starting with the normalizing components $Z_{1}$ and $Z_{2}$. In additions to consider the distributions of the PDF mixture parameters $\mathbf{A}$ and $\mathbf{Mu}$.
 
-The normalizing components of observable data points and the hidden variables distributions are depended on the prior PDF assumption. In case of Gaussian ditriobution thier vaule can be calculated in a \emph{closed form} (NOTE:Sure excatly this is) while for all the other case we have to employee an \emph{approximation method}. In our case where cosine similarity is must be used an approximate inference method is required which can be very expensice coputationally. In this case we can assume that $Z$ and $Z$ are constant but not eq.\ref{eq:MAP_to_Objective} will no longer be an joint probablitiy. However, empirically it has been shown that this objective funcitons will work properly and the alogorithm will manage to convege in a local minimum \cite{basu2004probabilistic}. However, if in some applications it is important to preserve the semantics of the underlying joint probability model, then the normalizers Z and ZΘ must be estimated by approximate inference methods.
+The normalizing components of observable data points and the hidden variables distributions are depended on the prior PDF assumption. In case of Gaussian distribution their value can be calculated in a \emph{closed form} \textbf{(NOTE:No sure what exactly that is)} while for all the other case we have to employee an \emph{approximation method}. In our case where cosine similarity must be used an approximate inference method is required which can be very expensive computationally. In this case we can assume that $Z_{1}$ and $Z_{2}$ are constants. Now eq.\ref{eq:MAP_to_Objective} will no longer be an joint probability, however, empirically it has been shown that this objective functions will work properly and the algorithm will manage to converge in a local minimum \cite{basu2004probabilistic}. However, if in some applications it is important to preserve the joint probability model, then the normalizers should be estimated by approximate inference methods.
 
- 
+The distribution on cluster centroids $\{\mu_{i}\}_{i=1}^{K}$ can safely assumed to be uniformly distributed thus $P(\mathbf{Mu})$ can be assumed as constant, thus, $lnP(\mathbf{Mu})=0$. Distributions parameters $\mathbf{A}$ can lead to \emph{diegenerate solutions} of the optimization problem. As an example, for squared Euclidean distance it can be $\mathbf{A}=0$ as such solution. In order to prevent \emph{degenerate solutions}, $P(\mathbf{A})$ is used to regularize the parameter values using a prior distribution. In addition, we mostly need non-negative solutions for several computational problems might occur otherwise, thus, one such a distributions can be Rayleigh distribution as described in eq.\ref{eq:Rayleigh_pdf}, with the assumptions of mutually independent parameters values $\alpha$.
 
+\begin{equation}
+	P(\mathbf{A})=\prod_{\alpha_{ij}\in\mathbf{A}}\frac{\alpha_{ij}\exp(-\frac{\alpha_{ij}^{2}}{s^{2}})}{s^{2}}
+\label{eq:Rayleigh_pdf}
+\end{equation}
+
+Where $s$ is the width parameter of the distortion.
+
+The last step for deriving the Semi-supervised HMRF Kmeans is to define exactly the $f_{M}$ and $f_{C}$ sub-functions of the constraint violation $V$ functions of eq.\ref{eq:constraints_potential_function} based on the cosine similarity as explained above.
+
+Starting with $f_{\mathb{M}}$, it should return the violation cost of must-link constrains between an $(i,j)$ pair if only $\mathbf{l}_{i} \neq \mathbf{l}_{j}$, i.e. their labels are not equal which means the are not belonging to the same cluster as they should. Moreover, we want to use the constraint violations to learn the underlying distance measure (distortion function), thus, the penalty for violating a must-link constraint between distant points should be higher than that between nearby points. Therefore, we have to adjust the distortion function to get there points closer as they should upon the must-link constraints. To do so we need the penalty scaling function to be a
+monotonically increasing function of the distance between $x_i$ and $x_j$ according to the current distortion measure. Consequently, we have the following equation eq.\ref{eq:fm} which satisfies the above properties for $F_{M}$ \cite{basu2004probabilistic,chapelle2006semi_hmrf_kmeans} \textbf{(NOTE: The reasoning is very close but note exactly and I think my reasoning is more clear and more sensible, because theirs is a bit odd for example related to W, in Chappell's is better explained but more complex in notation. Also my notation defers allot because theirs finally is equivalent to my notation.)}.
+
+\begin{equation}
+	f_{\mathbf{M}}(x_{i},x_{j})=w_{ij}D_{cos_{\mathbf{A}}}\Psi(l_{i}\neq l_{j})
+\label{eq:fm}
+\end{equation}
+
+The function $f_{\mathb{C}}$ for the cannot-link constraint, same as must-link one, should entourage the distortion function parameters to be changes for putting as far as possible the $x_{i}$ from $x_{j}$ upon the cannot link violation. Since we again using the distance measure of the algorithm as the violation function this time we need to get the compliment value which the maximum value the distortion function can return minus the current distance of the points. Thus, the $f_{\mathb{C}}$ is becoming as shown in eq.\ref{eq:fc}.
+
+\begin{equation}
+	f_{\mathbf{M}}(x_{i},x_{j})=\overline{w}_{ij}(D_{cos_{\mathbf{A}}}^{max}-D_{cos_{\mathbf{A}}}\Psi(l_{i}= l_{j}))
+\label{eq:fc}
+\end{equation}
+
+Note that in both eq.\ref{eq:fm} and eq.\ref{eq:fc} the $\Psi())$ function is returning ${0,1}$ depending whether of not the condition given is False or True respectively. As for $w_{ij}$ and $\overline{w}_{ij}$ are weights for each must-link and cannot-link constraint significance if there is a need to be difference upon the problem setting, and they are also depicted in fig.\ref{fig:hmrf_em}.
+
+Putting all the above together equation eq.\ref{eq:MAP_to_Objective} together with eq.\ref{eq:fm}, eq.\ref{eq:fc} and $Z_{1}$, $Z_{2}$, $P(\mathbf{Mu})$ being constant values (where for 1 their logarithms to be equal to 0) we are getting the following Objective function eq.\ref{eq:job_final}. In addition we assume Rayleigh distribution eq.\ref{eq:Rayleigh_pdf} for the $\mathbf{A}$ parameters as explained above.
+
+\begin{equation}
+	\begin{split}
+		Jobj=\sum_{i=1}^{N}D_{\mathbf{A}}(x_{i},\mathbf{\mu}_{\mathbf{l}_{i}})
+		+\sum_{(x_{i},x_{j})\in\mathbf{M}}w_{ij}D_{cos_{\mathbf{A}}}\Psi(l_{i}\neq l_{j}) \\
+		+\sum_{(x_{i},x_{j})\in\mathbf{C}}\overline{w}_{ij}(D_{cos_{\mathbf{A}}}^{max}-D_{cos_{\mathbf{A}}}\Psi(l_{i}=l_{j})) \\
+		+\sum_{\alpha_{ij}\in\mathbf{A}}\frac{a_{ij}}{s^{2}}+\sum_{\alpha_{ij}\in\mathbf{A}}\ln\alpha_{ij}+ \mathit{Na} \ln s^{2}
+	\end{split}
+\label{eq:job_final}
+\end{equation}
+
+Where $\mathit{Na}$ is the amount of the model's parameters \textbf{(NOTE: the last 3 terms of the sum which are the lnP(A) was missing in the Basu et. all and I susspect that this was the reason I am having (0,0) centroids same times plus my Global Objective is not monotonically decreasing)}.
+
+\subsection{The HMRF Kmeans algorithm steps}
+
+Going back to the EM algorithm, we can properly adjust it in the semi-supervised form as expressed in eq.\ref{eq:job_final}. In particular in algorithm alg.\ref{alg:semi_kmeans} we present the kmeans form of th EM with the goal to minimize the objective function, which concurrently is minimizing the distances of the data-points from their cluster centroid and the violation of the must-Link and cannot-link constraints.
+
+\begin{algorithm}[H]\label{alg:semi_kmeans}
+\KwData{\\
+		\hspace{.01\textwidth} $\mathbf{X}$ observable data points.\\
+		\hspace{.01\textwidth} $\mathbf{K}$ possible states clusters we expect to be existing in the data-set.\\
+		\hspace{.01\textwidth} $\mathbf{L}_{i=1}^K$ the hidden field variables with values $(0,1]$\\
+		\hspace{.01\textwidth} $\mathbf{A}$ a set of parameters for initializing the distortion measure.\\
+		}
+\KwResult{\\
+		  \hspace{.01\textwidth} $\mathbf{L} = \{l_{k}\}_{k=1}^{K}$ where $(0,1]$ final label assignment.\\
+		  \hspace{.01\textwidth} $\mathbf{A}^{0}$ the final set of parameters after the Probability Density Functions Mixture.\\
+		 }
+Initializing the $\mathbf{K}$ clusters by calculating their initial centroids $\mathbf{M}^{0}=(\mathbf{\mu}_{1}^{0},...,\mathbf{\mu}_{k}^{0})$;\\
+\While{$I$ iterations not reached}{
+	\textbf{1. E-step }\\
+		\hspace{.05\textwidth} Re-assigning cluster labels $(l_{1}^{i+1},...,l_{k}^{i+1})$;\\
+	\textbf{2. M-step }\\
+		\hspace{.05\textwidth} \textbf{a.} Re-calculating $\mathbf{M}^{i+1}=(\mathbf{\mu}_{1}^{i+1},...,\mathbf{\mu}_{k}^{i+1})$ to minimize $Jobj$ objective function;\\
+		\hspace{.05\textwidth} \textbf{b.} Re-estimating parameters $\mathbf{A}^{i+1}$;\\
+
+	\eIf{$Jobj$ min threshold has been reached}{
+		Breaking the loop and Ending the Clustering\;
+	}{
+		$\mathbf{A}^{i}\leftarrow\mathbf{A}^{i+1}$\;
+	}
+}
+\caption{The HMRF Kmeans.}
+\end{algorithm}
+
+\textbf{The E-Step} of the alg.\ref{alg:semi_kmeans} is calculating the cluster labels where the data-point are belonging into at the current $i$ iterations of the EM. This step in actually a full function of its own where an other algorithm or strategy of assignment has to be selected. In particular the E-step can be one of the following algorithms:
+
+\begin{itemize}
+	\item Iterated Conditional Modes (ICM).
+	\item Belief Propagation.
+	\item Linear Programming Relaxation.
+	\item Mean-field approximation based algorithm of Lange et al. cited in \cite{chapelle2006semi_hmrf_kmeans}.
+\end{itemize}
+
+In this implementation we have selected ICM because of its straightforward implementation. ICM performs a sequential clustering assignment \emph{for all points} \textbf{in random order}. Each point $\mathbf{x}_{i}$ is assigned to cluster representative $\mathbf{\mu}_{k}$ that minimized the point's contribution in such a manner that the eq.\ref{eq:job_estep} is minimized.
+
+\begin{equation}
+	\begin{split}
+		Jobj=D(x_{i},\mathbf{\mu}_{\mathbf{k}})+\sum_{(x_{i},x_{j})\in\mathbf{M}}w_{ij}D_{cos_{\mathbf{A}}}\Psi(k\neql_{j})\\
+		+\sum_{(x_{i},x_{j})\in\mathbf{C}}\overline{w}_{ij}(D_{cos_{\mathbf{A}}}^{max}-D_{cos_{\mathbf{A}}}\Psi(k=l_{j}))\\
+		+\sum_{\alpha_{ij}\in\mathbf{A}}\frac{a_{ij}}{s^{2}}+\sum_{\alpha_{ij}\in\mathbf{A}}\ln\alpha_{ij}+\mathit{Na}\ln s^{2}
+	\end{split}
+\label{eq:job_estep}
+\end{equation}
+
+After all points are assigned the process repeated until \emph{no change in cluster assignment occures} between two successive iterations. \textbf{(NOTE: In eq.\ref{eq:job_estep} the last line has been appended by my based on Chappells book which is missing from Basu respective formula.)}.
+
+\textbf{The M-Step} of the alg.\ref{alg:semi_kmeans} has two steps. The (a.) step, where centroids of the clusters (for the current) iteration are calculated, based on the parametrized cosine distance, as shown in equation eq.\ref{eq:consine_param_mu}.
+
+\begin{equation}
+	\mathbf{\mu_{h}^{COS{}_{\mathbf{A}}}=\frac{\sum_{x_{i}\in\mathbf{\mathbf{X}_{h}}}x_{i}}{\parallel\sum_{\mathbf{x}_{i}\in\mathbf{X}_{h}}\mathbf{x}_{i}\parallel_{\mathbf{A}}}}
+\label{eq:consine_param_mu}
+\end{equation}
+
+The (b.) step is calculating the parameters $\mathbf{A}$ in order to adopt the distortion measure to fit best the current state of the clustering. In the description of eq.\ref{eq:parametrized_cos_sim} we have seen that the parameters of the cosine distance is a $F\times F$ matrix where $F$ is the size of the feature set, i.e. the number of dimensions of the data vectors. In order to reduce the computational overhead due to a potential large feature set, as this is the case is IR problems in general, we set $A = diag(Ap)$ $Ap=(a_{1},...,a_{F})}$. Thus $A$ is a diagonal matrix and all we have to be calculated now is a vector of values same in size as the feature set.
+
+The update derivative..........
+
+Prof of convergence...
 
 \bibliographystyle{splncs03}
 \bibliography{djumble_doc}

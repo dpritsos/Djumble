@@ -1,13 +1,13 @@
 # Fdb version 3
-["bibtex djumble_doc"] 1438857879 "djumble_doc.aux" "djumble_doc.bbl" "djumble_doc" 1438857880
+["bibtex djumble_doc"] 1439209991 "djumble_doc.aux" "djumble_doc.bbl" "djumble_doc" 1439210971
   "./splncs03.bst" 1245050222 33098 4ef5df5462ae7c3cec476a39dec1b7bb ""
-  "djumble_doc.aux" 1438857880 2213 570c65183bc5f44a78e81fea11b7c95c ""
+  "djumble_doc.aux" 1439210971 2742 ed95022f855c8a9a75f47cd789990476 ""
   "djumble_doc.bcf" 0 -1 0 ""
   "djumble_doc.bib" 1438331332 13161 71a37487cfeec525d713d67e993ce48e ""
   (generated)
-  "djumble_doc.blg"
   "djumble_doc.bbl"
-["pdflatex"] 1438857879 "djumble_doc.tex" "djumble_doc.pdf" "djumble_doc" 1438857880
+  "djumble_doc.blg"
+["pdflatex"] 1439210970 "djumble_doc.tex" "djumble_doc.pdf" "djumble_doc" 1439210971
   "/etc/texmf/web2c/texmf.cnf" 1415902660 1101 af7716885e081ab43982cab7b4672c1a ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
@@ -26,6 +26,7 @@
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr9.tfm" 1136768653 1292 6b21b9c2c7bebb38aa2273f7ca0fb3af ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmsy9.tfm" 1136768653 1116 25a7bf822c58caf309a702ef79f4afbb ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmti10.tfm" 1136768653 1480 aa8e34af0eb6a2941b776984cf1dfdc4 ""
+  "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmti7.tfm" 1136768653 1492 86331993fe614793f5e7e755835c31c5 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb" 1248133631 34811 78b52f49e893bcba91bd7581cdc144c0 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb" 1248133631 32080 340ef9bf63678554ee606688e7b5339d ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx5.pfb" 1248133631 32034 6149cc3792d7e291632994f6e6ca6d68 ""
@@ -36,6 +37,7 @@
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb" 1248133631 37912 77d683123f92148345f3fc36a38d9ab1 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb" 1248133631 36281 c355509802a035cadc5f15869451dcee ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb" 1248133631 35752 024fb6c41858982481f6968b5fc26508 ""
+  "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb" 1248133631 31809 8670ca339bf94e56da1fc21c80635e2a ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb" 1248133631 32762 224316ccc9ad3ca0423a14971cfa7fc1 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb" 1248133631 33993 9b89b85fd2d9df0482bd47194d1d3bf3 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb" 1248133631 32569 5e5ddc8df908dea60932f3c484a54c0d ""
@@ -207,9 +209,9 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1392645748 31083 1dfd8bf685ce0009c40532fedf8a7c53 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1415902731 1346346 7f2b8b715a9ddb095afe3697a6ba02b5 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1410948179 3822874 eccfb62f9ee6f8a8defba0e099c02e3d ""
-  "djumble_doc.aux" 1438857880 2213 570c65183bc5f44a78e81fea11b7c95c ""
-  "djumble_doc.bbl" 1438857879 657 3329f12a407f3e94247c2f77ba7f0b66 "bibtex djumble_doc"
-  "djumble_doc.tex" 1438857875 23993 16c8142fd73203353fd137c377946908 ""
+  "djumble_doc.aux" 1439210971 2742 ed95022f855c8a9a75f47cd789990476 ""
+  "djumble_doc.bbl" 1439209991 657 3329f12a407f3e94247c2f77ba7f0b66 "bibtex djumble_doc"
+  "djumble_doc.tex" 1439210968 33871 6ab0dcc7c33aae298e257fb33e2cc3dd ""
   "figures/SemiSupervised_HMRF_EM_Graphical_Model-eps-converted-to.pdf" 1438334079 16078 262db9cdbe17a9144a74fd227a015dab ""
   "figures/SemiSupervised_HMRF_EM_Graphical_Model.eps" 1438331851 33624 a568d93b157520196782941f0d709fd5 ""
   "llncs.cls" 1380273272 42849 e98f9316a296920ae82de0017d2b1604 ""
