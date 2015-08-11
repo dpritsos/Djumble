@@ -220,18 +220,17 @@ The objective of the semi-supervised HMRF Kmeans is to maximize the MAP as defin
 \label{eq:final_MAP}
 \end{equation}
 
-
 Our early decision was the hard-clustering setup for the algorithm thus my explaining the logarithmic properties from eq.\ref{eq:final_MAP} we are getting eq.\ref{eq:MAP_to_Objective}.
 
 \begin{equation}
 	\begin{split}
 		\ln P(\mathbf{X,L,\Theta}|\mathbf{M,C})=\sum_{\mathbf{\Gamma}_{i}\in\Gamma}V_{\Gamma_{i}}(\mathbf{L})+\sum_{i=1}^{N}D_{\mathbf{A}}(x_{i},\mathbf{\mu}_{\mathbf{l}_{i}})+ \\
-		\ln Z_{1}+N\ln Z_{2}+\ln P(\mathbf{A})+\ln P(\mathbf{Mu})
+		\ln Z_{1}+N\ln Z_{2}-\ln P(\mathbf{A})-\ln P(\mathbf{Mu})
 	\end{split}
 \label{eq:MAP_to_Objective}
 \end{equation}
 
-Equation eq.\ref{eq:MAP_to_Objective} is now called the \emph{Objective Function} and the goal of the algorithm is to minimize its output, which is equivalent to the MAP maximization. Expressing it in words the minimization process of eq.\ref{eq:MAP_to_Objective} is equivalent to the the iterative process in order to find the proper clustering configuration where each arbitrary data-point is the closest to the mean value of the cluster it will belong into at the end. Moreover, the constraints violation will also be minimized.
+Equation eq.\ref{eq:MAP_to_Objective} is now called the \emph{Objective Function} and the goal of the algorithm is to minimize its output, which is equivalent to the MAP maximization. Expressing it in words the minimization process of eq.\ref{eq:MAP_to_Objective} is equivalent to the the iterative process in order to find the proper clustering configuration where each arbitrary data-point is the closest to the mean value of the cluster it will belong into at the end. Moreover, the constraints violation will also be minimized. \textbf{(NOTE: Applying the logarithm on eq.\ref{eq:final_MAP} seems to me that all the sights in the right part of eq.\ref{eq:MAP_to_Objective} should have been exactly the opposite but in literature is not. Am I missing something here?)}
 
 Before we proceed in replacing the exact violation $V$ and distortion measure $D$ functions with the parameterized cosine similarity we are considering the rest of the equation starting with the normalizing components $Z_{1}$ and $Z_{2}$. In additions to consider the distributions of the PDF mixture parameters $\mathbf{A}$ and $\mathbf{Mu}$.
 
@@ -269,10 +268,10 @@ Putting all the above together equation eq.\ref{eq:MAP_to_Objective} together wi
 
 \begin{equation}
 	\begin{split}
-		Jobj=\sum_{i=1}^{N}D_{\mathbf{A}}(x_{i},\mathbf{\mu}_{\mathbf{l}_{i}})
+		J_{obj}=\sum_{i=1}^{N}D_{\mathbf{A}}(x_{i},\mathbf{\mu}_{\mathbf{l}_{i}})
 		+\sum_{(x_{i},x_{j})\in\mathbf{M}}w_{ij}D_{cos_{\mathbf{A}}}\Psi(l_{i}\neq l_{j}) \\
 		+\sum_{(x_{i},x_{j})\in\mathbf{C}}\overline{w}_{ij}(D_{cos_{\mathbf{A}}}^{max}-D_{cos_{\mathbf{A}}}\Psi(l_{i}=l_{j})) \\
-		+\sum_{\alpha_{ij}\in\mathbf{A}}\frac{a_{ij}}{s^{2}}+\sum_{\alpha_{ij}\in\mathbf{A}}\ln\alpha_{ij}+ \mathit{Na} \ln s^{2}
+		+\sum_{\alpha_{ij}\in\mathbf{A}}\frac{a_{ij}}{s^{2}}-\sum_{\alpha_{ij}\in\mathbf{A}}\ln\alpha_{ij}+ \mathit{Na} \ln s^{2}
 	\end{split}
 \label{eq:job_final}
 \end{equation}
@@ -299,10 +298,10 @@ Initializing the $\mathbf{K}$ clusters by calculating their initial centroids $\
 	\textbf{1. E-step }\\
 		\hspace{.05\textwidth} Re-assigning cluster labels $(l_{1}^{i+1},...,l_{k}^{i+1})$;\\
 	\textbf{2. M-step }\\
-		\hspace{.05\textwidth} \textbf{a.} Re-calculating $\mathbf{M}^{i+1}=(\mathbf{\mu}_{1}^{i+1},...,\mathbf{\mu}_{k}^{i+1})$ to minimize $Jobj$ objective function;\\
+		\hspace{.05\textwidth} \textbf{a.} Re-calculating $\mathbf{M}^{i+1}=(\mathbf{\mu}_{1}^{i+1},...,\mathbf{\mu}_{k}^{i+1})$ to minimize $J_{obj}$ objective function;\\
 		\hspace{.05\textwidth} \textbf{b.} Re-estimating parameters $\mathbf{A}^{i+1}$;\\
 
-	\eIf{$Jobj$ min threshold has been reached}{
+	\eIf{$J_{obj}$ min threshold has been reached}{
 		Breaking the loop and Ending the Clustering\;
 	}{
 		$\mathbf{A}^{i}\leftarrow\mathbf{A}^{i+1}$\;
@@ -324,9 +323,9 @@ In this implementation we have selected ICM because of its straightforward imple
 
 \begin{equation}
 	\begin{split}
-		Jobj=D(x_{i},\mathbf{\mu}_{\mathbf{k}})+\sum_{(x_{i},x_{j})\in\mathbf{M}}w_{ij}D_{cos_{\mathbf{A}}}\Psi(k\neql_{j})\\
+		J_{obj}=D(x_{i},\mathbf{\mu}_{\mathbf{k}})+\sum_{(x_{i},x_{j})\in\mathbf{M}}w_{ij}D_{cos_{\mathbf{A}}}\Psi(k\neql_{j})\\
 		+\sum_{(x_{i},x_{j})\in\mathbf{C}}\overline{w}_{ij}(D_{cos_{\mathbf{A}}}^{max}-D_{cos_{\mathbf{A}}}\Psi(k=l_{j}))\\
-		+\sum_{\alpha_{ij}\in\mathbf{A}}\frac{a_{ij}}{s^{2}}+\sum_{\alpha_{ij}\in\mathbf{A}}\ln\alpha_{ij}+\mathit{Na}\ln s^{2}
+		+\sum_{\alpha_{ij}\in\mathbf{A}}\frac{a_{ij}}{s^{2}}-\sum_{\alpha_{ij}\in\mathbf{A}}\ln\alpha_{ij}+\mathit{Na}\ln s^{2}
 	\end{split}
 \label{eq:job_estep}
 \end{equation}
@@ -336,15 +335,69 @@ After all points are assigned the process repeated until \emph{no change in clus
 \textbf{The M-Step} of the alg.\ref{alg:semi_kmeans} has two steps. The (a.) step, where centroids of the clusters (for the current) iteration are calculated, based on the parametrized cosine distance, as shown in equation eq.\ref{eq:consine_param_mu}.
 
 \begin{equation}
-	\mathbf{\mu_{h}^{COS{}_{\mathbf{A}}}=\frac{\sum_{x_{i}\in\mathbf{\mathbf{X}_{h}}}x_{i}}{\parallel\sum_{\mathbf{x}_{i}\in\mathbf{X}_{h}}\mathbf{x}_{i}\parallel_{\mathbf{A}}}}
+	\mathbf{\mu}_{h}^{cos_{\mathbf{A}}}=\frac{\sum_{x_{i}\in\mathbf{\mathbf{X}_{h}}}x_{i}}{\parallel\sum_{\mathbf{x}_{i}\in\mathbf{X}_{h}}\mathbf{x}_{i}\parallel_{\mathbf{A}}}}
 \label{eq:consine_param_mu}
 \end{equation}
 
 The (b.) step is calculating the parameters $\mathbf{A}$ in order to adopt the distortion measure to fit best the current state of the clustering. In the description of eq.\ref{eq:parametrized_cos_sim} we have seen that the parameters of the cosine distance is a $F\times F$ matrix where $F$ is the size of the feature set, i.e. the number of dimensions of the data vectors. In order to reduce the computational overhead due to a potential large feature set, as this is the case is IR problems in general, we set $A = diag(Ap)$ $Ap=(a_{1},...,a_{F})}$. Thus $A$ is a diagonal matrix and all we have to be calculated now is a vector of values same in size as the feature set.
 
-The update derivative..........
+In order to update the $\mathbf{A}$ all we have to do is to calculate the partial derivatives of its variables and update its values with eq.\ref{eq:job_params_update}, where $\eta$ is the \emph{learning/adaption rate}. In this way the distance measure will gradually adapted in order the vector space to be transformed for getting similar data-points closer and dissimilar farther farther apart.
 
-Prof of convergence...
+Although for some distance measures such as Euclidean we can have \emph{tractable closed-form solution} for the partial derivatives, in general the solution is of the partial derivative intractable. \empgh{Gradient descent} \textbf{(NOTE: As I can tell is some short of partial derivative approximation. However, I am not sure what exactly this is.)} is a alternative and general solution irrespectively of the distance measure we use in the algorithm. In equation eq.\ref{eq:a_params_gradient} we show the \emph{gradient descent} for the partial derivative for the parameters of the parametrized cosine similarity \cite{basu2004probabilistic}.
+
+\begin{equation}
+	\frac{\partial D_{cos_{\mathbf{a}}}(\mathbf{x}_{i},\mathbf{x}_{j})}{\partial a_{m}}=\frac{x_{im}x_{jm}\Vert\mathbf{x}_{i}\Vert_{\mathbf{A}}\Vert\mathbf{x}_{j}\Vert_{\mathbf{A}}-\mathbf{x}_{i}^{T}\mathbf{A}\mathbf{x}_{j}\frac{x_{im}^{2}\Vert\mathbf{x}_{j}\Vert_{\mathbf{A}}^{2}+x_{jm}^{2}\Vert\mathbf{x}_{i}\Vert_{\mathbf{A}}^{2}}{2\Vert\mathbf{x}_{i}\Vert_{\mathbf{A}}\Vert\mathbf{x}_{j}\Vert_{\mathbf{A}}}}{\Vert\mathbf{x}_{i}\Vert_{\mathbf{A}}^{2}\Vert\mathbf{x}_{j}\Vert_{\mathbf{A}}^{2}}
+\label{eq:a_params_gradient}
+\end{equation}
+
+This equation will be used in order to calculate eq.\ref{eq:job_params_update} which is the right most part of the eq.\ref{eq:job_params_update}. Its value for each variable $a_{ij}$ or the parameters matrix $\mathbf{A}$ will change by a percentage of $\eta$ as shown in eq.\ref{eq:job_params_update} in each iteration.
+
+\begin{equation}
+	\begin{split}
+	\frac{\partial J_{obj}}{\partial a_{m}}=\sum_{\mathbf{x}_{i}\in\mathbf{X}}\frac{\partial D_{cos_{\mathbf{a}}}(\mathbf{x}_{i},\mathbf{\mu}_{l_{i}})}{\partial a_{m}}\\
+		+\sum_{(\mathbf{x}_{i},\mathbf{x}_{j})\in\mathbf{M}}w_{ij}\frac{\partial D_{cos_{\mathbf{a}}}(\mathbf{x}_{i},\mathbf{x}_{j})}{\partial a_{m}}\Psi(l_{i}\neq l_{j})\\
+		+\sum_{(\mathbf{x}_{i},\mathbf{x}_{j})\in\mathbf{M}}\overline{w}_{ij}\left[\frac{\partial D_{cos_{\mathbf{a}}}^{max}}{\partial a_{m}}-\frac{\partial D_{cos_{\mathbf{a}}}(\mathbf{x}_{i},\mathbf{x}_{j})}{\partial a_{m}}\right]\Psi(l_{i}=l_{j})\\
+		-\frac{\partial lnP(A)}{\partial a_{m}}
+	\end{split}
+\label{eq:job_params_update}
+\end{equation}
+
+Where the the last line of the eq.\ref{eq:job_params_update} is the partial derivative of the prior distribution of the distortion measure parameters. When Rayleigh priors are used then the partial derivative is equivalent to eq.\ref{eq:parial_reyleigh}.
+
+\begin{equation}
+	\frac{\partial lnP(A)}{\partial a_{m}} = \frac{1}{a_{m}}-\frac{a_{m}}{s^{2}}
+\label{eq:parial_reyleigh}
+\end{equation}
+
+\subsection{Prof of convergence}
+In general we can say that the HMRF-KMeans algorithm monotonically decreases its objective function, while alternates between updating the assignment of points to clusters, and updating the parameters. This is depicted in eq. \ref{eq:global_Jobj} which we can considered as the Global Objective function compare to the eq.\ref{eq:job_estep}, which is the objective for each data-point classification separability in the ICM algorithm.
+
+\begin{equation}
+	\begin{split}
+		G_{obj}=\sum_{h=1}^{K}\sum_{i=1}^{N}D_{\mathbf{A}}(x_{i},\mathbf{\mu}_{\mathbf{h}})
+		+\sum_{h=1}^{K}\sum_{(x_{i},x_{j})\in\mathbf{M}}w_{ij}D_{cos_{\mathbf{A}}}\Psi(h\neq l_{j}) \\
+		+\sum_{h=1}^{K}\sum_{(x_{i},x_{j})\in\mathbf{C}}\overline{w}_{ij}(D_{cos_{\mathbf{A}}}^{max}-D_{cos_{\mathbf{A}}}\Psi(h=l_{j})) \\
+		+\sum_{\alpha_{ij}\in\mathbf{A}}\frac{a_{ij}}{s^{2}}-\sum_{\alpha_{ij}\in\mathbf{A}}\ln\alpha_{ij}+ \mathit{Na} \ln s^{2}
+	\end{split}
+\label{eq:global_Jobj}
+\end{equation}
+
+In the first line of equation eq.\ref{eq:global_Jobj} each cluster centroid $μ_{h}$ is re-estimated by taking the mean of the points in the neighborhood $X_{h}$, which minimizes the component $D_{cos_{A}}(\mathbf{x}_{i},\mu_{h})$. The constraint potential functions, at the second and third line, are not taking a part in centroid re-estimation, because they are not explicit functions of the centroid. Therefore, given the cluster assignments and the distortion parameters, $J_{obj}$ \emph{will decrease or remain the same}.
+
+The parameter estimation step (b.) in the E-step, decreases $J_{obj}$ or keeps it unchanged. Thus, the objective function decreases after every cluster assignment, centroid re-estimation, and parameter re-estimation step.
+
+That the objective function is bounded below by a constant: \emph{being the negative log likelihood} \textbf{(NOTE: Here is claimed to be the Negative Log while in other places in Basu or Chappel is not mentions. Here is from Chappel. If this is correct then the above NOTE does not need an asware)} of a probabilistic model with the normalizer terms, $J_{obj}$ is bounded below by zero. Even without the normalizers, the objective function is bounded below by zero, since the \emph{distortion and potential functions are non-negative} due to the fact that A is \textbf{positive definite} (NOTE: How they can claim this. How I assure that the $A$ is positive definite. I think the Rayleight prior pdf should do this but is not event mentioned in Basu paper). Therefore, $J_{obj}$ is bounded below, and HMRF-KMeans results in a decreasing sequence of objective function values, the value sequence must have a limit. The limit in this case will be a fixed point of $J_{obj}$, since neither updating the assignments nor the parameters can further decrease the value of the objective function \cite{chapelle2006semi_hmrf_kmeans}.
+
+''As a result, the HMRFK Means algorithm will converge to a fixed point of the objective. \textbf{In practice, convergence can be determined if subsequent iterations of HMRF-KMeans result in insignificant changes in}'' $J_{obj}$.
+
+\subsection{Some quetions for Stathis}
+\begin{itemize}
+	\item What would be the best structure for must-link and cannot-link constraints. Should be given as pairs or as a graph. A pair (5,6) is equivalent to (6,5) and should both be present?
+	\item Eq.\ref{eq:global_Jobj} is not exactly as in the \cite{chapelle2006semi_hmrf_kmeans}, but I think mine is more descriptive. Is it?
+	\item The $P(A)$ and Rayleight prior distribution for the parameters are not mentioned in \cite{basu2004probabilistic} but are very important part in \cite{chapelle2006semi_hmrf_kmeans}.
+	\item In my implementation based mainly in \cite{basu2004probabilistic} the \ref{eq:global_Jobj} is not decreasing monotonically. On the contrary is decreasing up to a point and then starts increasing again? I think the omitted $P(A)$ might be the problem. I ll check it before you even read this line.
+	\item Note that I've omitted the $Z$ normalization factors assuming value 1 thus 0 for their logarithm. Are they important given the assumption that they are constant as explained above, something that making the objective not to be a log likelihood anymore?
+\end{itemize}
 
 \bibliographystyle{splncs03}
 \bibliography{djumble_doc}
