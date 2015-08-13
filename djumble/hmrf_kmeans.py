@@ -54,20 +54,20 @@ def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_no
                                            cannot_lnk_cons, w_constr_viol_mtrx,)
 
         # Calculating Global JObjective function.
-        glob_jobj = GlobJObjCosDM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
-                                  must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx,
-                                  distor_params)
+        # glob_jobj = GlobJObjCosDM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
+        #                          must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx,
+        #                          distor_params)
 
         # Terminating upon Global JObej on condition.
         # It suppose that global JObjective monotonically decreases, am I right?
-        if last_gobj - glob_jobj < 0.000:
-            raise Exception("Global JObjective difference returned a negative value.")
+        # if last_gobj - glob_jobj < 0.000:
+        #    raise Exception("Global JObjective difference returned a negative value.")
 
-        if last_gobj - glob_jobj < 0.001:
-            break
-        else:
-            last_gobj = glob_jobj
-            print glob_jobj
+        # if last_gobj - glob_jobj < 0.001:
+        #    break
+        # else:
+        #    last_gobj = glob_jobj
+        #    print glob_jobj
 
     # Returning the Centroids, Clusters/Neighbourhoods, distortion parameters,
     # constraint violations matrix.
@@ -89,14 +89,14 @@ def ICM(x_data_arr, mu_lst, mu_neib_idxs_set_lst, must_lnk_cons, cannot_lnk_cons
         # Calculating the new Neighbourhoods/Clusters.
         for x_idx in np.random.randint(0, x_data_arr.shape[0], size=x_data_arr.shape[0]):
 
-            last_jobj = 999999.0
+            last_jobj = 9999999999999999.0
 
             for i, (mu, mu_neib_idxs_set) in enumerate(zip(mu_lst, mu_neib_idxs_set_lst)):
 
                 j_obj = JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
                                   must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx,
                                   distor_params)
-
+                print j_obj
                 if j_obj < last_jobj:
                     last_jobj = j_obj
                     mu_neib_idx = i
@@ -217,7 +217,19 @@ def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
                            (1 - CosDistPar(x_data_arr[x_idx, :], x_data_arr[x_cons, :],
                                            distor_params))
 
-    return d + ml_cost + cl_cost
+    # ### Calculating the Rayleigh's PDF contribution.
+    sum1 = 0.0
+    sum2 = 0.0
+
+    for a in distor_params:
+        sum1 += a / np.square(1.2533)
+        print a
+        sum2 += np.log(a)
+
+    params_pdf = sum1 - sum2 + distor_params.shape[0] * np.log(np.square(1.2533))
+    # print params_pdf
+    print d, ml_cost, cl_cost, params_pdf
+    return d + ml_cost + cl_cost + params_pdf
 
 
 def GlobJObjCosDM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
@@ -254,7 +266,17 @@ def GlobJObjCosDM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
                         (1 - CosDistPar(x_data_arr[x_con_i, :], x_data_arr[x_con_j, :],
                          distor_params))
 
-    return sum_d + ml_cost + cl_cost
+    # ### Calculating the Rayleigh's PDF contribution.
+    sum1 = 0.0
+    sum2 = 0.0
+
+    for a in distor_params:
+        sum1 += a / np.square(1.2533)
+        sum2 += np.log(a)
+
+    params_pdf = sum1 - sum2 + distor_params.shape[0] * np.log(np.square(1.2533))
+
+    return sum_d + ml_cost + cl_cost + params_pdf
 
 
 def UpdateDistorParams(distor_params, chang_rate, x_data_arr, mu_lst,
@@ -275,7 +297,7 @@ def UpdateDistorParams(distor_params, chang_rate, x_data_arr, mu_lst,
                 xm_pderiv += PartialDerivative(a_idx, x_data_arr[x_neib_idx], mu, distor_params)
 
         # [idx for neib in neib_idxs_lst for idx in neib]
-        # Calculating Partial Derivative of D(xi, xj) of Must-Link Constraints.
+        # Calculating the Partial Derivative of D(xi, xj) of Must-Link Constraints.
         mlcost_pderiv = 0.0
         ml_visited = set()
         for x_con_i, x_con_jz in must_lnk_cons.iteritems():
@@ -288,7 +310,7 @@ def UpdateDistorParams(distor_params, chang_rate, x_data_arr, mu_lst,
                             PartialDerivative(a_idx, x_data_arr[x_con_i], x_data_arr[x_con_j],
                                               distor_params)
 
-        # Calculating Partial Derivative of D(xi, xj) of Cannot-Link Constraints.
+        # Calculating the Partial Derivative of D(xi, xj) of Cannot-Link Constraints.
         clcost_pderiv = 0.0
         cl_visited = set()
         for x_con_i, x_con_jz in cannot_lnk_cons.iteritems():
@@ -300,8 +322,12 @@ def UpdateDistorParams(distor_params, chang_rate, x_data_arr, mu_lst,
                             PartialDerivative(a_idx, x_data_arr[x_con_i], x_data_arr[x_con_j],
                                               distor_params)
 
+        # ### Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
+        a_pderiv = (1 / a) - (a / np.square(1.2533))
+        print a_pderiv
+        # a_pderiv = 0.0
         # Changing the a dimension of A = np.diag(distortions-measure-parameters)
-        distor_params[a_idx] = a + chang_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv)
+        distor_params[a_idx] = a + chang_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
 
     return distor_params
 
@@ -494,10 +520,10 @@ if __name__ == '__main__':
     }
 
     k_expect = 3
-    print "Runnint Kmeans"
+    print "Running HMRF Kmeans"
     res = HMRFKmeans(k_expect, x_data_2d_arr, must_lnk_con, cannot_lnk_con, CosDist,
-                     CosDistPar, np.random.uniform(0.0, 1.0, size=2),
-                     np.random.uniform(0.5, 0.5, size=(1500, 1500)),
+                     CosDistPar, np.random.uniform(0.1, 1.0, size=2),
+                     np.random.uniform(1.0, 1.0, size=(1500, 1500)),
                      dparmas_chang_rate=0.01)
 
     for mu_idx, neib_idxs in enumerate(res[1]):
