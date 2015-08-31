@@ -341,16 +341,21 @@ After all points are assigned the process repeated until \emph{no change in clus
 
 The (b.) step is calculating the parameters $\mathbf{A}$ in order to adopt the distortion measure to fit best the current state of the clustering. In the description of eq.\ref{eq:parametrized_cos_sim} we have seen that the parameters of the cosine distance is a $F\times F$ matrix where $F$ is the size of the feature set, i.e. the number of dimensions of the data vectors. In order to reduce the computational overhead due to a potential large feature set, as this is the case is IR problems in general, we set $A = diag(Ap)$ $Ap=(a_{1},...,a_{F})}$. Thus $A$ is a diagonal matrix and all we have to be calculated now is a vector of values same in size as the feature set.
 
-In order to update the $\mathbf{A}$ all we have to do is to calculate the partial derivatives of its variables and update its values with eq.\ref{eq:job_params_update}, where $\eta$ is the \emph{learning/adaption rate}. In this way the distance measure will gradually adapted in order the vector space to be transformed for getting similar data-points closer and dissimilar farther farther apart.
+In order to update the $\mathbf{A}$ all we have to do is to calculate the partial derivatives of its variables and update its values with eq.\ref{eq:a_params_update}, where $\eta$ is the \emph{learning/adaption rate}. In this way the distance measure will gradually adapted in order the vector space to be transformed for getting similar data-points closer and dissimilar farther apart.
 
-Although for some distance measures such as Euclidean we can have \emph{tractable closed-form solution} for the partial derivatives, in general the solution is of the partial derivative intractable. \empgh{Gradient descent} \textbf{(NOTE: As I can tell is some short of partial derivative approximation. However, I am not sure what exactly this is.)} is a alternative and general solution irrespectively of the distance measure we use in the algorithm. In equation eq.\ref{eq:a_params_gradient} we show the \emph{gradient descent} for the partial derivative for the parameters of the parametrized cosine similarity \cite{basu2004probabilistic}.
+\begin{equation}
+	a_{m}=a_{m}+\eta\frac{\partial J_{obj}}{\partial a_{m}}
+\label{eq:a_params_update}
+\end{equation}
+
+Although for some distance measures such as Euclidean we can have \emph{tractable closed-form solution} for the partial derivatives, in general the solution of the partial derivative is intractable. \empgh{Gradient descent} \textbf{(NOTE: As I can tell is some short of partial derivative approximation. However, I am not sure what exactly this is.)} is a alternative and general solution irrespectively of the distance measure we use in the algorithm. In equation eq.\ref{eq:a_params_gradient} we show the \emph{gradient descent} for the partial derivative for the parameters of the parametrized cosine similarity \cite{basu2004probabilistic}.
 
 \begin{equation}
 	\frac{\partial D_{cos_{\mathbf{a}}}(\mathbf{x}_{i},\mathbf{x}_{j})}{\partial a_{m}}=\frac{x_{im}x_{jm}\Vert\mathbf{x}_{i}\Vert_{\mathbf{A}}\Vert\mathbf{x}_{j}\Vert_{\mathbf{A}}-\mathbf{x}_{i}^{T}\mathbf{A}\mathbf{x}_{j}\frac{x_{im}^{2}\Vert\mathbf{x}_{j}\Vert_{\mathbf{A}}^{2}+x_{jm}^{2}\Vert\mathbf{x}_{i}\Vert_{\mathbf{A}}^{2}}{2\Vert\mathbf{x}_{i}\Vert_{\mathbf{A}}\Vert\mathbf{x}_{j}\Vert_{\mathbf{A}}}}{\Vert\mathbf{x}_{i}\Vert_{\mathbf{A}}^{2}\Vert\mathbf{x}_{j}\Vert_{\mathbf{A}}^{2}}
 \label{eq:a_params_gradient}
 \end{equation}
 
-This equation will be used in order to calculate eq.\ref{eq:job_params_update} which is the right most part of the eq.\ref{eq:job_params_update}. Its value for each variable $a_{ij}$ or the parameters matrix $\mathbf{A}$ will change by a percentage of $\eta$ as shown in eq.\ref{eq:job_params_update} in each iteration.
+This equation will be used in order to calculate eq.\ref{eq:job_params_update} which is the right most part of the eq.\ref{eq:a_params_update}. Its value for each variable $a_{ij}$ or the parameters matrix $\mathbf{A}$ will change by a percentage of $\eta$ in each iteration, as shown in eq.\ref{eq:a_params_update}.
 
 \begin{equation}
 	\begin{split}

@@ -63,12 +63,13 @@ def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_no
         # if last_gobj - glob_jobj < 0.000:
         #    raise Exception("Global JObjective difference returned a negative value.")
 
-        # if glob_jobj < 0.0:
-        #     print glob_jobj
-        #     break
+        if glob_jobj < 0.001:
+            print glob_jobj
+            break
         # else:
         #     # last_gobj = glob_jobj
-        print glob_jobj
+
+        print "Global Objective", glob_jobj
 
     # Returning the Centroids, Clusters/Neighbourhoods, distortion parameters,
     # constraint violations matrix.
@@ -90,7 +91,7 @@ def ICM(x_data_arr, mu_lst, mu_neib_idxs_set_lst, must_lnk_cons, cannot_lnk_cons
         # Calculating the new Neighbourhoods/Clusters.
         for x_idx in np.random.randint(0, x_data_arr.shape[0], size=x_data_arr.shape[0]):
 
-            last_jobj = 9999999999999999.0
+            last_jobj = 999999999999999999999999999999999999999.0
 
             for i, (mu, mu_neib_idxs_set) in enumerate(zip(mu_lst, mu_neib_idxs_set_lst)):
 
@@ -101,6 +102,9 @@ def ICM(x_data_arr, mu_lst, mu_neib_idxs_set_lst, must_lnk_cons, cannot_lnk_cons
                 if j_obj < last_jobj:
                     last_jobj = j_obj
                     mu_neib_idx = i
+                else:
+                    pass
+                    # print "else J_Obj", j_obj
 
             if x_idx not in mu_neib_idxs_set_lst[mu_neib_idx]:
 
@@ -231,14 +235,14 @@ def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
     sum2 = 0.0
 
     for a in distor_params:
-        sum1 += a / np.square(1.2533)
-        # print a
+        sum1 += a / 2 * np.square(0.5)
         sum2 += np.log(a)
 
-    params_pdf = sum2 - sum1 - distor_params.shape[0] * np.log(np.square(1.2533))
+    params_pdf = sum2 - sum1 - distor_params.shape[0] * np.log(np.square(0.5))
     # print params_pdf
-    # print d, ml_cost, cl_cost, params_pdf
-    return d + ml_cost + cl_cost #+ params_pdf
+    # if ml_cost > 0.0 or cl_cost > 0.0:
+    #    print d, ml_cost, cl_cost, params_pdf
+    return d + ml_cost + cl_cost + params_pdf
 
 
 def GlobJObjCosDM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
@@ -282,12 +286,16 @@ def GlobJObjCosDM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
     sum2 = 0.0
 
     for a in distor_params:
-        sum1 += a / np.square(1.2533)
+        sum1 += a / 2 * np.square(0.5)
         sum2 += np.log(a)
 
-    params_pdf = sum2 - sum1 - distor_params.shape[0] * np.log(np.square(1.2533))
+    params_pdf = sum2 - sum1 - distor_params.shape[0] * np.log(np.square(0.5))
 
-    return sum_d + ml_cost + cl_cost #+ params_pdf
+    # print sum_d, ml_cost, cl_cost, params_pdf
+
+    print "In Global Params PDF", params_pdf
+
+    return sum_d + ml_cost + cl_cost + params_pdf
 
 
 def UpdateDistorParams(dparams, chang_rate, x_data_arr, mu_lst,
@@ -299,7 +307,7 @@ def UpdateDistorParams(dparams, chang_rate, x_data_arr, mu_lst,
     # i is for x
     # j is for μ of the neib where x is into
 
-    print dparams
+    print "OLD Params", dparams
 
     for a_idx, a in enumerate(dparams):
 
@@ -308,6 +316,7 @@ def UpdateDistorParams(dparams, chang_rate, x_data_arr, mu_lst,
         for mu, neib_idxs in zip(mu_lst, neib_idxs_lst):
             for x_neib_idx in neib_idxs:
                 xm_pderiv += PartialDerivative(a_idx, x_data_arr[x_neib_idx], mu, dparams)
+        # print "Partial Distance", xm_pderiv
 
         # [idx for neib in neib_idxs_lst for idx in neib]
         # Calculating the Partial Derivative of D(xi, xj) of Must-Link Constraints.
@@ -322,6 +331,7 @@ def UpdateDistorParams(dparams, chang_rate, x_data_arr, mu_lst,
 
                     mlcost_pderiv += w_constr_viol_mtrx[x[0], x[1]] *\
                         PartialDerivative(a_idx, x_data_arr[x[0], :], x_data_arr[x[1], :], dparams)
+        # print "Partial MustLink", mlcost_pderiv
 
         # Calculating the Partial Derivative of D(xi, xj) of Cannot-Link Constraints.
         clcost_pderiv = 0.0
@@ -335,15 +345,15 @@ def UpdateDistorParams(dparams, chang_rate, x_data_arr, mu_lst,
 
                     clcost_pderiv += w_constr_viol_mtrx[x[0], x[1]] *\
                         PartialDerivative(a_idx, x_data_arr[x[0], :], x_data_arr[x[1], :], dparams)
+        # print "Partial MustLink", clcost_pderiv
 
         # ### Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
-        a_pderiv = (1 / a) - (a / np.square(1.2533))
-        # print a_pderiv
-        # a_pderiv = 0.0
-        # Changing the a dimension of A = np.diag(distortions-measure-parameters)
-        dparams[a_idx] = a + chang_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv) #- a_pderiv
+        a_pderiv = (1 / a) - (a / np.square(0.5))
 
-    print dparams
+        # Changing the a dimension of A = np.diag(distortions-measure-parameters)
+        dparams[a_idx] = a + chang_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
+
+    print "Params", dparams
 
     return dparams
 
@@ -361,11 +371,23 @@ def PartialDerivative(a_idx, x1, x2, distor_params):
     x1_pnorm = np.sqrt(np.abs(x1 * A * x1.T))
     x2_pnorm = np.sqrt(np.abs(x2 * A * x2.T))
 
-    return ((x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x1_pnorm) - (x1 * A * x2.T *
-            ((np.square(x1[0, a_idx]) * np.square(x2_pnorm) +
-              np.square(x2[0, a_idx]) * np.square(x1_pnorm)) /
-             (2 * x1_pnorm * x2_pnorm)))) / (np.square(x1_pnorm) * np.square(x2_pnorm))
+    res_a = (
+                (x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x1_pnorm) -
+                (
+                    x1 * A * x2.T *
+                    (
+                        (
+                            np.square(x1[0, a_idx]) * np.square(x2_pnorm) +
+                            np.square(x2[0, a_idx]) * np.square(x1_pnorm)
+                        ) / (2 * x1_pnorm * x2_pnorm)
+                    )
+                )
+            ) / (np.square(x1_pnorm) * np.square(x2_pnorm))
 
+    # if res_a < 0:
+    # print res_a
+
+    return res_a
 
 def FarFirstCosntraint(x_data_arr, k_expect, must_lnk_cons, cannnot_lnk_cons, distor_measure):
 
@@ -521,6 +543,13 @@ if __name__ == '__main__':
         set([521, 539]),
         set([535, 525]),
         set([537, 539]),
+        set([1037, 1238]),
+        set([1057, 1358]),
+        set([1039, 1438]),
+        set([1045, 1138]),
+        set([1098, 1038]),
+        set([1019, 1138]),
+        set([1087, 1338])
     ]
 
     cannot_lnk_con = [
@@ -555,15 +584,22 @@ if __name__ == '__main__':
         set([7, 528]),
         set([7, 535]),
         set([7, 537]),
-        set([7, 539])
+        set([7, 539]),
+        set([538, 1237]),
+        set([548, 1357]),
+        set([558, 1437]),
+        set([738, 1137]),
+        set([938, 1037]),
+        set([838, 1039]),
+        set([555, 1337])
     ]
 
     k_expect = 3
     print "Running HMRF Kmeans"
     res = HMRFKmeans(k_expect, x_data_2d_arr, must_lnk_con, cannot_lnk_con, CosDist,
-                     CosDistPar, np.random.uniform(10.0, 20.0, size=2),
-                     np.random.normal(0.1, 0.9, size=(1500, 1500)),
-                     dparmas_chang_rate=0.01)
+                     CosDistPar, np.random.uniform(0.0, 20.0, size=2),
+                     np.random.uniform(0.9, 0.9, size=(1500, 1500)),
+                     dparmas_chang_rate=0.025)
 
     for mu_idx, neib_idxs in enumerate(res[1]):
         # print res[0][mu_idx][:, 0], res[0][mu_idx][:, 1]
