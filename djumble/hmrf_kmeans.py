@@ -46,7 +46,7 @@ def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_no
 
         # Recalculating centroids upon the new clusters set-up.
         mu_lst = MuCosDMPar(x_data_arr, mu_neib_idxs_set_lst, distor_params)
-        print mu_lst
+        # print mu_lst
 
         # Re-estimating distortion measure parameters upon the new clusters set-up.
         distor_params = UpdateDistorParams(distor_params, dparmas_chang_rate, x_data_arr, mu_lst,
@@ -64,7 +64,7 @@ def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_no
         #    raise Exception("Global JObjective difference returned a negative value.")
 
         if glob_jobj < 0.001:
-            print glob_jobj
+            print "Global Objective", glob_jobj
             break
         # else:
         #     # last_gobj = glob_jobj
@@ -293,7 +293,7 @@ def GlobJObjCosDM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
 
     # print sum_d, ml_cost, cl_cost, params_pdf
 
-    print "In Global Params PDF", params_pdf
+    # print "In Global Params PDF", params_pdf
 
     return sum_d + ml_cost + cl_cost + params_pdf
 
@@ -307,7 +307,7 @@ def UpdateDistorParams(dparams, chang_rate, x_data_arr, mu_lst,
     # i is for x
     # j is for μ of the neib where x is into
 
-    print "OLD Params", dparams
+    # print "OLD Params", dparams
 
     for a_idx, a in enumerate(dparams):
 
@@ -348,12 +348,12 @@ def UpdateDistorParams(dparams, chang_rate, x_data_arr, mu_lst,
         # print "Partial MustLink", clcost_pderiv
 
         # ### Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
-        a_pderiv = (1 / a) - (a / np.square(0.5))
+        a_pderiv = (1 / a) - (a / 2 * np.square(0.5))
 
         # Changing the a dimension of A = np.diag(distortions-measure-parameters)
         dparams[a_idx] = a + chang_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
 
-    print "Params", dparams
+    # print "Params", dparams
 
     return dparams
 
