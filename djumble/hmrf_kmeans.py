@@ -6,10 +6,11 @@ import scipy as sp
 import scipy.stats as sps
 import random as rnd
 import matplotlib.pyplot as plt
+import scipy.special as special
 
 
 def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_noparam,
-               distor_measure, distor_params, w_constr_viol_mtrx, dparmas_chang_rate):
+               distor_measure, distor_params, w_constr_viol_mtrx, dparmas_chang_rate, s):
     """HMRF Kmeans: A Semi-supervised clustering algorithm based on Hidden Markov Random Fields
         Clustering model optimized by Expectation Maximization (EM) algorithm with Hard clustering
         constraints, i.e. a Kmeans Semi-supervised clustering variant.
@@ -40,7 +41,7 @@ def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_no
         # ...parameters and centroids of the current iteration.
         mu_neib_idxs_set_lst = ICM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
                                    must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx,
-                                   distor_params)
+                                   distor_params, s)
 
         # The M-Step #######
 
@@ -51,12 +52,12 @@ def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_no
         # Re-estimating distortion measure parameters upon the new clusters set-up.
         distor_params = UpdateDistorParams(distor_params, dparmas_chang_rate, x_data_arr, mu_lst,
                                            mu_neib_idxs_set_lst, must_lnk_cons,
-                                           cannot_lnk_cons, w_constr_viol_mtrx,)
+                                           cannot_lnk_cons, w_constr_viol_mtrx, s)
 
         # Calculating Global JObjective function.
         glob_jobj = GlobJObjCosDM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
                                   must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx,
-                                  distor_params)
+                                  distor_params, s)
 
         # Terminating upon Global JObej on condition.
         # It suppose that global JObjective monotonically decreases, am I right?
@@ -77,7 +78,7 @@ def HMRFKmeans(k_expect, x_data_arr, must_lnk_cons, cannot_lnk_cons, dmeasure_no
 
 
 def ICM(x_data_arr, mu_lst, mu_neib_idxs_set_lst, must_lnk_cons, cannot_lnk_cons,
-        w_constr_viol_mtrx, distor_params):
+        w_constr_viol_mtrx, distor_params, s):
     """ ICM: Iterated Conditional Modes (for the E-Step)
 
         After all points are assigned, they are randomly re-ordered, and
@@ -97,7 +98,7 @@ def ICM(x_data_arr, mu_lst, mu_neib_idxs_set_lst, must_lnk_cons, cannot_lnk_cons
 
                 j_obj = JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
                                   must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx,
-                                  distor_params)
+                                  distor_params, s)
                 # print j_obj
                 if j_obj < last_jobj:
                     last_jobj = j_obj
@@ -193,7 +194,7 @@ def MuCos(x_data_arr, neibs_idxs_lsts):
 
 
 def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
-              must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params):
+              must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params, s):
     """JObjCosDM: J Objective function for Cosine Distortion Measure. It cannot very generic
         because the gradient decent (partial derivative) calculation should be applied which they
         are totally dependent on the distortion measure, here Cosine Distance.
@@ -235,18 +236,29 @@ def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
     sum2 = 0.0
 
     for a in distor_params:
-        sum1 += a / 2 * np.square(0.5)
-        sum2 += np.log(a)
+        sum1 += np.log(a)
+        sum2 += a / 2 * np.square(s)
 
-    params_pdf = sum2 - sum1 - distor_params.shape[0] * np.log(np.square(0.5))
+    params_pdf = sum1 - sum2 - 2 * distor_params.shape[0] * np.log(s)
     # print params_pdf
     # if ml_cost > 0.0 or cl_cost > 0.0:
     #    print d, ml_cost, cl_cost, params_pdf
-    return d + ml_cost + cl_cost + params_pdf
+
+    # Vector space dimensions
+    d = x_data_arr.shape[1]
+
+    # Concentration approximation
+    r = np.linalg.norm(x_data_arr)
+    k = (r*d - np.power(r, 3)) / (1 - np.power(r, 2))
+
+    # Calculating Bessel Function for the first kind for order equals to vector space dimensions.
+    bessel = special.jv((d/2.0)-1.0, k)
+
+    return d + ml_cost + cl_cost + params_pdf + np.log(bessel)*x_data_arr.shape[0]
 
 
 def GlobJObjCosDM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
-                  must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params):
+                  must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params, s):
     """
     """
 
@@ -286,20 +298,38 @@ def GlobJObjCosDM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
     sum2 = 0.0
 
     for a in distor_params:
-        sum1 += a / 2 * np.square(0.5)
-        sum2 += np.log(a)
+        sum1 += np.log(a)
+        sum2 += a / 2 * np.square(s)
 
-    params_pdf = sum2 - sum1 - distor_params.shape[0] * np.log(np.square(0.5))
+    params_pdf = sum1 - sum2 - 2 * distor_params.shape[0] * np.log(s)
 
     # print sum_d, ml_cost, cl_cost, params_pdf
 
     # print "In Global Params PDF", params_pdf
 
-    return sum_d + ml_cost + cl_cost + params_pdf
+    # Vector space dimensions
+    d = x_data_arr.shape[1]
+    print d
+
+    # Concentration approximation
+    r = np.linalg.norm(x_data_arr)
+    k = (r*d - np.power(r, 3)) / (1 - np.power(r, 2))
+    print r
+    print k
+
+    # Calculating Bessel Function for the first kind for order equals to vector space dimensions.
+    bessel = special.jv((d/2.0)-1.0, k)
+    print bessel
+
+    print 'np.log(bessel)*N', np.log(bessel)*x_data_arr.shape[0]
+
+    print x_data_arr.shape[0]
+
+    return sum_d + ml_cost + cl_cost + params_pdf - np.log(bessel)*x_data_arr.shape[0]
 
 
 def UpdateDistorParams(dparams, chang_rate, x_data_arr, mu_lst,
-                       neib_idxs_lst, must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx):
+                       neib_idxs_lst, must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, s):
     """
     """
     # #### HERE IS THE TRICKY THING #### #
@@ -348,7 +378,7 @@ def UpdateDistorParams(dparams, chang_rate, x_data_arr, mu_lst,
         # print "Partial MustLink", clcost_pderiv
 
         # ### Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
-        a_pderiv = (1 / a) - (a / 2 * np.square(0.5))
+        a_pderiv = (1 / a) - (a / 2 * np.square(s))
 
         # Changing the a dimension of A = np.diag(distortions-measure-parameters)
         dparams[a_idx] = a + chang_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
@@ -509,10 +539,17 @@ def FarFirstWeighted(x_data_arr, k_expect, must_lnk_con, cannnot_lnk_con, CosDis
 
 if __name__ == '__main__':
 
+    test_dims = 1000
+
     print "Creating Sample"
-    x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=(0.7, 0.2), scale=1, size=(500, 2))
-    x_data_2d_arr2 = sps.vonmises.rvs(1200.0, loc=(0.6, 0.6), scale=1, size=(500, 2))
-    x_data_2d_arr3 = sps.vonmises.rvs(1200.0, loc=(0.2, 0.3), scale=1, size=(500, 2))
+    x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 0.6, size=(1, test_dims)), scale=1, size=(500, test_dims))
+    x_data_2d_arr2 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.3, 0.7, size=(1, test_dims)), scale=1, size=(500, test_dims))
+    x_data_2d_arr3 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.6, 0.9, size=(1, test_dims)), scale=1, size=(500, test_dims))
+
+
+# (0.7, 0.2, 0.7, 0.2, 0.6, 0.6, 0.1, 0.3, 0.8, 0.5)
+# (0.6, 0.6, 0.7, 0.2, 0.6, 0.6, 0.8, 0.3, 0.9, 0.1)
+# (0.2, 0.3, 0.7, 0.2, 0.6, 0.6, 0.2, 0.3, 0.6, 0.4)
 
     # tuple(np.random.normal(0.0, 10.0, size=2))
     # x_data_2d_arr1 = np.random.vonmises(0.5, 100, size=(20, 2))
@@ -597,9 +634,9 @@ if __name__ == '__main__':
     k_expect = 3
     print "Running HMRF Kmeans"
     res = HMRFKmeans(k_expect, x_data_2d_arr, must_lnk_con, cannot_lnk_con, CosDist,
-                     CosDistPar, np.random.uniform(0.0, 20.0, size=2),
+                     CosDistPar, np.random.uniform(0.50, 100.0, size=test_dims),
                      np.random.uniform(0.9, 0.9, size=(1500, 1500)),
-                     dparmas_chang_rate=0.025)
+                     dparmas_chang_rate=0.3, s=0.5)
 
     for mu_idx, neib_idxs in enumerate(res[1]):
         # print res[0][mu_idx][:, 0], res[0][mu_idx][:, 1]

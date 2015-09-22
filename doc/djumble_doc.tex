@@ -117,7 +117,7 @@ The EM algorithm can also be used to find MAP (maximum a-posterior) solutions in
 Where the set of vector are the same as in alg.\ref{alg:em_generic} but this time the constraints set of the fig.\ref{fig:hmrf_em} have been included, i.e. Mast-link and Cannot-link constraints set $\left\{\mathbf{M,C}\right\}$. Moreover, as the graphical model is describing the constraints are independent from $\mathbf{X}$ and parameters $\mathbf{\Theta}$ are, also, independent from the constraints set. Thus:
 
 \begin{equation}
-	P(\mathbf{L}|\mathbf{\Theta,M,L})P(\mathbf{X}|\mathbf{L,\Theta,M,C})=P(\mathbf{X}|\mathbf{L,M,C})
+	P(\mathbf{X}|\mathbf{L,\Theta,M,C})=P(\mathbf{X}|\mathbf{L,\Theta})
 \label{eq:hmrm_em_X_MC_interdependency}
 \end{equation}
 
@@ -129,14 +129,14 @@ Where the set of vector are the same as in alg.\ref{alg:em_generic} but this tim
 Considering $\mathbf{X}$ observable data-set is convient due to compuational issues to simplify the algorithm by assuming the vectors $\mathbf{x}$ are \emph{mutually impediment}, thus:
 
 \begin{equation}
-	P(\mathbf{X}|\mathbf{L,\Theta})=\prod_{i=1}^{N}P(\mathbf{x}_{i}|\mathbf{l}_{i},\mathbf{M,L})
+	P(\mathbf{X}|\mathbf{L,\Theta})=\prod_{i=1}^{N}P(\mathbf{x}_{i}|\mathbf{l}_{i},\mathbf{\Theta})
 \label{eq:hmrm_em_X_mutually_interdependency}
 \end{equation}
 
 Consequentially, from equations \ref{eq:hmrm_em_pdf}, \ref{eq:hmrm_em_X_MC_interdependency}, \ref{eq:hmrm_em_Theta_MC_interdependency} and \ref{eq:hmrm_em_X_mutually_interdependency} we are getting the following MAP which it should be maximized.
 
 \begin{equation}
-	P(\mathbf{X,L,\Theta}|\mathbf{M,C})=P(\mathbf{\Theta})P(\mathbf{L}|\mathbf{\Theta,M,C})\prod_{i=1}^{N}P(\mathbf{x}_{i}|\mathbf{l}_{i},\mathbf{M,L})
+	P(\mathbf{X,L,\Theta}|\mathbf{M,C})=P(\mathbf{\Theta})P(\mathbf{L}|\mathbf{\Theta,M,C})\prod_{i=1}^{N}P(\mathbf{x}_{i}|\mathbf{l}_{i},\mathbf{\Theta})
 \label{eq:hmrm_em_MAP_or_MAX_Liklihood}
 \end{equation}
 
