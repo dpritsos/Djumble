@@ -52,7 +52,7 @@ class HMRFKmeans(object):
         self.lrn_rate = lrn_rate
         self.ray_sigma = ray_sigma
         self.w_violations = w_violations
-        self.d_params = d_params
+        self.A = d_params
 
     def Fit(self, x_data):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
@@ -65,18 +65,25 @@ class HMRFKmeans(object):
             ---------
                 x_data: A numpy.array with X rows of data points and N rows of features/dimensions.
 
+            Output
+            ------
+                mu_lst: The list of N cluster centroids.
+                clstr_idxs_set_lst: The list of sets of x_data array indices for each of the N
+                    clusters.
+                self.A.data: The values of the (hyper-)parametes for the cosine distance after the
+                    final model fit.
+
         """
 
         # Initializing clustering
 
         # Setting up distortion parameters if not have been passed as class argument.
-        if not self.d_params:
-            self.d_params = np.random.uniform(0.50, 100.0, size=x_data.shape[1])
-
-        # A is the same as d_params but in a diagonal matrix form required for the...
-        # ...calculations in the functions bellow. It will save array to matrix transformations.
-        self.A = sp.sparse.dia_matrix((distor_params, [0]),
-                                      shape=(distor_params.shape[0], distor_params.shape[0]))
+        if not self.A:
+            self.A = np.random.uniform(0.50, 100.0, size=x_data.shape[1])
+        # A should be a diagonal matrix form for the calculations in the functions bellow. The...
+        # ...sparse form will save space and the csr_matrix will make the dia_matrix write-able.
+        self.A = sp.sparse.dia_matrix((self.A, [0]), shape=(self.A.shape[0], self.A.shape[0]))
+        self.A = sp.sparse.csr_matrix(self.A)
 
         # Setting up the violation weights matrix if not have been passed as class argument.
         if not self.w_violations:
@@ -85,10 +92,10 @@ class HMRFKmeans(object):
 
         # Deriving initial centroids lists from the must-link an cannot-link constraints.
         # Not ready yet...
-        # init_clstr_sets_lst = FarFirstCosntraint(x_data, k_clusters, must_lnk_cons,
-        #                                           cannot_lnk_cons, dmeasure_noparam)
+        # init_clstr_sets_lst = FarFirstCosntraint(x_data, k_clusters, self.must_lnk,
+        #                                           self.cannot_lnk, dmeasure_noparam)
         # init_clstr_sets_lst = ConsolidateAL(neibs_sets, x_data,
-        #                                      must_lnk_cons, dmeasure_noparam)
+        #                                      self.must_lnk, dmeasure_noparam)
         init_clstr_sets_lst = list()
 
         # If initial centroids arguments has been passed.
@@ -99,7 +106,12 @@ class HMRFKmeans(object):
         mu_lst = MeanCosA(x_data, init_clstr_sets_lst)
 
         # EM algorithm execution.
-        # While no convergence yet or i times.
+
+        # This values is the last global objective. Thus it should be the highest possible...
+        # ...number initially, i.e. Inf.
+        last_gobj = np.Inf
+
+        # While no convergence yet repeat for at least i times.
         for conv_step in range(self.max_iter):
 
             print conv_step
@@ -117,27 +129,23 @@ class HMRFKmeans(object):
             # print mu_lst
 
             # Re-estimating distortion measure parameters upon the new clusters set-up.
-            self.d_params = UpdateDistorParams(self.d_params, x_data, mu_lst, clstr_idxs_set_lst)
+            self.A = UpdateDistorParams(self.A, x_data, mu_lst, clstr_idxs_set_lst)
 
             # Calculating Global JObjective function.
             glob_jobj = GlobJObjCosA(x_data, mu_lst, clstr_idxs_set_lst)
 
-            # Terminating upon Global JObej on condition.
-            # It suppose that global JObjective monotonically decreases, am I right?
-            # if last_gobj - glob_jobj < 0.000:
-            #    raise Exception("Global JObjective difference returned a negative value.")
-
-            if glob_jobj < 0.001:
+            # Terminating upon difference of the last two Global JObej values.
+            if (last_gobj - glob_jobj) < self.cvg:
                 print "Global Objective", glob_jobj
                 break
-            # else:
-            #     # last_gobj = glob_jobj
+            else:
+                last_gobj = glob_jobj
 
             print "Global Objective", glob_jobj
 
         # Returning the Centroids, Clusters/Neighbourhoods, distortion parameters,
         # constraint violations matrix.
-        return mu_lst, clstr_idxs_set_lst, distor_params, w_constr_viol_mtrx
+        return mu_lst, clstr_idxs_set_lst, self.A.data
 
     def ICM(self, x_data, mu_lst, clstr_idxs_sets_lst):
         """ ICM: Iterated Conditional Modes (for the E-Step).
@@ -151,6 +159,11 @@ class HMRFKmeans(object):
             mu_lst: The list of centroids of the clusters.
             clstr_idxs_sets_lst: The list of sets of the
 
+            Output
+            ------
+                clstr_idxs_sets_lst: Returning a python list of python sets of the x_data array
+                    row indices for the vectors belonging to each cluster.
+
         """
         no_change_cnt = 0
         while no_change_cnt < 2:
@@ -158,19 +171,20 @@ class HMRFKmeans(object):
             # Calculating the new Clusters.
             for x_idx in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]):
 
-                last_jobj = 999999999999999999999999999999999999999.0
+                # Setting the initial value for the previews J-Objective value.
+                last_jobj = np.Inf
 
+                # Calculating the J-Objective for every x_i vector of the x_data set.
                 for i, (mu, clstr_idxs_set) in enumerate(zip(mu_lst, clstr_idxs_sets_lst)):
 
+                    # Calculating the J-Objective.
                     j_obj = JObjCosA(x_idx, x_data, mu, clstr_idxs_set)
-                    # print j_obj
+
                     if j_obj < last_jobj:
                         last_jobj = j_obj
                         mu_neib_idx = i
-                    else:
-                        pass
-                        # print "else J_Obj", j_obj
 
+                # Re-assinging the x_i vector to the new cluster if not already.
                 if x_idx not in clstr_idxs_sets_lst[mu_neib_idx]:
 
                     # Remove x form all Clusters.
@@ -185,6 +199,8 @@ class HMRFKmeans(object):
                 else:
                     no_change = True
 
+            # Counting Non-Changes, i.e. if no change happens for two (2) iteration the...
+            # ...re-assingment process stops.
             if no_change:
                 no_change_cnt += 1
 
@@ -200,6 +216,10 @@ class HMRFKmeans(object):
             ---------
                 x1, x2: The numpy.array vectors, their (parameterized) cosine distance will
                         be measured.
+
+            Output
+            ------
+                Returning the parameterized cosine distance between two vectors.
 
         """
 
@@ -221,6 +241,10 @@ class HMRFKmeans(object):
                 x_data: A numpy.array with X rows of data points and N rows of features/dimensions.
                 clstr_idxs_lsts: The lists of indices for each cluster.
 
+            Output
+            ------
+                mu_lst: The list of N centroids(mu_i), one for each of the N expected clusters.
+
         """
 
         mu_lst = list()
@@ -238,21 +262,35 @@ class HMRFKmeans(object):
 
         return mu_lst
 
-    def JObjCosA(self, x_idx, x_data, mu, clstr_idxs_set,
-                 must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params, s):
-        """ JObjCosA: J Objective function for Cosine Distortion Measure. It cannot very generic
-            because the gradient decent (partial derivative) calculation should be applied which they
-            are totally dependent on the distortion measure, here Cosine Distance.
+    def JObjCosA(self, x_idx, x_data, mu, clstr_idxs_set):
+        """ JObjCosA: J-Objective function for parametrized Cosine Distortion Measure. It cannot
+            be very generic because the gradient decent (partial derivative) calculations should be
+            applied, they are totally dependent on the distortion measure (here is Cosine Distance).
+
+            It is calculating the J-Obective for the specific X data point upon the cosine distance
+            plus the must-link and cannot-link constraints.
+
+            Arguments
+            ---------
+                x_idx: The row index of the x_data array for the specific data-point.
+                x_data: A numpy.array with X rows of data points and N rows of features/dimensions.
+                    clstr_idxs_lsts: The lists of indices for each cluster.
+                mu: The centroid vector of the current cluster.
+                clstr_idxs_set: The set of row indices (from the x_data array) which are assembling
+                    the current cluster.
+
+            Output
+            ------
+                Returning the J-Objective values for the specific x_i in the specific cluster.
 
         """
 
-        "Phi_max depends on the distortion measure"
-
-        d = CosDistA(x_data[x_idx, :], mu, distor_params)
+        # Calculating the cosine distance of the specific x_i from the cluster's centroid.
+        dist = CosDistA(x_data[x_idx, :], mu)
 
         # Calculating Must-Link violation cost.
         ml_cost = 0.0
-        for x_cons in must_lnk_cons:
+        for x_cons in self.must_lnk:
 
             if x_idx in x_cons:
 
@@ -260,12 +298,12 @@ class HMRFKmeans(object):
 
                     x = list(x_cons)
 
-                    ml_cost += w_constr_viol_mtrx[x[0], x[1]] *\
-                        CosDistA(x_data[x[0], :], x_data[x[1], :], distor_params)
+                    ml_cost += self.w_violations[x[0], x[1]] *\
+                        CosDistA(x_data[x[0], :], x_data[x[1], :])
 
         # Calculating Cannot-Link violation cost.
         cl_cost = 0.0
-        for x_cons in cannot_lnk_cons:
+        for x_cons in self.cannot_lnk:
 
             if x_idx in x_cons:
 
@@ -273,168 +311,180 @@ class HMRFKmeans(object):
 
                     x = list(x_cons)
 
-                    cl_cost += w_constr_viol_mtrx[x[0], x[1]] *\
-                        (1 - CosDistA(x_data[x[0], :], x_data[x[1], :], distor_params))
+                    cl_cost += self.w_violations[x[0], x[1]] *\
+                        (1 - CosDistA(x_data[x[0], :], x_data[x[1], :]))
 
-        # ### Calculating the Rayleigh's PDF contribution.
-        sum1 = 0.0
-        sum2 = 0.0
-
-        for a in distor_params:
+        # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
+        sum1, sum2 = 0.0, 0.0
+        for a in self.d_params:
             sum1 += np.log(a)
-            sum2 += a / 2 * np.square(s)
+            sum2 += a / 2 * np.square(self.ray_sigma)
+        params_pdf = sum1 - sum2 - 2 * self.d_params.shape[0] * np.log(self.ray_sigma)
 
-        params_pdf = sum1 - sum2 - 2 * distor_params.shape[0] * np.log(s)
-        # print params_pdf
-        # if ml_cost > 0.0 or cl_cost > 0.0:
-        #    print d, ml_cost, cl_cost, params_pdf
-
-        # Vector space dimensions
-        d = x_data.shape[1]
-
+        # Calculating Bessel Function for the first kind for order equals to 1/2 of the...
+        # vector-space dimensions. Von Misses Fisher's k concentration is approximated as seen..
+        # ....in Banerjee et al. 2003.
+        dim = x_data.shape[1]
         # Concentration approximation
         r = np.linalg.norm(x_data)
-        k = (r*d - np.power(r, 3)) / (1 - np.power(r, 2))
+        k = (r*dim - np.power(r, 3)) / (1 - np.power(r, 2))
+        # The bessel function calculation using the above approximation for k Concentration.
+        bessel = special.jv((dim/2.0)-1.0, k)
 
-        # Calculating Bessel Function for the first kind for order equals to vector space dimensions.
-        bessel = special.jv((d/2.0)-1.0, k)
+        # Calculating and returning the J-Objective value for this cluster's set-up.
+        return dist + ml_cost + cl_cost + params_pdf - np.log(bessel)*x_data.shape[0]
 
-        return d + ml_cost + cl_cost + params_pdf + np.log(bessel)*x_data.shape[0]
-
-    def GlobJObjCosA(self, x_data, mu_lst, clstr_idxs_set_lst,
-                     must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, distor_params, s):
+    def GlobJObjCosA(self, x_data, mu_lst, clstr_idxs_set_lst):
         """
         """
 
         sum_d = 0.0
         for mu, neib_idxs in zip(mu_lst, clstr_idxs_set_lst):
             for x_neib_idx in neib_idxs:
-                sum_d += CosDistA(x_data[x_neib_idx], mu, distor_params)
+                sum_d += CosDistA(x_data[x_neib_idx], mu)
 
         # Calculating Must-Link violation cost.
         ml_cost = 0.0
         for clstr_idxs_set in clstr_idxs_set_lst:
 
-            for x_cons in must_lnk_cons:
+            for x_cons in self.must_lnk:
 
                 if not (x_cons <= clstr_idxs_set):
 
                     x = list(x_cons)
 
-                    ml_cost += w_constr_viol_mtrx[x[0], x[1]] *\
-                        CosDistA(x_data[x[0], :], x_data[x[1], :], distor_params)
+                    ml_cost += self.w_violations[x[0], x[1]] *\
+                        CosDistA(x_data[x[0], :], x_data[x[1], :])
 
         # Calculating Cannot-Link violation cost.
         cl_cost = 0.0
         for clstr_idxs_set in clstr_idxs_set_lst:
 
-            for x_cons in cannot_lnk_cons:
+            for x_cons in self.cannot_lnk:
 
                 if x_cons <= clstr_idxs_set:
 
                     x = list(x_cons)
 
-                    cl_cost += w_constr_viol_mtrx[x[0], x[1]] *\
-                        (1 - CosDistA(x_data[x[0], :], x_data[x[1], :], distor_params))
+                    cl_cost += self.w_violations[x[0], x[1]] *\
+                        (1 - CosDistA(x_data[x[0], :], x_data[x[1], :]))
 
-        # ### Calculating the Rayleigh's PDF contribution.
-        sum1 = 0.0
-        sum2 = 0.0
-
-        for a in distor_params:
+        # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
+        sum1, sum2 = 0.0, 0.0
+        for a in self.d_params:
             sum1 += np.log(a)
-            sum2 += a / 2 * np.square(s)
+            sum2 += a / 2 * np.square(self.ray_sigma)
+        params_pdf = sum1 - sum2 - 2 * self.d_params.shape[0] * np.log(self.ray_sigma)
 
-        params_pdf = sum1 - sum2 - 2 * distor_params.shape[0] * np.log(s)
-
-        # print sum_d, ml_cost, cl_cost, params_pdf
-
-        # print "In Global Params PDF", params_pdf
-
-        # Vector space dimensions
-        d = x_data.shape[1]
-        print d
-
+        # Calculating Bessel Function for the first kind for order equals to 1/2 of the...
+        # vector-space dimensions. Von Misses Fisher's k concentration is approximated as seen..
+        # ....in Banerjee et al. 2003.
+        dim = x_data.shape[1]
         # Concentration approximation
         r = np.linalg.norm(x_data)
-        k = (r*d - np.power(r, 3)) / (1 - np.power(r, 2))
-        print r
-        print k
-
-        # Calculating Bessel Function for the first kind for order equals to vector space dimensions.
-        bessel = special.jv((d/2.0)-1.0, k)
+        k = (r*dim - np.power(r, 3)) / (1 - np.power(r, 2))
+        # The bessel function calculation using the above approximation for k Concentration.
+        bessel = special.jv((dim/2.0)-1.0, k)
         print bessel
-
         print 'np.log(bessel)*N', np.log(bessel)*x_data.shape[0]
-
         print x_data.shape[0]
 
+        # Calculating and returning the Global J-Objective value for the current Spherical...
+        # ...vMF-Mixture set-up.
         return sum_d + ml_cost + cl_cost + params_pdf - np.log(bessel)*x_data.shape[0]
 
-    def UpdateDistorParams(self, dparams, chang_rate, x_data, mu_lst,
-                           neib_idxs_lst, must_lnk_cons, cannot_lnk_cons, w_constr_viol_mtrx, s):
-        """
-        """
-        # #### HERE IS THE TRICKY THING #### #
-        # I think this is the last hard thing to figure out!
-        # i is for x
-        # j is for μ of the neib where x is into
+    def UpdateDistorParams(self, A, x_data, mu_lst, clstr_idxs_lst):
+        """ Update Distortion Parameters: This function is updating the whole set of the distortion
+            parameters. In particular the parameters for the Cosine Distance in this implementation
+            of the HMRF Kmeans.
 
-        # print "OLD Params", dparams
+            Arguments
+            ---------
+                A: The diagonal sparse matrix of the cosine distance parameters. This is actually
+                    not necessary to be passed as argument but it is here for coding constancy
+                    reasons.
+                x_data: A numpy.array with X rows of data points and N rows of features/dimensions.
+                    clstr_idxs_lsts: The lists of indices for each cluster.
+                mu_lst: The list of N centroids(mu_i), one for each of the N expected clusters.
+                clstr_idxs_set_lst: The list of sets of x_data array indices for each of the N
+                    clusters.
 
-        for a_idx, a in enumerate(dparams):
+            Output
+            ------
+                Returning the updated A paramters diagonal (sparse) matrix. Again this is a
+                redundant step just for coding constancy reasons.
+
+        """
+
+        # Updating every parameter's value one-by-one.
+        for a_idx, a in enumerate(A.data):
 
             # Calculating Partial Derivative of D(xi, mu).
             xm_pderiv = 0.0
-            for mu, neib_idxs in zip(mu_lst, neib_idxs_lst):
+            for mu, neib_idxs in zip(mu_lst, clstr_idxs_lst):
                 for x_neib_idx in neib_idxs:
-                    xm_pderiv += PartialDerivative(a_idx, x_data[x_neib_idx], mu, dparams)
+                    xm_pderiv += PartialDerivative(a_idx, x_data[x_neib_idx], mu, A)
             # print "Partial Distance", xm_pderiv
 
-            # [idx for neib in neib_idxs_lst for idx in neib]
+            # [idx for neib in clstr_idxs_lst for idx in neib]
             # Calculating the Partial Derivative of D(xi, xj) of Must-Link Constraints.
             mlcost_pderiv = 0.0
-            for clstr_idxs_set in neib_idxs_lst:
+            for clstr_idxs_set in clstr_idxs_lst:
 
-                for x_cons in must_lnk_cons:
+                for x_cons in self.must_lnk:
 
                     if not (x_cons <= clstr_idxs_set):
 
                         x = list(x_cons)
 
-                        mlcost_pderiv += w_constr_viol_mtrx[x[0], x[1]] *\
-                            PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], dparams)
+                        mlcost_pderiv += self.w_violations[x[0], x[1]] *\
+                            PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
             # print "Partial MustLink", mlcost_pderiv
 
             # Calculating the Partial Derivative of D(xi, xj) of Cannot-Link Constraints.
             clcost_pderiv = 0.0
-            for clstr_idxs_set in neib_idxs_lst:
+            for clstr_idxs_set in clstr_idxs_lst:
 
-                for x_cons in cannot_lnk_cons:
+                for x_cons in self.cannot_lnk:
 
                     if x_cons <= clstr_idxs_set:
 
                         x = list(x_cons)
 
-                        clcost_pderiv += w_constr_viol_mtrx[x[0], x[1]] *\
-                            PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], dparams)
+                        clcost_pderiv += self.w_violations[x[0], x[1]] *\
+                            PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
             # print "Partial MustLink", clcost_pderiv
 
             # ### Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
-            a_pderiv = (1 / a) - (a / 2 * np.square(s))
+            a_pderiv = (1 / a) - (a / 2 * np.square(self.ray_sigma))
 
-            # Changing the a dimension of A = np.diag(distortions-measure-parameters)
-            dparams[a_idx] = a + chang_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
+            # Changing a diagonal value of the A cosine similarity parameters measure.
+            A[a_idx, a_idx] = (a + self.lrn_rate *
+                               (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
+                               )
+        # Returning the A parameters. This is actually a dump return for coding constance reasons.
+        return A
 
-        # print "Params", dparams
+    def PartialDerivative(self, a_idx, x1, x2, A):
+        """ Partial Derivative: This method is calculating the partial derivative of a specific
+            parameter given the proper vectors. That is, for the cosine distance is a x_i with the
+            centroid vector (mu) of the cluster where x_i is belonging into. As for the constraint
+            violations is the x_1 and x_2 of a specific pair of constraints each time this method
+            is called.
+            **for detail see documentation.
 
-        return dparams
+            Arguments
+            ---------
+                a_idx: The index of the parameter on the diagonal of the A diagonal sparse
+                    parameters matrix.
+                x1, x2: The vectors will be used for the partial derivative calculation.
 
-    def PartialDerivative(self, a_idx, x1, x2, distor_params):
+            Output
+            ------
+                res_a: The partial derivative's value.
+
         """
-        """
-        A = sp.sparse.dia_matrix((distor_params, [0]),
-                                 shape=(distor_params.shape[0], distor_params.shape[0]))
+
         # A = sp.diag(distor_params)
         x1 = sp.matrix(x1)
         x2 = sp.matrix(x2)
@@ -456,12 +506,10 @@ class HMRFKmeans(object):
                     )
                 ) / (np.square(x1_pnorm) * np.square(x2_pnorm))
 
-        # if res_a < 0:
-        # print res_a
-
         return res_a
 
-    def FarFirstCosntraint(self, x_data, k_clusters, must_lnk_cons, cannnot_lnk_cons, distor_measure):
+    def FarFirstCosntraint(self, x_data, k_clusters, self.must_lnk,
+                           cannnot_lnk_cons, distor_measure):
 
         # ########### NOT PROPERLY IMPLEMENTED FOR THIS GIT COMMIT ###
         """
@@ -511,8 +559,8 @@ class HMRFKmeans(object):
 
             # Looking for Must-Link
             must_link_neib_indx = None
-            if farthest_x_idx in must_lnk_cons:
-                for ml_idx in must_lnk_cons[farthest_x_idx]:
+            if farthest_x_idx in self.must_lnk:
+                for ml_idx in self.must_lnk[farthest_x_idx]:
                     for n_idx, neib in enumerate(neibs_sets):
                         if ml_idx in neib:
                             must_link_neib_indx = n_idx
@@ -540,7 +588,7 @@ class HMRFKmeans(object):
 
         return neibs_sets
 
-    def ConsolidateAL(self, neibs_sets, x_data, must_lnk_cons, distor_measure):
+    def ConsolidateAL(self, neibs_sets, x_data, self.must_lnk, distor_measure):
 
         # ########### NOT PROPERLY IMPLEMENTED FOR THIS GIT COMMIT ###
 
@@ -564,15 +612,15 @@ class HMRFKmeans(object):
             )
 
             for neib_idx in srted_dists_neib_idx:
-                if rnd_idx in must_lnk_cons:
-                    for ml_idx in must_lnk_cons[rnd_idx]:
+                if rnd_idx in self.must_lnk:
+                    for ml_idx in self.must_lnk[rnd_idx]:
                         if ml_idx in neibs_sets[neib_idx] and rnd_idx not in neibs_sets[neib_idx]:
                             neibs_sets[neib_idx].append(rnd_idx)
 
         return neibs_sets
 
 
-# The following function most probably won't be needed
+# The following function most probably won't be needed.
 def FarFirstWeighted(x_data, k_clusters, must_lnk_con, cannnot_lnk_con, CosDist):
     pass
 

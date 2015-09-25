@@ -203,7 +203,7 @@ def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
 
     "Phi_max depends on the distortion measure"
 
-    d = CosDistPar(x_data_arr[x_idx, :], mu, distor_params)
+    dist = CosDistPar(x_data_arr[x_idx, :], mu, distor_params)
 
     # Calculating Must-Link violation cost.
     ml_cost = 0.0
@@ -245,16 +245,16 @@ def JObjCosDM(x_idx, x_data_arr, mu, mu_neib_idxs_set,
     #    print d, ml_cost, cl_cost, params_pdf
 
     # Vector space dimensions
-    d = x_data_arr.shape[1]
+    dim = x_data_arr.shape[1]
 
     # Concentration approximation
-    r = np.linalg.norm(x_data_arr)
-    k = (r*d - np.power(r, 3)) / (1 - np.power(r, 2))
+    r = np.linalg.norm(x_data_arr) # [list(mu_neib_idxs_set)]
+    k = (r*dim - np.power(r, 3)) / (1 - np.power(r, 2))
 
     # Calculating Bessel Function for the first kind for order equals to vector space dimensions.
-    bessel = special.jv((d/2.0)-1.0, k)
+    bessel = special.jv((dim/2.0)-1.0, k)
 
-    return d + ml_cost + cl_cost + params_pdf + np.log(bessel)*x_data_arr.shape[0]
+    return dist + ml_cost + cl_cost + params_pdf - np.log(bessel)*x_data_arr.shape[0]
 
 
 def GlobJObjCosDM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
@@ -308,17 +308,17 @@ def GlobJObjCosDM(x_data_arr, mu_lst, mu_neib_idxs_set_lst,
     # print "In Global Params PDF", params_pdf
 
     # Vector space dimensions
-    d = x_data_arr.shape[1]
-    print d
+    dim = x_data_arr.shape[1]
+    print dim
 
     # Concentration approximation
     r = np.linalg.norm(x_data_arr)
-    k = (r*d - np.power(r, 3)) / (1 - np.power(r, 2))
+    k = (r*dim - np.power(r, 3)) / (1 - np.power(r, 2))
     print r
     print k
 
     # Calculating Bessel Function for the first kind for order equals to vector space dimensions.
-    bessel = special.jv((d/2.0)-1.0, k)
+    bessel = special.jv((dim/2.0)-1.0, k)
     print bessel
 
     print 'np.log(bessel)*N', np.log(bessel)*x_data_arr.shape[0]
@@ -539,7 +539,7 @@ def FarFirstWeighted(x_data_arr, k_expect, must_lnk_con, cannnot_lnk_con, CosDis
 
 if __name__ == '__main__':
 
-    test_dims = 10
+    test_dims = 1000
 
     print "Creating Sample"
     x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 0.6, size=(1, test_dims)), scale=1, size=(500, test_dims))
