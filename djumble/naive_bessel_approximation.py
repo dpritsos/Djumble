@@ -3,7 +3,8 @@ import numpy as np
 import scipy.special as sp
 import matplotlib.pyplot as plt
 
-def Idx(d, x):
+
+def Jd(d, x):
 
     t = 0.01
     conv = False
