@@ -42,7 +42,7 @@ class HMRFKmeans(object):
 
     def __init__(self, k_clusters, must_lnk, cannot_lnk, init_centroids=None, max_iter=300,
                  cvg=0.0001, lrn_rate=0.03, ray_sigma=0.5, w_violations=None, d_params=None,
-                 norm_part=False):
+                 norm_part=False, globj='non-normed'):
 
         self.k_clusters = k_clusters
         self.must_lnk = must_lnk
@@ -54,11 +54,18 @@ class HMRFKmeans(object):
         self.ray_sigma = ray_sigma
         self.w_violations = w_violations
         self.A = d_params
-
-        # For forcing the calculation in every iteration, when norm_part == True, a separate...
-        # ...variable for the partition normalization function's values is required.
         self.norm_part = norm_part
-        self.norm_part_value = 0.0
+
+        # This option enables or disables the normalizations values to be included in the...
+        # ...calculation of the total values, other than the total cosine distances, the...
+        # ...total must-link and cannot-link violation scores.
+        if globj == 'non-normed':
+            self.globj = False
+        elif globj == 'proper':
+            self.globj = True
+        else:
+            raise Exception("globj: can be either 'proper' or 'non-normed'.")
+
 
     def Fit(self, x_data):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
@@ -480,7 +487,7 @@ class HMRFKmeans(object):
                         (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
-        if self.norm_part:
+        if self.globj:
             sum1, sum2 = 0.0, 0.0
             for a in self.A.data:
                 sum1 += np.log(a)
@@ -491,7 +498,7 @@ class HMRFKmeans(object):
 
         # Calculating the log normalization function of the von Mises-Fisher distribution...
         # ...of the whole mixture.
-        if self.norm_part:
+        if self.norm_part and self.globj:
             norm_part_value = 0.0
             for clstr_idxs_set in clstr_idxs_set_lst:
                 norm_part_value += self.NormPart(x_data[list(clstr_idxs_set)])
