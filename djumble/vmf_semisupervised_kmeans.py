@@ -66,7 +66,6 @@ class HMRFKmeans(object):
         else:
             raise Exception("globj: can be either 'proper' or 'non-normed'.")
 
-
     def Fit(self, x_data):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
             data in the Mixture of the von Misses Fisher (vMF) distributions. However, the vMF(s)
