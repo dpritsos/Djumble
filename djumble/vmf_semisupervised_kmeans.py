@@ -129,6 +129,7 @@ class HMRFKmeans(object):
         # While no convergence yet repeat for at least i times.
         for conv_step in range(self.max_iter):
 
+            print
             print conv_step
 
             # The E-Step.
@@ -338,28 +339,34 @@ class HMRFKmeans(object):
         # ....in Banerjee et al. 2003.
         dim = x_data_subset.shape[1]
 
-        if dim > 10000:
-            raise Exception("NOT IMPLEMENTED YET!")
+        if dim == 1:
+            raise Exception("Data points cannot have less than two(2) dimension.")
 
-        k = (r*dim - np.power(r, 3.0)) / (1 - np.power(r, 2.0))
+        if dim > 100:
+            # Returning a heuristically found constant value as normalizer because when the...
+            # ...dimentions are very high Bessel function equals Zero.
+            return dim * x_data_subset.shape[0]
 
         # Calculating the partition function depending on the vector dimensions.
-        if dim > 2:
+        k = (r*dim - np.power(r, 3.0)) / (1 - np.power(r, 2.0))
+        # k=0.001 only for the case where the r is too small. Usually at the 1-2 first iterations...
+        # ...of the EM/Kmeans.
+        if k < 0.0:
+            k = 0.001
 
+        if dim > 3 and dim <= 100:
+
+            # This is the proper way for calculating the von Misses Fisher normalization factor.
             bessel = np.abs(special.jv((dim/2.0)-1.0, k))
             # bessel = np.abs(self.Jd((dim/2.0)-1.0, k))
             cdk = np.power(k, (dim/2.0)-1) / (np.power(2*np.pi, dim/2)*bessel)
 
         elif dim == 2:
 
+            # This is the proper way for calculating the vMF normalization factor for 2D vectors.
             bessel = np.abs(special.jv(0, k))
             # bessel = np.abs(self.Jd(0, k))
             cdk = 1.0 / (2*np.pi*bessel)
-
-        else:
-            raise Exception("Data points cannot have less than two(2) dimension.")
-
-        # NOTE: ...the np.abs() in bessel is only required for preventing NaN in np.log() bellow.
 
         # Returning the log of the normalization function plus the log of the k that is used in...
         # ...the von Mises Fisher PDF, which is separated from the Cosine Distance due to the log.
@@ -367,7 +374,6 @@ class HMRFKmeans(object):
         # the global normalizer after the whole summations has been completed.
         # Still this need to be revised.
         return (np.log(cdk) + np.log(k)) * x_data_subset.shape[0]
-
 
     def JObjCosA(self, x_idx, x_data, mu, clstr_idxs_set):
         """ JObjCosA: J-Objective function for parametrized Cosine Distortion Measure. It cannot
@@ -428,10 +434,15 @@ class HMRFKmeans(object):
             sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
         params_pdf = sum1 - sum2 - (2 * self.A.data.shape[0] * np.log(self.ray_sigma))
 
-        # dsfs
+        # Calculating the log normalization function of the von Mises-Fisher distribution...
+        # ...NOTE: Only for this cluster i.e. this vMF of the whole PDF mixture.
+        if self.norm_part:
+            norm_part_value = self.NormPart(x_data[list(clstr_idxs_set)])
+        else:
+            norm_part_value = 0.0
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
-        return dist + ml_cost + cl_cost - params_pdf + self.norm_part_value
+        return dist + ml_cost + cl_cost - params_pdf + norm_part_value
 
     def GlobJObjCosA(self, x_data, mu_lst, clstr_idxs_set_lst):
         """
@@ -469,44 +480,33 @@ class HMRFKmeans(object):
                         (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
-        sum1, sum2 = 0.0, 0.0
-        for a in self.A.data:
-            sum1 += np.log(a)
-            sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
-        params_pdf = sum1 - sum2 - (2 * self.A.data.shape[0] * np.log(self.ray_sigma))
+        if self.norm_part:
+            sum1, sum2 = 0.0, 0.0
+            for a in self.A.data:
+                sum1 += np.log(a)
+                sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
+            params_pdf = sum1 - sum2 - (2 * self.A.data.shape[0] * np.log(self.ray_sigma))
+        else:
+            params_pdf = 0.0
 
-        # Calculating Bessel Function for the first kind for order equals to 1/2 of the...
-        # vector-space dimensions. Von Misses Fisher's k concentration is approximated as seen..
-        # ....in Banerjee et al. 2003.
-        dim = x_data.shape[1]
-        # Concentration approximation
-        N = x_data.shape[0]  # np.float(len(clstr_idxs_set))
-        r = np.linalg.norm(x_data)
-        k = (r*dim - np.power(r, 3)) / (1 - np.power(r, 2))
-        # The bessel function calculation using the above approximation for k Concentration.
-        # bessel2 = self.Jd((dim/2.0)-1.0, k)
-        # bessel = special.jv((dim/2.0)-1.0, k)
-        bessel = special.jv(0, k)
-        nf = 1.0 / np.abs(2*np.pi*bessel)
+        # Calculating the log normalization function of the von Mises-Fisher distribution...
+        # ...of the whole mixture.
+        if self.norm_part:
+            norm_part_value = 0.0
+            for clstr_idxs_set in clstr_idxs_set_lst:
+                norm_part_value += self.NormPart(x_data[list(clstr_idxs_set)])
+        else:
+            norm_part_value = 0.0
 
-        #cdk = np.power(k, (dim/2.0)-1) / (np.power(2*np.pi, dim/2) * bessel)
-
-
+        print 'dims', x_data.shape[1]
         print 'sum_d, ml_cost, cl_cost', sum_d, ml_cost, cl_cost
         print 'sum_d + ml_cost + cl_cost', sum_d + ml_cost + cl_cost
         print 'np.log(Rayleigh)', params_pdf
-        print 'Bessel', bessel
-        print 'np.log(k)', np.log(k)
-        print 'np.log(nf)', np.log(nf)
-        # print 'cdk', cdk
-        # print 'log(cdk)', np.log(cdk)
-        # print 'np.log(cdk)*N', np.log(cdk)*x_data.shape[0]
-        print 'dims', x_data.shape[1]
-        print
+        print 'N*(np.log(cdk) + np.log(k))', norm_part_value
 
         # Calculating and returning the Global J-Objective value for the current Spherical...
         # ...vMF-Mixture set-up.
-        return sum_d + ml_cost + cl_cost - params_pdf + self.norm_part_value
+        return sum_d + ml_cost + cl_cost - params_pdf + norm_part_value
 
     def UpdateDistorParams(self, A, x_data, mu_lst, clstr_idxs_lst):
         """ Update Distortion Parameters: This function is updating the whole set of the distortion
@@ -570,11 +570,19 @@ class HMRFKmeans(object):
                         # ...assuption that max(CosA) == 1 above (see documentation). However...
                         # ...based on Chapelle et al. in the partial derivative a proper constant...
                         # ...should be selected in order to keep the cannot-link constraints...
-                        # ...contribution positive. Here it is just using the outcome of the...
+                        # ...contribution positive. **Here it is just using the outcome of the...
                         # ...partial derivative it self as to be equally weighted with the...
-                        # ...must-link constraints.
-                        clcost_pderiv += self.w_violations[x[0], x[1]] *\
-                            self.PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
+                        # ...must-link constraints** OR NOT.
+                        cl_pd = self.PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
+
+                        minus_max_clpd = 0.0
+                        if cl_pd < 0.0:
+                            minus_max_clpd = np.floor(cl_pd) - cl_pd
+                        elif cl_pd > 0.0:
+                            minus_max_clpd = np.ceil(cl_pd) - cl_pd
+
+                        clcost_pderiv += self.w_violations[x[0], x[1]] * minus_max_clpd
+
             # print "Partial Cannot-Link", clcost_pderiv
 
             # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
@@ -778,7 +786,7 @@ def CosDist(x1, x2):
 
 if __name__ == '__main__':
 
-    test_dims = 2
+    test_dims = 100
 
     print "Creating Sample"
     x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 0.6, size=(1, test_dims)), scale=1, size=(500, test_dims))
@@ -874,9 +882,9 @@ if __name__ == '__main__':
     init_centrs = [set([0]), set([550]), set([1100])]
     print "Running HMRF Kmeans"
     hkmeans = HMRFKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
-                         max_iter=300, cvg=0.0001, lrn_rate=0.003, ray_sigma=1.0,
+                         max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5,
                          w_violations=np.random.uniform(1.0, 1.0, size=(1500, 1500)),
-                         d_params=np.random.uniform(5.0, 15.0, size=test_dims))
+                         d_params=np.random.uniform(0.9, 1.7, size=test_dims), norm_part=False)
     res = hkmeans.Fit(x_data_2d_arr)
 
     for mu_idx, neib_idxs in enumerate(res[1]):
