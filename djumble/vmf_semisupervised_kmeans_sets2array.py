@@ -44,7 +44,7 @@ class HMRFKmeans(object):
                  cvg=0.001, lrn_rate=0.003, ray_sigma=0.5, w_violations=None, d_params=None,
                  norm_part=False, globj='non-normed'):
 
-        self.k_clusters = k_clusters
+        self.k_cltrs = k_clusters
         self.must_lnk = must_lnk
         self.cannot_lnk = cannot_lnk
         self.init_centroids = init_centroids
@@ -119,8 +119,8 @@ class HMRFKmeans(object):
             # ######### This might actually change based on the initialization above.
 
             # Pick k random vector from the x_data set as initial centroids. Where k is equals...
-            # ...the number of self.k_clusters.
-            k_rand_idx = np.random.randint(0, self.k_clusters, size=x_data.shape[0])
+            # ...the number of self.k_cltrs.
+            k_rand_idx = np.random.randint(0, self.k_cltrs, size=x_data.shape[0])
             init_clstr_sets_lst.extend([set(idx) for idx in k_rand_idx])
 
         # Calculating the initial Centroids of the assumed hyper-shperical clusters.
