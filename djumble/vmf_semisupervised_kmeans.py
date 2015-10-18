@@ -275,8 +275,9 @@ class HMRFKmeans(object):
         for clstr_ilst in clstr_idxs_lsts:
 
             # Summing up all the X data points for the current cluster.
-            xi_sum = np.sum(x_data[list(clstr_ilst), :], axis=0)
+            xi_sum = x_data[list(clstr_ilst), :].sum(axis=0)
             xi_sum = sp.matrix(xi_sum)
+            print xi_sum
 
             # Calculating denominator ||Σ xi||(A)
             parametrized_norm_xi = np.sqrt(np.abs(xi_sum * self.A * xi_sum.T))
@@ -891,7 +892,7 @@ if __name__ == '__main__':
                          max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5,
                          w_violations=np.random.uniform(1.0, 1.0, size=(1500, 1500)),
                          d_params=np.random.uniform(0.9, 1.7, size=test_dims), norm_part=False)
-    res = hkmeans.Fit(x_data_2d_arr)
+    res = hkmeans.fit(x_data_2d_arr)
 
     for mu_idx, neib_idxs in enumerate(res[1]):
         # print res[0][mu_idx][:, 0], res[0][mu_idx][:, 1]
