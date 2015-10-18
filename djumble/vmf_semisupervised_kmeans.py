@@ -248,8 +248,12 @@ class HMRFKmeans(object):
         """
 
         # Converting vectors x1 and x2 to 1D matrices.
-        x1 = sp.matrix(x1)
-        x2 = sp.matrix(x2)
+        if sp.sparse.issparse(x1):
+            x1 = sp.matrix(x1.todense())
+            x2 = sp.matrix(x2.todense())
+        else:
+            x1 = sp.matrix(x1)
+            x2 = sp.matrix(x2)
 
         # Calculating and returning the parameterized cosine distance.
         return 1 - (x1 * self.A * x2.T /
