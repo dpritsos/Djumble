@@ -189,12 +189,16 @@ class HMRFKmeans(object):
                     row indices for the vectors belonging to each cluster.
 
         """
+
+        print "In ICM..."
+
         no_change_cnt = 0
         while no_change_cnt < 2:
-
+            cnt = 0
             # Calculating the new Clusters.
             for x_idx in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]):
-
+                cnt += 1
+                print cnt
                 # Setting the initial value for the previews J-Objective value.
                 last_jobj = np.Inf
 
@@ -202,7 +206,7 @@ class HMRFKmeans(object):
                 for i, (mu, clstr_idxs_set) in enumerate(zip(mu_lst, clstr_idxs_sets_lst)):
 
                     # Calculating the J-Objective.
-                    j_obj = self.JObjCosA(x_idx, x_data, mu, clstr_idxs_set)
+                    j_obj = np.round(self.JObjCosA(x_idx, x_data, mu, clstr_idxs_set), 3)
 
                     if j_obj < last_jobj:
                         last_jobj = j_obj
@@ -250,9 +254,12 @@ class HMRFKmeans(object):
         # Converting vectors x1 and x2 to 1D matrices.
         if sp.sparse.issparse(x1):
             x1 = sp.matrix(x1.todense())
-            x2 = sp.matrix(x2.todense())
         else:
             x1 = sp.matrix(x1)
+
+        if sp.sparse.issparse(x2):
+            x2 = sp.matrix(x2.todense())
+        else:
             x2 = sp.matrix(x2)
 
         # Calculating and returning the parameterized cosine distance.
@@ -275,13 +282,14 @@ class HMRFKmeans(object):
 
         """
 
+        print "In MeanCosA..."
+
         mu_lst = list()
         for clstr_ilst in clstr_idxs_lsts:
 
             # Summing up all the X data points for the current cluster.
             xi_sum = x_data[list(clstr_ilst), :].sum(axis=0)
             xi_sum = sp.matrix(xi_sum)
-            print xi_sum
 
             # Calculating denominator ||Σ xi||(A)
             parametrized_norm_xi = np.sqrt(np.abs(xi_sum * self.A * xi_sum.T))
@@ -339,6 +347,8 @@ class HMRFKmeans(object):
                 The logarithmic value of the partition normalization function.
 
         """
+
+        print "In NormPart..."
 
         # Calculating the r.
         # The r it suppose to be the norm of the data points of the current cluster, not the...
@@ -452,12 +462,16 @@ class HMRFKmeans(object):
         else:
             norm_part_value = 0.0
 
+        print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
+
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
 
     def GlobJObjCosA(self, x_data, mu_lst, clstr_idxs_set_lst):
         """
         """
+
+        print "In GlobalJObjCosA..."
 
         sum_d = 0.0
         for mu, clstr_idxs in zip(mu_lst, clstr_idxs_set_lst):
@@ -541,6 +555,8 @@ class HMRFKmeans(object):
                 redundant step just for coding constancy reasons.
 
         """
+
+        print "In UpdateDistorParams..."
 
         # Updating every parameter's value one-by-one.
         for a_idx, a in enumerate(A.data):
@@ -630,8 +646,18 @@ class HMRFKmeans(object):
         """
 
         # A = sp.diag(distor_params)
-        x1 = sp.matrix(x1)
-        x2 = sp.matrix(x2)
+        # x1 = sp.matrix(x1)
+        # x2 = sp.matrix(x2)
+
+        if sp.sparse.issparse(x1):
+            x1 = sp.matrix(x1.todense())
+        else:
+            x1 = sp.matrix(x1)
+
+        if sp.sparse.issparse(x2):
+            x2 = sp.matrix(x2.todense())
+        else:
+            x2 = sp.matrix(x2)
 
         # Calculating parametrized Norms ||Σ xi||(A)
         x1_pnorm = np.sqrt(np.abs(x1 * A * x1.T))
@@ -797,7 +823,7 @@ def CosDist(x1, x2):
 
 if __name__ == '__main__':
 
-    test_dims = 100
+    test_dims = 10
 
     print "Creating Sample"
     x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 0.6, size=(1, test_dims)), scale=1, size=(500, test_dims))
