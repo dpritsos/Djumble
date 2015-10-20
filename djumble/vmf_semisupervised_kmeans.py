@@ -463,6 +463,7 @@ class HMRFKmeans(object):
             norm_part_value = 0.0
 
         print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
+        print "Params are: ", self.A
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
