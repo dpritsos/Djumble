@@ -41,7 +41,7 @@ class HMRFKmeans(object):
     """
 
     def __init__(self, k_clusters, must_lnk, cannot_lnk, init_centroids=None, max_iter=300,
-                 cvg=0.001, lrn_rate=0.003, ray_sigma=0.5, w_violations=None, d_params=None,
+                 cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5, w_violations=None, d_params=None,
                  norm_part=False, globj='non-normed'):
 
         self.k_clusters = k_clusters
@@ -167,9 +167,24 @@ class HMRFKmeans(object):
 
             print "Global Objective", glob_jobj
 
-        # Returning the Centroids, Clusters/Neighbourhoods, distortion parameters,
-        # constraint violations matrix.
-        return mu_lst, clstr_idxs_set_lst, self.A.data
+        # Storing the amount of iterations until convergence.
+        self.conv_step = conv_step
+
+        # Returning the Centroids and the Clusters,i.e. the set of indeces for each cluster.
+        return mu_lst, clstr_idxs_set_lst
+
+    def get_params(self):
+        return {
+            'k_clusters': self.k_clusters,
+            'max_iter': self.max_iter,
+            'final_iter': self.conv_step,
+            'convg_diff': self.cvg,
+            'lrn_rate': self.lrn_rate,
+            'ray_sigma': self.ray_sigma,
+            'w_violations': self.w_violations,
+            'dist_msur_params': self.A,
+            'norm_part': self.norm_part
+        }
 
     def ICM(self, x_data, mu_lst, clstr_idxs_sets_lst):
         """ ICM: Iterated Conditional Modes (for the E-Step).
@@ -191,14 +206,14 @@ class HMRFKmeans(object):
         """
 
         print "In ICM..."
-
+        change_cnt = 0
         no_change_cnt = 0
         while no_change_cnt < 2:
-            cnt = 0
+            change_cnt += 1
+            print change_cnt
             # Calculating the new Clusters.
             for x_idx in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]):
-                cnt += 1
-                print cnt
+
                 # Setting the initial value for the previews J-Objective value.
                 last_jobj = np.Inf
 
@@ -462,8 +477,8 @@ class HMRFKmeans(object):
         else:
             norm_part_value = 0.0
 
-        print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
-        print "Params are: ", self.A
+        # print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
+        # print "Params are: ", self.A
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
@@ -922,7 +937,8 @@ if __name__ == '__main__':
     hkmeans = HMRFKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
                          max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5,
                          w_violations=np.random.uniform(1.0, 1.0, size=(1500, 1500)),
-                         d_params=np.random.uniform(0.9, 1.7, size=test_dims), norm_part=False)
+                         d_params=np.random.uniform(0.9, 1.7, size=test_dims), norm_part=False,
+                         globj='non-normed')
     res = hkmeans.fit(x_data_2d_arr)
 
     for mu_idx, neib_idxs in enumerate(res[1]):
