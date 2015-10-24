@@ -208,44 +208,44 @@ class HMRFKmeans(object):
         print "In ICM..."
         change_cnt = 0
         no_change_cnt = 0
-        while no_change_cnt < 2:
-            change_cnt += 1
-            print change_cnt
-            # Calculating the new Clusters.
-            for x_idx in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]):
+        # while no_change_cnt < 2:
+        #     change_cnt += 1
+        #     print change_cnt
+        #     # Calculating the new Clusters.
+        for x_idx in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]):
 
-                # Setting the initial value for the previews J-Objective value.
-                last_jobj = np.Inf
+            # Setting the initial value for the previews J-Objective value.
+            last_jobj = np.Inf
 
-                # Calculating the J-Objective for every x_i vector of the x_data set.
-                for i, (mu, clstr_idxs_set) in enumerate(zip(mu_lst, clstr_idxs_sets_lst)):
+            # Calculating the J-Objective for every x_i vector of the x_data set.
+            for i, (mu, clstr_idxs_set) in enumerate(zip(mu_lst, clstr_idxs_sets_lst)):
 
-                    # Calculating the J-Objective.
-                    j_obj = np.round(self.JObjCosA(x_idx, x_data, mu, clstr_idxs_set), 3)
+                # Calculating the J-Objective.
+                j_obj = np.round(self.JObjCosA(x_idx, x_data, mu, clstr_idxs_set), 3)
 
-                    if j_obj < last_jobj:
-                        last_jobj = j_obj
-                        mu_neib_idx = i
+                if j_obj < last_jobj:
+                    last_jobj = j_obj
+                    mu_neib_idx = i
 
-                # Re-assinging the x_i vector to the new cluster if not already.
-                if x_idx not in clstr_idxs_sets_lst[mu_neib_idx]:
+            # Re-assinging the x_i vector to the new cluster if not already.
+            if x_idx not in clstr_idxs_sets_lst[mu_neib_idx]:
 
-                    # Remove x form all Clusters.
-                    for clstr_idxs_set in clstr_idxs_sets_lst:
-                        clstr_idxs_set.discard(x_idx)
-                        # clstr_idxs_sets_lst[midx].discard(x_idx)
+                # Remove x form all Clusters.
+                for clstr_idxs_set in clstr_idxs_sets_lst:
+                    clstr_idxs_set.discard(x_idx)
+                    # clstr_idxs_sets_lst[midx].discard(x_idx)
 
-                    clstr_idxs_sets_lst[mu_neib_idx].add(x_idx)
+                clstr_idxs_sets_lst[mu_neib_idx].add(x_idx)
 
-                    no_change = False
+                no_change = False
 
-                else:
-                    no_change = True
+            else:
+                no_change = True
 
-            # Counting Non-Changes, i.e. if no change happens for two (2) iteration the...
-            # ...re-assingment process stops.
-            if no_change:
-                no_change_cnt += 1
+        #     # Counting Non-Changes, i.e. if no change happens for two (2) iteration the...
+        #     # ...re-assingment process stops.
+        #     if no_change:
+        #         no_change_cnt += 1
 
         # Returning clstr_idxs_sets_lst.
         return clstr_idxs_sets_lst
@@ -362,8 +362,6 @@ class HMRFKmeans(object):
                 The logarithmic value of the partition normalization function.
 
         """
-
-        print "In NormPart..."
 
         # Calculating the r.
         # The r it suppose to be the norm of the data points of the current cluster, not the...

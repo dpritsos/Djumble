@@ -41,10 +41,10 @@ class HMRFKmeans(object):
     """
 
     def __init__(self, k_clusters, must_lnk, cannot_lnk, init_centroids=None, max_iter=300,
-                 cvg=0.001, lrn_rate=0.003, ray_sigma=0.5, w_violations=None, d_params=None,
+                 cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5, w_violations=None, d_params=None,
                  norm_part=False, globj='non-normed'):
 
-        self.k_cltrs = k_clusters
+        self.k_clusters = k_clusters
         self.must_lnk = must_lnk
         self.cannot_lnk = cannot_lnk
         self.init_centroids = init_centroids
@@ -119,8 +119,8 @@ class HMRFKmeans(object):
             # ######### This might actually change based on the initialization above.
 
             # Pick k random vector from the x_data set as initial centroids. Where k is equals...
-            # ...the number of self.k_cltrs.
-            k_rand_idx = np.random.randint(0, self.k_cltrs, size=x_data.shape[0])
+            # ...the number of self.k_clusters.
+            k_rand_idx = np.random.randint(0, self.k_clusters, size=x_data.shape[0])
             init_clstr_sets_lst.extend([set(idx) for idx in k_rand_idx])
 
         # Calculating the initial Centroids of the assumed hyper-shperical clusters.
@@ -167,9 +167,24 @@ class HMRFKmeans(object):
 
             print "Global Objective", glob_jobj
 
-        # Returning the Centroids, Clusters/Neighbourhoods, distortion parameters,
-        # constraint violations matrix.
-        return mu_lst, clstr_idxs_set_lst, self.A.data
+        # Storing the amount of iterations until convergence.
+        self.conv_step = conv_step
+
+        # Returning the Centroids and the Clusters,i.e. the set of indeces for each cluster.
+        return mu_lst, clstr_idxs_set_lst
+
+    def get_params(self):
+        return {
+            'k_clusters': self.k_clusters,
+            'max_iter': self.max_iter,
+            'final_iter': self.conv_step,
+            'convg_diff': self.cvg,
+            'lrn_rate': self.lrn_rate,
+            'ray_sigma': self.ray_sigma,
+            'w_violations': self.w_violations,
+            'dist_msur_params': self.A,
+            'norm_part': self.norm_part
+        }
 
     def ICM(self, x_data, mu_lst, clstr_idxs_sets_lst):
         """ ICM: Iterated Conditional Modes (for the E-Step).
@@ -189,44 +204,48 @@ class HMRFKmeans(object):
                     row indices for the vectors belonging to each cluster.
 
         """
+
+        print "In ICM..."
+        change_cnt = 0
         no_change_cnt = 0
-        while no_change_cnt < 2:
+        # while no_change_cnt < 2:
+        #     change_cnt += 1
+        #     print change_cnt
+        #     # Calculating the new Clusters.
+        for x_idx in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]):
 
-            # Calculating the new Clusters.
-            for x_idx in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]):
+            # Setting the initial value for the previews J-Objective value.
+            last_jobj = np.Inf
 
-                # Setting the initial value for the previews J-Objective value.
-                last_jobj = np.Inf
+            # Calculating the J-Objective for every x_i vector of the x_data set.
+            for i, (mu, clstr_idxs_set) in enumerate(zip(mu_lst, clstr_idxs_sets_lst)):
 
-                # Calculating the J-Objective for every x_i vector of the x_data set.
-                for i, (mu, clstr_idxs_set) in enumerate(zip(mu_lst, clstr_idxs_sets_lst)):
+                # Calculating the J-Objective.
+                j_obj = np.round(self.JObjCosA(x_idx, x_data, mu, clstr_idxs_set), 3)
 
-                    # Calculating the J-Objective.
-                    j_obj = self.JObjCosA(x_idx, x_data, mu, clstr_idxs_set)
+                if j_obj < last_jobj:
+                    last_jobj = j_obj
+                    mu_neib_idx = i
 
-                    if j_obj < last_jobj:
-                        last_jobj = j_obj
-                        mu_neib_idx = i
+            # Re-assinging the x_i vector to the new cluster if not already.
+            if x_idx not in clstr_idxs_sets_lst[mu_neib_idx]:
 
-                # Re-assinging the x_i vector to the new cluster if not already.
-                if x_idx not in clstr_idxs_sets_lst[mu_neib_idx]:
+                # Remove x form all Clusters.
+                for clstr_idxs_set in clstr_idxs_sets_lst:
+                    clstr_idxs_set.discard(x_idx)
+                    # clstr_idxs_sets_lst[midx].discard(x_idx)
 
-                    # Remove x form all Clusters.
-                    for clstr_idxs_set in clstr_idxs_sets_lst:
-                        clstr_idxs_set.discard(x_idx)
-                        # clstr_idxs_sets_lst[midx].discard(x_idx)
+                clstr_idxs_sets_lst[mu_neib_idx].add(x_idx)
 
-                    clstr_idxs_sets_lst[mu_neib_idx].add(x_idx)
+                no_change = False
 
-                    no_change = False
+            else:
+                no_change = True
 
-                else:
-                    no_change = True
-
-            # Counting Non-Changes, i.e. if no change happens for two (2) iteration the...
-            # ...re-assingment process stops.
-            if no_change:
-                no_change_cnt += 1
+        #     # Counting Non-Changes, i.e. if no change happens for two (2) iteration the...
+        #     # ...re-assingment process stops.
+        #     if no_change:
+        #         no_change_cnt += 1
 
         # Returning clstr_idxs_sets_lst.
         return clstr_idxs_sets_lst
@@ -248,8 +267,15 @@ class HMRFKmeans(object):
         """
 
         # Converting vectors x1 and x2 to 1D matrices.
-        x1 = sp.matrix(x1)
-        x2 = sp.matrix(x2)
+        if sp.sparse.issparse(x1):
+            x1 = sp.matrix(x1.todense())
+        else:
+            x1 = sp.matrix(x1)
+
+        if sp.sparse.issparse(x2):
+            x2 = sp.matrix(x2.todense())
+        else:
+            x2 = sp.matrix(x2)
 
         # Calculating and returning the parameterized cosine distance.
         return 1 - (x1 * self.A * x2.T /
@@ -271,11 +297,13 @@ class HMRFKmeans(object):
 
         """
 
+        print "In MeanCosA..."
+
         mu_lst = list()
         for clstr_ilst in clstr_idxs_lsts:
 
             # Summing up all the X data points for the current cluster.
-            xi_sum = np.sum(x_data[list(clstr_ilst), :], axis=0)
+            xi_sum = x_data[list(clstr_ilst), :].sum(axis=0)
             xi_sum = sp.matrix(xi_sum)
 
             # Calculating denominator ||Σ xi||(A)
@@ -381,7 +409,7 @@ class HMRFKmeans(object):
         # Still this need to be revised.
         return (np.log(cdk) + np.log(k)) * x_data_subset.shape[0]
 
-    def JObjCosA(self, x_idx, x_data, mu, clstr_idxs_set):
+    def JObjCosA(self, x_idx, x_data, mu, clstr_tags_arr):
         """ JObjCosA: J-Objective function for parametrized Cosine Distortion Measure. It cannot
             be very generic because the gradient decent (partial derivative) calculations should be
             applied, they are totally dependent on the distortion measure (here is Cosine Distance).
@@ -403,6 +431,7 @@ class HMRFKmeans(object):
                 Returning the J-Objective values for the specific x_i in the specific cluster.
 
         """
+        # clstr_idxs_set
 
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
         dist = self.CosDistA(x_data[x_idx, :], mu)
@@ -447,12 +476,17 @@ class HMRFKmeans(object):
         else:
             norm_part_value = 0.0
 
+        # print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
+        # print "Params are: ", self.A
+
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
 
     def GlobJObjCosA(self, x_data, mu_lst, clstr_idxs_set_lst):
         """
         """
+
+        print "In GlobalJObjCosA..."
 
         sum_d = 0.0
         for mu, clstr_idxs in zip(mu_lst, clstr_idxs_set_lst):
@@ -536,6 +570,8 @@ class HMRFKmeans(object):
                 redundant step just for coding constancy reasons.
 
         """
+
+        print "In UpdateDistorParams..."
 
         # Updating every parameter's value one-by-one.
         for a_idx, a in enumerate(A.data):
@@ -625,8 +661,18 @@ class HMRFKmeans(object):
         """
 
         # A = sp.diag(distor_params)
-        x1 = sp.matrix(x1)
-        x2 = sp.matrix(x2)
+        # x1 = sp.matrix(x1)
+        # x2 = sp.matrix(x2)
+
+        if sp.sparse.issparse(x1):
+            x1 = sp.matrix(x1.todense())
+        else:
+            x1 = sp.matrix(x1)
+
+        if sp.sparse.issparse(x2):
+            x2 = sp.matrix(x2.todense())
+        else:
+            x2 = sp.matrix(x2)
 
         # Calculating parametrized Norms ||Σ xi||(A)
         x1_pnorm = np.sqrt(np.abs(x1 * A * x1.T))
@@ -792,7 +838,7 @@ def CosDist(x1, x2):
 
 if __name__ == '__main__':
 
-    test_dims = 100
+    test_dims = 10
 
     print "Creating Sample"
     x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 0.6, size=(1, test_dims)), scale=1, size=(500, test_dims))
@@ -890,8 +936,9 @@ if __name__ == '__main__':
     hkmeans = HMRFKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
                          max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5,
                          w_violations=np.random.uniform(1.0, 1.0, size=(1500, 1500)),
-                         d_params=np.random.uniform(0.9, 1.7, size=test_dims), norm_part=False)
-    res = hkmeans.Fit(x_data_2d_arr)
+                         d_params=np.random.uniform(0.9, 1.7, size=test_dims), norm_part=False,
+                         globj='non-normed')
+    res = hkmeans.fit(x_data_2d_arr)
 
     for mu_idx, neib_idxs in enumerate(res[1]):
         # print res[0][mu_idx][:, 0], res[0][mu_idx][:, 1]
