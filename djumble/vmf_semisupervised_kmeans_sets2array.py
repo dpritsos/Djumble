@@ -438,6 +438,16 @@ class HMRFKmeans(object):
 
         # Calculating Must-Link violation cost.
         ml_cost = 0.0
+
+        # Getting the must-link (if any) for this index (i.e. data sample).
+        mst_lnk_idxs = np.where(self.ml_cl_cons[x_idx] == 1)
+
+        # Getting the indeces of the whole cluster where this x_idx (i.e. data point) belongs into.
+        clstr_idxs = np.where(clstr_tgs_arr == clstr_tgs_arr[x_idx])
+
+        # Getting the indeces of must-link than are not in the cluster as they should have been.
+        viol_idxs = mst_lnk_idxs[~np.in1d(mst_lnk_idxs, clstr_idxs)]
+
         for x_cons in self.must_lnk:
 
             if x_idx in x_cons:
