@@ -434,6 +434,7 @@ class HMRFKmeans(object):
         # clstr_idxs_set
 
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
+        # --------------------------------------------------------------------------------
         dist = np.dot(mu, x_data[x_idx, :].T)
 
         # Getting the indeces of the whole cluster where this x_idx (i.e. data point) belongs into.
@@ -452,10 +453,10 @@ class HMRFKmeans(object):
             viol_idxs = mst_lnk_idxs[~np.in1d(mst_lnk_idxs, clstr_idxs)]
 
             # Calculating all pairs of violation costs for must-link constraints.
-            # NOTE: The violation cost is equivalent to the parametrized Cosine similarity which...
-            # ...here is equivalent to the Dot-product because the data points assumed to be..
-            # ...normalized by the parametrized Norm of the vectors (i.e. the data points).
-            viol_costs = np.dot(x_data[x_idx], x_data[viol_idxs].T)
+            # NOTE: The violation cost is equivalent to the parametrized Cosine distance which...
+            # ...here is equivalent to the (1 - dot product) because the data points assumed to...
+            # ...be normalized by the parametrized Norm of the vectors.
+            viol_costs = 1 - np.dot(x_data[x_idx], x_data[viol_idxs].T)
 
             # Sum-ing up Weighted violations costs.
             ml_cost = np.sum(self.w_violations[x_idx, viol_idxs]*viol_costs)
@@ -479,9 +480,11 @@ class HMRFKmeans(object):
 
             # Calculating all pairs of violation costs for cannot-link constraints.
             # NOTE: The violation cost is equivalent to the maxCosine distance minus the...
-            # ...parametrized Cosine similarity of the vectors. Again the data points assumed...
-            # ...to be normalized.
-            viol_costs = np.ones_like(viol_costs) - viol_costs
+            # ...parametrized Cosine distance of the vectors. Since MaxCosine is 1 then...
+            # ...maxCosineDistance - CosineDistance == CosineSimilarty of the vectors....
+            # ...Again the data points assumed to be normalized.
+            viol_costs = np.dot(x_data[x_idx], x_data[viol_idxs].T)
+            # viol_costs = np.ones_like(viol_costs) - viol_costs
 
             # Sum-ing up Weighted violations costs.
             cl_cost = np.sum(self.w_violations[x_idx, viol_idxs]*viol_costs)
@@ -516,52 +519,82 @@ class HMRFKmeans(object):
 
         print "In GlobalJObjCosA..."
 
-        # Calculating the distance of all vectors in a cluster by their centroid.
-        sum_d = 0.0
+        # Getting all the must-link (if any) indeces.
+        mst_lnk_idxs = np.where(self.ml_cl_cons[x_idx] == 1)
+
+        # Getting all the cannot-link (if any) indeces.
+        cnt_lnk_idxs = np.where(self.ml_cl_cons[x_idx] == -1)
+
+        # Calculating the distance of all vectors, the must-link and cannot-link violations scores.
+        sum_d, ml_cost, cl_cost = 0.0, 0.0, 0.0
+
         for i, mu in enumerate(mu_arr):
 
             # Getting the indeces for the i cluster.
             clstr_idxs = np.where(clstr_tags_arr == i)[0]
 
             # Calculating the cosine distances and add the to the total sum of distances.
+            # ---------------------------------------------------------------------------
             sum_d += np.sum(np.dot(mu, x_data[clstr_idxs]))
 
-        # Calculating Must-Link violation cost.
-        ml_cost = 0.0
+            # Calculating Must-Link violation cost.
+            # -------------------------------------
+            if mst_lnk_idxs:
 
-        # Getting all the must-link (if any) indeces.
-        mst_lnk_idxs = np.where(self.ml_cl_cons[x_idx] == 1)[0]
+                # Getting the must-link left side of the pair constraints, i.e. the row indeces...
+                # ...of the constraints matrix that are in the cluster's set of indeces.
+                in_clstr_ml_rows = np.in1d(mst_lnk_idxs[0], clstr_idxs)
 
-        if 
-        # Getting the indeces of must-link than are not in the cluster as they should have been.
-        viol_idxs = mst_lnk_idxs[~np.in1d(mst_lnk_idxs, clstr_idxs)]
+                # Getting the indeces of must-link than are not in the cluster as they should...
+                # ...have been.
+                viol_idxs = mst_lnk_idxs[~np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs)]
 
+                # Calculating all pairs of violation costs for must-link constraints.
+                # NOTE: The violation cost is equivalent to the maxCosine distance
+                viol_costs = 1 - np.dot(
+                    x_data[mst_lnk_idxs[0][in_clstr_ml_rows]],
+                    x_data[viol_idxs].T
+                )
 
+                # Sum-ing up Weighted violations costs. NOTE: Here the matrix multiply should be...
+                # ...element-by-element.
+                ml_cost += np.sum(
+                    self.w_violations[mst_lnk_idxs[0][in_clstr_ml_rows], viol_idxs] *
+                    np.tril(
+                        viol_costs,
+                        -1
+                    )
+                )
 
+            # Calculating Cannot-Link violation cost.
+            # ---------------------------------------
+            if cnt_lnk_idxs:
 
-        for clstr_idxs_set in clstr_idxs_set_lst:
+                # Getting the cannot-link left side of the pair constraints, i.e. the row indeces...
+                # ...of the constraints matrix that are in the cluster's set of indeces.
+                in_clstr_ml_rows = np.in1d(mst_lnk_idxs[0], clstr_idxs)
 
-            for x_cons in self.must_lnk:
+                # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
+                # ...have been.
+                viol_idxs = mst_lnk_idxs[np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs)]
 
-                if not (x_cons <= clstr_idxs_set):
+                # Calculating all pairs of violation costs for cannot-link constraints.
+                # NOTE: The violation cost is equivalent to the maxCosine distance
+                viol_costs = np.dot(
+                    x_data[mst_lnk_idxs[0][in_clstr_ml_rows]],
+                    x_data[viol_idxs].T
+                )
 
-                    x = list(x_cons)
-
-                    ml_cost += self.w_violations[x[0], x[1]] *\
-                        self.CosDistA(x_data[x[0], :], x_data[x[1], :])
-
-        # Calculating Cannot-Link violation cost.
-        cl_cost = 0.0
-        for clstr_idxs_set in clstr_idxs_set_lst:
-
-            for x_cons in self.cannot_lnk:
-
-                if x_cons <= clstr_idxs_set:
-
-                    x = list(x_cons)
-
-                    cl_cost += self.w_violations[x[0], x[1]] *\
-                        (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
+                # Sum-ing up Weighted violations costs. NOTE: Here the matrix multiply should be...
+                # ...element-by-element. NOTE#2: We are getting only the lower triangle because...
+                # ...we need the cosine distance of the constraints pairs only ones.
+                ml_cost += np.sum(
+                    self.w_violations[mst_lnk_idxs[0][in_clstr_ml_rows], viol_idxs] *
+                    np.tril(
+                        viol_costs,
+                        -1
+                    )
+                )
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
         if self.globj:
@@ -592,7 +625,7 @@ class HMRFKmeans(object):
         # ...vMF-Mixture set-up.
         return sum_d + ml_cost + cl_cost - params_pdf + norm_part_value
 
-    def UpdateDistorParams(self, A, x_data, mu_lst, clstr_idxs_lst):
+    def UpdateDistorParams(self, A, x_data, x_data, mu_arr, clstr_tags_arr):
         """ Update Distortion Parameters: This function is updating the whole set of the distortion
             parameters. In particular the parameters for the Cosine Distance in this implementation
             of the HMRF Kmeans.

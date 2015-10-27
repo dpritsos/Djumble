@@ -577,9 +577,9 @@ class HMRFKmeans(object):
 
             # Calculating Partial Derivative of D(xi, mu).
             xm_pderiv = 0.0
-            for mu, neib_idxs in zip(mu_lst, clstr_idxs_lst):
-                for x_neib_idx in neib_idxs:
-                    xm_pderiv += (self.PartialDerivative(a_idx, x_data[x_neib_idx], mu, A))
+            for mu, clstr_idxs in zip(mu_lst, clstr_idxs_lst):
+                for x_clstr_idx in clstr_idxs:
+                    xm_pderiv += (self.PartialDerivative(a_idx, x_data[x_clstr_idx], mu, A))
             # print "Partial Distance", xm_pderiv
 
             # [idx for neib in clstr_idxs_lst for idx in neib]
@@ -939,13 +939,13 @@ if __name__ == '__main__':
                          globj='non-normed')
     res = hkmeans.fit(x_data_2d_arr)
 
-    for mu_idx, neib_idxs in enumerate(res[1]):
+    for mu_idx, clstr_idxs in enumerate(res[1]):
         # print res[0][mu_idx][:, 0], res[0][mu_idx][:, 1]
         # plt.plot(res[0][mu_idx][:, 0], res[0][mu_idx][:, 1], '*', markersize=30)
         #  if mu_idx == 2:
         #    break
-        print mu_idx+1, len(neib_idxs), np.sort(neib_idxs)
-        for xy in x_data_2d_arr[list(neib_idxs)]:
+        print mu_idx+1, len(clstr_idxs), np.sort(clstr_idxs)
+        for xy in x_data_2d_arr[list(clstr_idxs)]:
             plt.text(xy[0], xy[1], str(mu_idx+1), color='red', fontsize=15)
         # plt.plot(x_data_2d_arr2, '^')
         # plt.plot(x_data_2d_arr3, '>')
