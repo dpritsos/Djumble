@@ -7,6 +7,7 @@ import scipy.stats as sps
 import random as rnd
 import matplotlib.pyplot as plt
 import scipy.special as special
+import multiprocessing as mp
 
 
 class HMRFKmeans(object):
@@ -40,13 +41,14 @@ class HMRFKmeans(object):
 
     """
 
-    def __init__(self, k_clusters, must_lnk, cannot_lnk, init_centroids=None, max_iter=300,
+    def __init__(self, k_clusters, ml_cl_cons, init_centroids=None, max_iter=300,
                  cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5, w_violations=None, d_params=None,
                  norm_part=False, globj='non-normed'):
 
+        self._pool = mp.Pool(mp.cpu_count*2)
+
         self.k_clusters = k_clusters
-        self.must_lnk = must_lnk
-        self.cannot_lnk = cannot_lnk
+        self.ml_cl_cons = must_lnk
         self.init_centroids = init_centroids
         self.max_iter = max_iter
         self.cvg = cvg
@@ -100,31 +102,47 @@ class HMRFKmeans(object):
         # Setting up the violation weights matrix if not have been passed as class argument.
         if self.w_violations is None:
             self.w_violations = np.random.uniform(0.9, 0.9, size=(x_data.shape[0], x_data.shape[0]))
-        # ### I am not sure what kind of values this weights should actually have.
+            # ### I am not sure what kind of values this weights should actually have.
+
+        # Converting the weights violation matrix into a sparse matrix.
+        non_zero = np.where(self.ml_cl_cons != 0, 1, 0)
+        self.w_violations = sp.sparse.csr_matrix(np.multiply(self.w_violations, non_zero))
 
         # Deriving initial centroids lists from the must-link an cannot-link constraints.
         # Not ready yet...
-        # init_clstr_sets_lst = FarFirstCosntraint(x_data, k_clusters, self.must_lnk,
-        #                                           self.cannot_lnk, dmeasure_noparam)
-        # init_clstr_sets_lst = ConsolidateAL(neibs_sets, x_data,
-        #                                      self.must_lnk, dmeasure_noparam)
-        init_clstr_sets_lst = list()
+        # init_clstr_sets_lst = FarFirstCosntraint()
+        # init_clstr_sets_lst = ConsolidateAL()
+        init_clstr_tags_arr = np.empty(x_data.shape[0], dtype=np.int)
+        init_clstr_tags_arr[:] = np.Inf
 
-        # If initial centroids arguments has been passed.
-        if self.init_centroids:
-            init_clstr_sets_lst.extend(self.init_centroids)
-            # ### Maybe this should be changed to a numpy vector of indices.
-        else:
-
-            # ######### This might actually change based on the initialization above.
-
+        # Selecting a random set of centroids if not any given as class initialization argument.
+        if not self.init_centroids:
             # Pick k random vector from the x_data set as initial centroids. Where k is equals...
             # ...the number of self.k_clusters.
-            k_rand_idx = np.random.randint(0, self.k_clusters, size=x_data.shape[0])
-            init_clstr_sets_lst.extend([set(idx) for idx in k_rand_idx])
+            self.init_centroids = np.random.randint(0, self.k_clusters, size=x_data.shape[0])
+
+        # Setting one index of the x_data set per expected cluster as the initialization centroid...
+        # ...for this cluster.
+        for i, idx in enumerate(self.init_centroids):
+            clstr_tags_arr[idx] = i
+
+        # ########
+        # # The above might actually change based on the initialization set-up will be used.
+        # ########
+
+        # NOTE: Initially normalizing the samples under the distortion parameters values in...
+        # ...order to reducing the cosine distance calculation to a simple dot products...
+        # ...calculation in the rest of the EM (sub)steps.
+        x_data = np.divide(
+            x_data,
+            sqrt(
+                np.diag(np.dot(np.dot(x_data, self.A), x_data.T)),
+                dtype=np.float
+            ).reshape(xdata.shape[0], 1)
+        )
 
         # Calculating the initial Centroids of the assumed hyper-shperical clusters.
-        mu_lst = self.MeanCosA(x_data, init_clstr_sets_lst)
+        mu_arr = self.MeanCosA(x_data, clstr_tags_arr)
 
         # EM algorithm execution.
 
@@ -142,21 +160,32 @@ class HMRFKmeans(object):
 
             # Assigning every data-set point to the proper cluster upon distortion parameters...
             # ...and centroids for the current iteration.
-            clstr_idxs_set_lst = self.ICM(x_data, mu_lst, init_clstr_sets_lst)
+            clstr_tgs_arr = self.ICM(x_data, mu_arr, clstr_tags_arr)
 
             # The M-Step.
 
             # Recalculating centroids upon the new clusters set-up.
-            mu_lst = self.MeanCosA(x_data, clstr_idxs_set_lst)
+            mu_arr = self.MeanCosA(x_data, clstr_tgs_arr)
             # print mu_lst
 
             # Re-estimating distortion measure parameters upon the new clusters set-up.
-            self.A = self.UpdateDistorParams(self.A, x_data, mu_lst, clstr_idxs_set_lst)
+            self.A = self.UpdateDistorParams(self.A, x_data, mu_arr, clstr_tags_arr)
+
+            # NOTE: Normalizing the samples under the new parameters values in order to reducing...
+            # ...the cosine distance calculation to a simple dot products calculation in the...
+            # ...rest of the EM (sub)steps.
+            x_data = np.divide(
+                x_data,
+                sqrt(
+                    np.diag(np.dot(np.dot(x_data, self.A), x_data.T)),
+                    dtype=np.float
+                ).reshape(xdata.shape[0], 1)
+            )
 
             # Calculating Global JObjective function.
             glob_jobj = self.GlobJObjCosA(x_data, mu_lst, clstr_idxs_set_lst)
 
-            # Terminating upon difference of the last two Global JObej values.
+            # Terminating upon the difference of the last two Global JObej values.
             if np.abs(last_gobj - glob_jobj) < self.cvg or glob_jobj < self.cvg:
                 # second condition is TEMP!
                 print 'last_gobj - glob_jobj', last_gobj - glob_jobj
@@ -171,7 +200,7 @@ class HMRFKmeans(object):
         self.conv_step = conv_step
 
         # Returning the Centroids and the Clusters,i.e. the set of indeces for each cluster.
-        return mu_lst, clstr_idxs_set_lst
+        return mu_arr, clstr_tags_arr
 
     def get_params(self):
         return {
@@ -186,7 +215,7 @@ class HMRFKmeans(object):
             'norm_part': self.norm_part
         }
 
-    def ICM(self, x_data, mu_lst, clstr_idxs_sets_lst):
+    def ICM(self, x_data, mu_arr, clstr_tags_arr):
         """ ICM: Iterated Conditional Modes (for the E-Step).
             After all points are assigned, they are randomly re-ordered, and the assignment process
             is repeated. This process proceeds until no point changes its cluster assignment
@@ -206,83 +235,49 @@ class HMRFKmeans(object):
         """
 
         print "In ICM..."
-        change_cnt = 0
+
         no_change_cnt = 0
-        # while no_change_cnt < 2:
-        #     change_cnt += 1
-        #     print change_cnt
-        #     # Calculating the new Clusters.
-        for x_idx in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]):
+        while no_change_cnt < 2:
 
-            # Setting the initial value for the previews J-Objective value.
-            last_jobj = np.Inf
+            # Calculating the new Clusters.
+            for x_idx in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]):
 
-            # Calculating the J-Objective for every x_i vector of the x_data set.
-            for i, (mu, clstr_idxs_set) in enumerate(zip(mu_lst, clstr_idxs_sets_lst)):
+                # Setting the initial value for the previews J-Objective value.
+                last_jobj = np.Inf
 
-                # Calculating the J-Objective.
-                j_obj = np.round(self.JObjCosA(x_idx, x_data, mu, clstr_idxs_set), 3)
+                # Calculating the J-Objective for every x_i vector of the x_data set.
+                for i, mu in enumerate(mu_arr):
 
-                if j_obj < last_jobj:
-                    last_jobj = j_obj
-                    mu_neib_idx = i
+                    # Getting the indeces for this cluster.
+                    clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
 
-            # Re-assinging the x_i vector to the new cluster if not already.
-            if x_idx not in clstr_idxs_sets_lst[mu_neib_idx]:
+                    # Calculating the J-Objective.
+                    j_obj = np.round(self.JObjCosA(x_idx, x_data, mu, clstr_idxs_arr), 3)
 
-                # Remove x form all Clusters.
-                for clstr_idxs_set in clstr_idxs_sets_lst:
-                    clstr_idxs_set.discard(x_idx)
-                    # clstr_idxs_sets_lst[midx].discard(x_idx)
+                    if j_obj < last_jobj:
+                        last_jobj = j_obj
+                        new_clstr_idx = i
 
-                clstr_idxs_sets_lst[mu_neib_idx].add(x_idx)
+                # Checking if the cluster where the data-point belongs into has been changed.
+                if clstr_tags_arr[x_idx] != new_clstr_idx:
 
-                no_change = False
+                    no_change = False
 
-            else:
-                no_change = True
+                    # Re-assinging the x_i vector to the new cluster if not already.
+                    clstr_tags_arr[x_idx] = new_clstr_idx
 
-        #     # Counting Non-Changes, i.e. if no change happens for two (2) iteration the...
-        #     # ...re-assingment process stops.
-        #     if no_change:
-        #         no_change_cnt += 1
+                else:
+                    no_change = True
 
-        # Returning clstr_idxs_sets_lst.
-        return clstr_idxs_sets_lst
+            # Counting Non-Changes, i.e. if no change happens for two (2) iteration the...
+            # ...re-assingment process stops.
+            if no_change:
+                no_change_cnt += 1
 
-    def CosDistA(self, x1, x2):
-        """ CosDistA: Cosine Distance with distortion parameters based on 'Soft Cosine Measure'
-            where a weighting schema is the distortion parameters diagonal matrix A. Note that
-            A matrix (diagonal) is expected as vector argument in this function.
+        # Returning clstr_tags_arr.
+        return clstr_tags_arr
 
-            Arguments
-            ---------
-                x1, x2: The numpy.array vectors, their (parameterized) cosine distance will
-                        be measured.
-
-            Output
-            ------
-                Returning the parameterized cosine distance between two vectors.
-
-        """
-
-        # Converting vectors x1 and x2 to 1D matrices.
-        if sp.sparse.issparse(x1):
-            x1 = sp.matrix(x1.todense())
-        else:
-            x1 = sp.matrix(x1)
-
-        if sp.sparse.issparse(x2):
-            x2 = sp.matrix(x2.todense())
-        else:
-            x2 = sp.matrix(x2)
-
-        # Calculating and returning the parameterized cosine distance.
-        return 1 - (x1 * self.A * x2.T /
-                    (np.sqrt(np.abs(x1 * self.A * x1.T)) * np.sqrt(np.abs(x2 * self.A * x2.T)))
-                    )
-
-    def MeanCosA(self, x_data, clstr_idxs_lsts):
+    def MeanCosA(self, x_data, clstr_tags_arr):
         """ MeanCosA method: It is calculating the centroids of the hyper-spherical clusters.
             Using the parametrized cosine mean as explained in the documentation.
 
@@ -300,48 +295,20 @@ class HMRFKmeans(object):
         print "In MeanCosA..."
 
         mu_lst = list()
-        for clstr_ilst in clstr_idxs_lsts:
+        for i in np.arange(self.k_clusters):
+
+            clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
 
             # Summing up all the X data points for the current cluster.
-            xi_sum = x_data[list(clstr_ilst), :].sum(axis=0)
-            xi_sum = sp.matrix(xi_sum)
+            xi_sum = x_data[clstr_idxs_arr, :].sum(axis=0)
 
             # Calculating denominator ||Σ xi||(A)
-            parametrized_norm_xi = np.sqrt(np.abs(xi_sum * self.A * xi_sum.T))
+            parametrized_norm_xi = np.sqrt(dot(dot(xi_sum. self.A), xi_sum.T))
 
             # Calculating the Centroid of the (assumed) hyper-sphear. Then appended to the mu list.
             mu_lst.append(xi_sum / parametrized_norm_xi)
 
-        return mu_lst
-
-    def Jd(self, d, x):
-        """ Naive Bessel function approximation of the first kind.
-
-            TESTING purpose only!
-
-        """
-
-        t = 0.9
-        conv = False
-
-        R = 1.0
-        t1 = np.power((x*np.exp(1.0))/(2.0*d), d)
-        t2 = 1 + (1.0/(12.0*d)) + (1/(288*np.power(d, 2.0))) - (139.0/(51840.0*np.power(d, 3.0)))
-        t1 = t1*np.sqrt((d/(2.0*np.pi))/t2)
-        M = 1.0/d
-        k = 1.0
-
-        while not conv:
-
-            R = R*((0.25*np.power(x, 2.0))/(k*(d+k)))
-            M = M + R
-
-            if R/M < t:
-                conv = True
-
-            k += 1
-
-        return t1*M
+        return np.array(mu_lst, dtype=np.float)
 
     def NormPart(self, x_data_subset):
         """ The von Mises and von Mises - Fisher Logarithmic Normalization partition function:...
@@ -409,7 +376,7 @@ class HMRFKmeans(object):
         # Still this need to be revised.
         return (np.log(cdk) + np.log(k)) * x_data_subset.shape[0]
 
-    def JObjCosA(self, x_idx, x_data, mu, clstr_tags_arr):
+    def JObjCosA(self, x_idx, x_data, mu, clstr_idx_arr):
         """ JObjCosA: J-Objective function for parametrized Cosine Distortion Measure. It cannot
             be very generic because the gradient decent (partial derivative) calculations should be
             applied, they are totally dependent on the distortion measure (here is Cosine Distance).
@@ -435,10 +402,7 @@ class HMRFKmeans(object):
 
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
         # --------------------------------------------------------------------------------
-        dist = np.dot(mu, x_data[x_idx, :].T)
-
-        # Getting the indeces of the whole cluster where this x_idx (i.e. data point) belongs into.
-        clstr_idxs = np.where(clstr_tgs_arr == clstr_tgs_arr[x_idx])
+        dist = np.dot(np.dot(mu, self.A), x_data[x_idx, :].T)
 
         # Calculating Must-Link violation cost.
         # -------------------------------------
@@ -450,13 +414,13 @@ class HMRFKmeans(object):
         if mst_lnk_idxs:
 
             # Getting the indeces of must-link than are not in the cluster as they should have been.
-            viol_idxs = mst_lnk_idxs[~np.in1d(mst_lnk_idxs, clstr_idxs)]
+            viol_idxs = mst_lnk_idxs[~np.in1d(mst_lnk_idxs, clstr_idx_arr)]
 
             # Calculating all pairs of violation costs for must-link constraints.
             # NOTE: The violation cost is equivalent to the parametrized Cosine distance which...
             # ...here is equivalent to the (1 - dot product) because the data points assumed to...
             # ...be normalized by the parametrized Norm of the vectors.
-            viol_costs = 1 - np.dot(x_data[x_idx], x_data[viol_idxs].T)
+            viol_costs = 1 - np.dot(np.dot(x_data[x_idx], self.A) x_data[viol_idxs].T)
 
             # Sum-ing up Weighted violations costs.
             ml_cost = np.sum(self.w_violations[x_idx, viol_idxs]*viol_costs)
@@ -476,14 +440,14 @@ class HMRFKmeans(object):
 
             # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
             # ...have been.
-            viol_idxs = cnt_lnk_idxs[np.in1d(cnt_lnk_idxs, clstr_idxs)]
+            viol_idxs = cnt_lnk_idxs[np.in1d(cnt_lnk_idxs, clstr_idx_arr)]
 
             # Calculating all pairs of violation costs for cannot-link constraints.
             # NOTE: The violation cost is equivalent to the maxCosine distance minus the...
             # ...parametrized Cosine distance of the vectors. Since MaxCosine is 1 then...
             # ...maxCosineDistance - CosineDistance == CosineSimilarty of the vectors....
             # ...Again the data points assumed to be normalized.
-            viol_costs = np.dot(x_data[x_idx], x_data[viol_idxs].T)
+            viol_costs = np.dot(np.dot(x_data[x_idx], self.A), x_data[viol_idxs].T)
             # viol_costs = np.ones_like(viol_costs) - viol_costs
 
             # Sum-ing up Weighted violations costs.
@@ -502,10 +466,9 @@ class HMRFKmeans(object):
 
         # Calculating the log normalization function of the von Mises-Fisher distribution...
         # ...NOTE: Only for this cluster i.e. this vMF of the whole PDF mixture.
+        norm_part_value = 0.0
         if self.norm_part:
-            norm_part_value = self.NormPart(x_data[list(clstr_idxs_set)])
-        else:
-            norm_part_value = 0.0
+            norm_part_value = self.NormPart(x_data[clstr_idx_arr])
 
         # print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
         # print "Params are: ", self.A
@@ -526,16 +489,16 @@ class HMRFKmeans(object):
         cnt_lnk_idxs = np.where(self.ml_cl_cons[x_idx] == -1)
 
         # Calculating the distance of all vectors, the must-link and cannot-link violations scores.
-        sum_d, ml_cost, cl_cost = 0.0, 0.0, 0.0
+        sum_d, ml_cost, cl_cost, norm_part_value, params_pdf = 0.0, 0.0, 0.0, 0.0, 0.0
 
         for i, mu in enumerate(mu_arr):
 
             # Getting the indeces for the i cluster.
-            clstr_idxs = np.where(clstr_tags_arr == i)[0]
+            clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
 
             # Calculating the cosine distances and add the to the total sum of distances.
             # ---------------------------------------------------------------------------
-            sum_d += np.sum(np.dot(mu, x_data[clstr_idxs]))
+            sum_d += np.sum(np.dot(np.dot(mu, self.A), x_data[clstr_idxs_arr]))
 
             # Calculating Must-Link violation cost.
             # -------------------------------------
@@ -543,16 +506,18 @@ class HMRFKmeans(object):
 
                 # Getting the must-link left side of the pair constraints, i.e. the row indeces...
                 # ...of the constraints matrix that are in the cluster's set of indeces.
-                in_clstr_ml_rows = np.in1d(mst_lnk_idxs[0], clstr_idxs)
+                in_clstr_ml_rows = np.in1d(mst_lnk_idxs[0], clstr_idxs_arr)
 
                 # Getting the indeces of must-link than are not in the cluster as they should...
                 # ...have been.
-                viol_idxs = mst_lnk_idxs[~np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs)]
+                viol_idxs = mst_lnk_idxs[
+                    ~np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs_arr)
+                ]
 
                 # Calculating all pairs of violation costs for must-link constraints.
                 # NOTE: The violation cost is equivalent to the maxCosine distance
                 viol_costs = 1 - np.dot(
-                    x_data[mst_lnk_idxs[0][in_clstr_ml_rows]],
+                    np.dot(x_data[mst_lnk_idxs[0][in_clstr_ml_rows]], self.A),
                     x_data[viol_idxs].T
                 )
 
@@ -572,16 +537,16 @@ class HMRFKmeans(object):
 
                 # Getting the cannot-link left side of the pair constraints, i.e. the row indeces...
                 # ...of the constraints matrix that are in the cluster's set of indeces.
-                in_clstr_ml_rows = np.in1d(mst_lnk_idxs[0], clstr_idxs)
+                in_clstr_ml_rows = np.in1d(mst_lnk_idxs[0], clstr_idxs_arr)
 
                 # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
                 # ...have been.
-                viol_idxs = mst_lnk_idxs[np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs)]
+                viol_idxs = mst_lnk_idxs[np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs_arr)]
 
                 # Calculating all pairs of violation costs for cannot-link constraints.
                 # NOTE: The violation cost is equivalent to the maxCosine distance
                 viol_costs = np.dot(
-                    x_data[mst_lnk_idxs[0][in_clstr_ml_rows]],
+                    np.dot(x_data[mst_lnk_idxs[0][in_clstr_ml_rows]], self.A),
                     x_data[viol_idxs].T
                 )
 
@@ -596,6 +561,11 @@ class HMRFKmeans(object):
                     )
                 )
 
+                # Calculating the log normalization function of the von Mises-Fisher...
+                # ...distribution of the whole mixture.
+                if self.norm_part and self.globj:
+                    norm_part_value += self.NormPart(x_data[clstr_idxs_arr])
+
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
         if self.globj:
             sum1, sum2 = 0.0, 0.0
@@ -603,17 +573,6 @@ class HMRFKmeans(object):
                 sum1 += np.log(a)
                 sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
             params_pdf = sum1 - sum2 - (2 * self.A.data.shape[0] * np.log(self.ray_sigma))
-        else:
-            params_pdf = 0.0
-
-        # Calculating the log normalization function of the von Mises-Fisher distribution...
-        # ...of the whole mixture.
-        if self.norm_part and self.globj:
-            norm_part_value = 0.0
-            for clstr_idxs_set in clstr_idxs_set_lst:
-                norm_part_value += self.NormPart(x_data[list(clstr_idxs_set)])
-        else:
-            norm_part_value = 0.0
 
         print 'dims', x_data.shape[1]
         print 'sum_d, ml_cost, cl_cost', sum_d, ml_cost, cl_cost
@@ -650,58 +609,116 @@ class HMRFKmeans(object):
 
         print "In UpdateDistorParams..."
 
-        # Updating every parameter's value one-by-one.
+        # Getting all the must-link (if any) indeces.
+        mst_lnk_idxs = np.where(self.ml_cl_cons[x_idx] == 1)
+
+        # Getting all the cannot-link (if any) indeces.
+        cnt_lnk_idxs = np.where(self.ml_cl_cons[x_idx] == -1)
+
+        # Initializing the lists where the partial derivative function results will be stored...
+        # ...in order to be calculated asynchronously and concretely.
+        xm_pderiv_lst, mlcost_pderiv_lst, clcost_pderiv_lst = list(), list(), list()
+
         for a_idx, a in enumerate(A.data):
 
-            # Calculating Partial Derivative of D(xi, mu).
-            xm_pderiv = 0.0
-            for mu, neib_idxs in zip(mu_lst, clstr_idxs_lst):
-                for x_neib_idx in neib_idxs:
-                    xm_pderiv += (self.PartialDerivative(a_idx, x_data[x_neib_idx], mu, A))
-            # print "Partial Distance", xm_pderiv
+            for i, mu in enumerate(mu_arr):
 
-            # [idx for neib in clstr_idxs_lst for idx in neib]
-            # Calculating the Partial Derivative of D(xi, xj) of Must-Link Constraints.
-            mlcost_pderiv = 0.0
-            for clstr_idxs_set in clstr_idxs_lst:
+                # Getting the indeces for the i cluster.
+                clstr_idxs = np.where(clstr_tags_arr == i)[0]
 
-                for x_cons in self.must_lnk:
+                # Calculating the partial derivatives of each parameter for all cluster's member...
+                # ...for each cluster. NOTE: The calculations dispatched to a process pull and...
+                # ...summed up at the end.
+                # ---------------------------------------------------------------------------------
+                for x_clstr_indx in clstr_idxs:
+                    xm_pderiv_lst.append(
+                        self._pool.apply_async(
+                            self.PartialDerivative,
+                            args=(a_idx, x_data[x_clstr_idx], mu, A)
+                        )
+                    )
 
-                    if not (x_cons <= clstr_idxs_set):
+                # Calculating Must-Link violation cost.
+                # -------------------------------------
+                if mst_lnk_idxs:
 
-                        x = list(x_cons)
+                    # Getting the must-link left side of the pair constraints, i.e. the row...
+                    # ...indeces of the constraints matrix that are in the cluster's set of...
+                    # ...indeces.
+                    in_clstr_ml_rows = np.in1d(mst_lnk_idxs[0], clstr_idxs)
 
-                        mlcost_pderiv += self.w_violations[x[0], x[1]] *\
-                            self.PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
-            # print "Partial Must-Link", mlcost_pderiv
+                    # Getting the indeces of must-link than are not in the cluster as they should...
+                    # ...have been.
+                    viol_idxs = mst_lnk_idxs[
+                        ~np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs)
+                    ]
 
-            # Calculating the Partial Derivative of D(xi, xj) of Cannot-Link Constraints.
-            clcost_pderiv = 0.0
-            for clstr_idxs_set in clstr_idxs_lst:
+                    # Calculating the partial derivatives of all pairs of violations for...
+                    # ...must-link constraints. NOTE: Calculation occur concurrently.
+                    for x in zip(mst_lnk_idxs[0][in_clstr_ml_rows], viol_idxs):
+                        mlcost_pderiv_lst.append(
+                            self._pool.apply_async(
+                                self.PartialDerivative,
+                                args=(a_idx, x_data[x[0], :], x_data[x[1], :], A)
+                            )
+                        )
 
-                for x_cons in self.cannot_lnk:
+                # Calculating Cannot-Link violation cost.
+                # ---------------------------------------
+                if cnt_lnk_idxs:
 
-                    if x_cons <= clstr_idxs_set:
+                    # Getting the cannot-link left side of the pair constraints, i.e. the row...
+                    # ...indeces of the constraints matrix that are in the cluster's set of indeces.
+                    in_clstr_ml_rows = np.in1d(mst_lnk_idxs[0], clstr_idxs)
 
-                        x = list(x_cons)
+                    # Getting the indeces of cannot-link than are in the cluster as they...
+                    # ...shouldn't have been.
+                    viol_idxs = mst_lnk_idxs[np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs)]
 
-                        # NOTE: The (Delta max(CosA) / Delta a) it is a constant according to the...
-                        # ...assuption that max(CosA) == 1 above (see documentation). However...
-                        # ...based on Chapelle et al. in the partial derivative a proper constant...
-                        # ...should be selected in order to keep the cannot-link constraints...
-                        # ...contribution positive. **Here it is just using the outcome of the...
-                        # ...partial derivative it self as to be equally weighted with the...
-                        # ...must-link constraints** OR NOT.
-                        cl_pd = self.PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
+                    # Calculating all pairs of violation costs for cannot-link constraints.
+                    # NOTE: The violation cost is equivalent to the maxCosine distance
+                    for x in zip(mst_lnk_idxs[0][in_clstr_ml_rows], viol_idxs):
+                        clcost_pderiv_lst.append(
+                            self._pool.apply_async(
+                                self.PartialDerivative,
+                                args=(a_idx, x_data[x[0], :], x_data[x[1], :], A)
+                            )
+                        )
 
-                        minus_max_clpd = 0.0
-                        if cl_pd < 0.0:
-                            minus_max_clpd = np.floor(cl_pd) - cl_pd
-                        elif cl_pd > 0.0:
-                            minus_max_clpd = np.ceil(cl_pd) - cl_pd
+        # Updating every parameter's value one-by-one.
 
-                        clcost_pderiv += self.w_violations[x[0], x[1]] * minus_max_clpd
+        # Summing up the partial derivatives for intra-clusters elements.
+        xm_pderiv = np.sum([xm.get() for xm in xm_pderiv_lst])
 
+        # Sum-ing up Weighted violations costs. NOTE: Here the matrix multiply should be...
+        # ...element-by-element.
+        for ml, x1_idx, x2_idx in zip(
+                mlcost_pderiv_lst, mst_lnk_idxs[0][in_clstr_ml_rows], viol_idxs):
+            mlcost_pderiv += -(self.w_violations[mst_lnk_idxs[0][in_clstr_ml_rows], viol_idxs] * ml)
+
+        # Sum-ing up Weighted violations costs. NOTE: Here the matrix multiply should be...
+        # ...element-by-element. NOTE#2: We are getting only the lower triangle because...
+        # ...we need the cosine distance of the constraints pairs only ones.
+        for ml, x1_idx, x2_idx in zip(
+                clcost_pderiv_lst, mst_lnk_idxs[0][in_clstr_cl_rows], viol_idxs):
+            clcost_pderiv += (self.w_violations[mst_lnk_idxs[0][in_clstr_cl_rows], viol_idxs] * cl)
+
+            # NOTE: The (Delta max(CosA) / Delta a) it is a constant according to the...
+            # ...assuption that max(CosA) == 1 above (see documentation). However...
+            # ...based on Chapelle et al. in the partial derivative a proper constant...
+            # ...should be selected in order to keep the cannot-link constraints...
+            # ...contribution positive. **Here it is just using the outcome of the...
+            # ...partial derivative it self as to be equally weighted with the...
+            # ...must-link constraints** OR NOT.
+
+            # ### cl_pd = self.PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
+            # minus_max_clpd = 0.0
+            # if cl_pd < 0.0:
+            #    minus_max_clpd = np.floor(cl_pd) - cl_pd
+            # elif cl_pd > 0.0:
+            #    minus_max_clpd = np.ceil(cl_pd) - cl_pd
+
+            #            clcost_pderiv += self.w_violations[x[0], x[1]] * minus_max_clpd
             # print "Partial Cannot-Link", clcost_pderiv
 
             # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
@@ -737,28 +754,14 @@ class HMRFKmeans(object):
 
         """
 
-        # A = sp.diag(distor_params)
-        # x1 = sp.matrix(x1)
-        # x2 = sp.matrix(x2)
-
-        if sp.sparse.issparse(x1):
-            x1 = sp.matrix(x1.todense())
-        else:
-            x1 = sp.matrix(x1)
-
-        if sp.sparse.issparse(x2):
-            x2 = sp.matrix(x2.todense())
-        else:
-            x2 = sp.matrix(x2)
-
         # Calculating parametrized Norms ||Σ xi||(A)
-        x1_pnorm = np.sqrt(np.abs(x1 * A * x1.T))
-        x2_pnorm = np.sqrt(np.abs(x2 * A * x2.T))
+        x1_pnorm = np.sqrt(dot(dot(x1, A), x1.reshape(x1.shape[0], 1)))
+        x2_pnorm = np.sqrt(dot(dot(x2, A), x1.reshape(x2.shape[0], 1)))
 
         res_a = (
                     (x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x2_pnorm) -
                     (
-                        x1 * A * x2.T *
+                        dot(dot(x1, A), x2.reshape(x2.shape[0], 1)) *
                         (
                             (
                                 np.square(x1[0, a_idx]) * np.square(x2_pnorm) +
@@ -879,38 +882,6 @@ class HMRFKmeans(object):
                             neibs_sets[neib_idx].append(rnd_idx)
 
         return neibs_sets
-
-
-# The following function most probably won't be needed.
-def FarFirstWeighted(x_data, k_clusters, must_lnk_con, cannnot_lnk_con, CosDist):
-    pass
-
-
-def MuCos(x_data, neibs_idxs_lsts):
-    mu_lst = list()
-    for neibs_idxlst in neibs_idxs_lsts:
-
-        xi_neib_sum = np.sum(x_data[neibs_idxlst, :], axis=0)
-        xi_neib_sum = sp.matrix(xi_neib_sum)
-
-        # Calculating denominator ||Σ xi||
-        parametrized_norm_xi = np.sqrt(np.abs(xi_neib_sum * xi_neib_sum.T))
-
-        mu_lst.append(xi_neib_sum / parametrized_norm_xi)
-
-    return mu_lst
-
-
-def CosDist(x1, x2):
-    """
-        Note: I the above function is equivalent if A is set to be the I identity matrix.
-
-    """
-
-    x1 = sp.matrix(x1)
-    x2 = sp.matrix(x2)
-
-    return x1 * x2.T / (np.sqrt(np.abs(x1 * x1.T)) * np.sqrt(np.abs(x2 * x2.T)))
 
 
 if __name__ == '__main__':

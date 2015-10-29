@@ -108,11 +108,11 @@ class HMRFKmeans(object):
         #                                           self.cannot_lnk, dmeasure_noparam)
         # init_clstr_sets_lst = ConsolidateAL(neibs_sets, x_data,
         #                                      self.must_lnk, dmeasure_noparam)
-        init_clstr_sets_lst = list()
+        clstr_idxs_set_lst = list()
 
         # If initial centroids arguments has been passed.
         if self.init_centroids:
-            init_clstr_sets_lst.extend(self.init_centroids)
+            clstr_idxs_set_lst.extend(self.init_centroids)
             # ### Maybe this should be changed to a numpy vector of indices.
         else:
 
@@ -121,10 +121,10 @@ class HMRFKmeans(object):
             # Pick k random vector from the x_data set as initial centroids. Where k is equals...
             # ...the number of self.k_clusters.
             k_rand_idx = np.random.randint(0, self.k_clusters, size=x_data.shape[0])
-            init_clstr_sets_lst.extend([set(idx) for idx in k_rand_idx])
+            clstr_idxs_set_lst.extend([set(idx) for idx in k_rand_idx])
 
         # Calculating the initial Centroids of the assumed hyper-shperical clusters.
-        mu_lst = self.MeanCosA(x_data, init_clstr_sets_lst)
+        mu_lst = self.MeanCosA(x_data, clstr_idxs_set_lst)
 
         # EM algorithm execution.
 
@@ -142,7 +142,7 @@ class HMRFKmeans(object):
 
             # Assigning every data-set point to the proper cluster upon distortion parameters...
             # ...and centroids for the current iteration.
-            clstr_idxs_set_lst = self.ICM(x_data, mu_lst, init_clstr_sets_lst)
+            clstr_idxs_set_lst = self.ICM(x_data, mu_lst, clstr_idxs_set_lst)
 
             # The M-Step.
 
@@ -206,46 +206,45 @@ class HMRFKmeans(object):
         """
 
         print "In ICM..."
-        change_cnt = 0
+
         no_change_cnt = 0
-        # while no_change_cnt < 2:
-        #     change_cnt += 1
-        #     print change_cnt
-        #     # Calculating the new Clusters.
-        for x_idx in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]):
+        while no_change_cnt < 2:
 
-            # Setting the initial value for the previews J-Objective value.
-            last_jobj = np.Inf
+            # Calculating the new Clusters.
+            for x_idx in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]):
 
-            # Calculating the J-Objective for every x_i vector of the x_data set.
-            for i, (mu, clstr_idxs_set) in enumerate(zip(mu_lst, clstr_idxs_sets_lst)):
+                # Setting the initial value for the previews J-Objective value.
+                last_jobj = np.Inf
 
-                # Calculating the J-Objective.
-                j_obj = np.round(self.JObjCosA(x_idx, x_data, mu, clstr_idxs_set), 3)
+                # Calculating the J-Objective for every x_i vector of the x_data set.
+                for i, (mu, clstr_idxs_set) in enumerate(zip(mu_lst, clstr_idxs_sets_lst)):
 
-                if j_obj < last_jobj:
-                    last_jobj = j_obj
-                    mu_neib_idx = i
+                    # Calculating the J-Objective.
+                    j_obj = np.round(self.JObjCosA(x_idx, x_data, mu, clstr_idxs_set), 3)
 
-            # Re-assinging the x_i vector to the new cluster if not already.
-            if x_idx not in clstr_idxs_sets_lst[mu_neib_idx]:
+                    if j_obj < last_jobj:
+                        last_jobj = j_obj
+                        mu_neib_idx = i
 
-                # Remove x form all Clusters.
-                for clstr_idxs_set in clstr_idxs_sets_lst:
-                    clstr_idxs_set.discard(x_idx)
-                    # clstr_idxs_sets_lst[midx].discard(x_idx)
+                # Re-assinging the x_i vector to the new cluster if not already.
+                if x_idx not in clstr_idxs_sets_lst[mu_neib_idx]:
 
-                clstr_idxs_sets_lst[mu_neib_idx].add(x_idx)
+                    # Remove x form all Clusters.
+                    for clstr_idxs_set in clstr_idxs_sets_lst:
+                        clstr_idxs_set.discard(x_idx)
+                        # clstr_idxs_sets_lst[midx].discard(x_idx)
 
-                no_change = False
+                    clstr_idxs_sets_lst[mu_neib_idx].add(x_idx)
 
-            else:
-                no_change = True
+                    no_change = False
 
-        #     # Counting Non-Changes, i.e. if no change happens for two (2) iteration the...
-        #     # ...re-assingment process stops.
-        #     if no_change:
-        #         no_change_cnt += 1
+                else:
+                    no_change = True
+
+            # Counting Non-Changes, i.e. if no change happens for two (2) iteration the...
+            # ...re-assingment process stops.
+            if no_change:
+                no_change_cnt += 1
 
         # Returning clstr_idxs_sets_lst.
         return clstr_idxs_sets_lst
