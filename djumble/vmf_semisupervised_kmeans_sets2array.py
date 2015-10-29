@@ -45,10 +45,10 @@ class HMRFKmeans(object):
                  cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5, w_violations=None, d_params=None,
                  norm_part=False, globj='non-normed'):
 
-        self._pool = mp.Pool(mp.cpu_count*2)
+        self._pool = mp.Pool(mp.cpu_count()*2)
 
         self.k_clusters = k_clusters
-        self.ml_cl_cons = must_lnk
+        self.ml_cl_cons = ml_cl_cons
         self.init_centroids = init_centroids
         self.max_iter = max_iter
         self.cvg = cvg
@@ -105,15 +105,15 @@ class HMRFKmeans(object):
             # ### I am not sure what kind of values this weights should actually have.
 
         # Converting the weights violation matrix into a sparse matrix.
-        non_zero = np.where(self.ml_cl_cons != 0, 1, 0)
+        non_zero = np.where(self.ml_cl_cons.toarray() != 0, 1, 0)
         self.w_violations = sp.sparse.csr_matrix(np.multiply(self.w_violations, non_zero))
 
         # Deriving initial centroids lists from the must-link an cannot-link constraints.
         # Not ready yet...
         # init_clstr_sets_lst = FarFirstCosntraint()
         # init_clstr_sets_lst = ConsolidateAL()
-        init_clstr_tags_arr = np.empty(x_data.shape[0], dtype=np.int)
-        init_clstr_tags_arr[:] = np.Inf
+        clstr_tags_arr = np.empty(x_data.shape[0], dtype=np.int)
+        clstr_tags_arr[:] = np.Inf
 
         # Selecting a random set of centroids if not any given as class initialization argument.
         if not self.init_centroids:
@@ -135,10 +135,10 @@ class HMRFKmeans(object):
         # ...calculation in the rest of the EM (sub)steps.
         x_data = np.divide(
             x_data,
-            sqrt(
-                np.diag(np.dot(np.dot(x_data, self.A), x_data.T)),
+            np.sqrt(
+                np.diag(np.dot(np.dot(x_data, self.A.toarray()), x_data.T)),
                 dtype=np.float
-            ).reshape(xdata.shape[0], 1)
+            ).reshape(x_data.shape[0], 1)
         )
 
         # Calculating the initial Centroids of the assumed hyper-shperical clusters.
@@ -176,10 +176,10 @@ class HMRFKmeans(object):
             # ...rest of the EM (sub)steps.
             x_data = np.divide(
                 x_data,
-                sqrt(
-                    np.diag(np.dot(np.dot(x_data, self.A), x_data.T)),
+                np.sqrt(
+                    np.diag(np.dot(np.dot(x_data, self.A.toarray()), x_data.T)),
                     dtype=np.float
-                ).reshape(xdata.shape[0], 1)
+                ).reshape(x_data.shape[0], 1)
             )
 
             # Calculating Global JObjective function.
@@ -303,7 +303,7 @@ class HMRFKmeans(object):
             xi_sum = x_data[clstr_idxs_arr, :].sum(axis=0)
 
             # Calculating denominator ||Σ xi||(A)
-            parametrized_norm_xi = np.sqrt(dot(dot(xi_sum. self.A), xi_sum.T))
+            parametrized_norm_xi = np.sqrt(np.dot(np.dot(xi_sum, self.A.toarray()), xi_sum.T))
 
             # Calculating the Centroid of the (assumed) hyper-sphear. Then appended to the mu list.
             mu_lst.append(xi_sum / parametrized_norm_xi)
@@ -402,17 +402,17 @@ class HMRFKmeans(object):
 
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
         # --------------------------------------------------------------------------------
-        dist = np.dot(np.dot(mu, self.A), x_data[x_idx, :].T)
+        dist = np.dot(np.dot(mu, self.A.toarray()), x_data[x_idx, :].T)
 
         # Calculating Must-Link violation cost.
         # -------------------------------------
         ml_cost = 0.0
 
         # Getting the must-link (if any) indeces for this index (i.e. data sample).
-        mst_lnk_idxs = np.where(self.ml_cl_cons[x_idx] == 1)[0]
-
+        mst_lnk_idxs = np.where(self.ml_cl_cons[x_idx].toarray() == 1)
+        print mst_lnk_idxs
         if mst_lnk_idxs:
-
+            print self.A.toarray()
             # Getting the indeces of must-link than are not in the cluster as they should have been.
             viol_idxs = mst_lnk_idxs[~np.in1d(mst_lnk_idxs, clstr_idx_arr)]
 
@@ -420,7 +420,7 @@ class HMRFKmeans(object):
             # NOTE: The violation cost is equivalent to the parametrized Cosine distance which...
             # ...here is equivalent to the (1 - dot product) because the data points assumed to...
             # ...be normalized by the parametrized Norm of the vectors.
-            viol_costs = 1 - np.dot(np.dot(x_data[x_idx], self.A) x_data[viol_idxs].T)
+            viol_costs = 1 - np.dot(np.dot(x_data[x_idx], self.A.toarray()), x_data[viol_idxs].T)
 
             # Sum-ing up Weighted violations costs.
             ml_cost = np.sum(self.w_violations[x_idx, viol_idxs]*viol_costs)
@@ -437,7 +437,7 @@ class HMRFKmeans(object):
         cnt_lnk_idxs = np.where(self.ml_cl_cons[x_idx] == -1)[0]
 
         if cnt_lnk_idxs:
-
+            print self.A.toarray()
             # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
             # ...have been.
             viol_idxs = cnt_lnk_idxs[np.in1d(cnt_lnk_idxs, clstr_idx_arr)]
@@ -447,7 +447,7 @@ class HMRFKmeans(object):
             # ...parametrized Cosine distance of the vectors. Since MaxCosine is 1 then...
             # ...maxCosineDistance - CosineDistance == CosineSimilarty of the vectors....
             # ...Again the data points assumed to be normalized.
-            viol_costs = np.dot(np.dot(x_data[x_idx], self.A), x_data[viol_idxs].T)
+            viol_costs = np.dot(np.dot(x_data[x_idx], self.A.toarray()), x_data[viol_idxs].T)
             # viol_costs = np.ones_like(viol_costs) - viol_costs
 
             # Sum-ing up Weighted violations costs.
@@ -459,7 +459,9 @@ class HMRFKmeans(object):
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
         sum1, sum2 = 0.0, 0.0
+        print self.A.toarray()
         for a in self.A.data:
+            print a
             sum1 += np.log(a)
             sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
         params_pdf = sum1 - sum2 - (2 * self.A.data.shape[0] * np.log(self.ray_sigma))
@@ -498,7 +500,7 @@ class HMRFKmeans(object):
 
             # Calculating the cosine distances and add the to the total sum of distances.
             # ---------------------------------------------------------------------------
-            sum_d += np.sum(np.dot(np.dot(mu, self.A), x_data[clstr_idxs_arr]))
+            sum_d += np.sum(np.dot(np.dot(mu, self.A.toarray()), x_data[clstr_idxs_arr]))
 
             # Calculating Must-Link violation cost.
             # -------------------------------------
@@ -517,7 +519,7 @@ class HMRFKmeans(object):
                 # Calculating all pairs of violation costs for must-link constraints.
                 # NOTE: The violation cost is equivalent to the maxCosine distance
                 viol_costs = 1 - np.dot(
-                    np.dot(x_data[mst_lnk_idxs[0][in_clstr_ml_rows]], self.A),
+                    np.dot(x_data[mst_lnk_idxs[0][in_clstr_ml_rows]], self.A.toarray()),
                     x_data[viol_idxs].T
                 )
 
@@ -546,7 +548,7 @@ class HMRFKmeans(object):
                 # Calculating all pairs of violation costs for cannot-link constraints.
                 # NOTE: The violation cost is equivalent to the maxCosine distance
                 viol_costs = np.dot(
-                    np.dot(x_data[mst_lnk_idxs[0][in_clstr_ml_rows]], self.A),
+                    np.dot(x_data[mst_lnk_idxs[0][in_clstr_ml_rows]], self.A.toarray()),
                     x_data[viol_idxs].T
                 )
 
@@ -584,7 +586,7 @@ class HMRFKmeans(object):
         # ...vMF-Mixture set-up.
         return sum_d + ml_cost + cl_cost - params_pdf + norm_part_value
 
-    def UpdateDistorParams(self, A, x_data, x_data, mu_arr, clstr_tags_arr):
+    def UpdateDistorParams(self, A, x_data, mu_arr, clstr_tags_arr):
         """ Update Distortion Parameters: This function is updating the whole set of the distortion
             parameters. In particular the parameters for the Cosine Distance in this implementation
             of the HMRF Kmeans.
@@ -761,7 +763,7 @@ class HMRFKmeans(object):
         res_a = (
                     (x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x2_pnorm) -
                     (
-                        dot(dot(x1, A), x2.reshape(x2.shape[0], 1)) *
+                        dot(dot(x1, A.toarray()), x2.reshape(x2.shape[0], 1)) *
                         (
                             (
                                 np.square(x1[0, a_idx]) * np.square(x2_pnorm) +
@@ -917,74 +919,81 @@ if __name__ == '__main__':
     # 0/0
 
     must_lnk_con = [
-        set([1, 5]),
-        set([1, 3]),
-        set([1, 6]),
-        set([1, 8]),
-        set([7, 3]),
-        set([521, 525]),
-        set([521, 528]),
-        set([521, 539]),
-        set([535, 525]),
-        set([537, 539]),
-        set([1037, 1238]),
-        set([1057, 1358]),
-        set([1039, 1438]),
-        set([1045, 1138]),
-        set([1098, 1038]),
-        set([1019, 1138]),
-        set([1087, 1338])
+        [1, 5],
+        [1, 3],
+        [1, 6],
+        [1, 8],
+        [7, 3],
+        [521, 525],
+        [521, 528],
+        [521, 539],
+        [535, 525],
+        [537, 539],
+        [1037, 1238],
+        [1057, 1358],
+        [1039, 1438],
+        [1045, 1138],
+        [1098, 1038],
+        [1019, 1138],
+        [1087, 1338]
     ]
 
     cannot_lnk_con = [
-        set([1, 521]),
-        set([1, 525]),
-        set([1, 528]),
-        set([1, 535]),
-        set([1, 537]),
-        set([1, 539]),
-        set([5, 521]),
-        set([5, 525]),
-        set([5, 528]),
-        set([5, 35]),
-        set([8, 521]),
-        set([8, 525]),
-        set([8, 528]),
-        set([8, 535]),
-        set([8, 537]),
-        set([8, 539]),
-        set([3, 521]),
-        set([3, 535]),
-        set([3, 537]),
-        set([3, 539]),
-        set([6, 521]),
-        set([6, 525]),
-        set([6, 528]),
-        set([6, 535]),
-        set([6, 537]),
-        set([6, 539]),
-        set([7, 521]),
-        set([7, 525]),
-        set([7, 528]),
-        set([7, 535]),
-        set([7, 537]),
-        set([7, 539]),
-        set([538, 1237]),
-        set([548, 1357]),
-        set([558, 1437]),
-        set([738, 1137]),
-        set([938, 1037]),
-        set([838, 1039]),
-        set([555, 1337])
+        [1, 521],
+        [1, 525],
+        [1, 528],
+        [1, 535],
+        [1, 537],
+        [1, 539],
+        [5, 521],
+        [5, 525],
+        [5, 528],
+        [5, 35],
+        [8, 521],
+        [8, 525],
+        [8, 528],
+        [8, 535],
+        [8, 537],
+        [8, 539],
+        [3, 521],
+        [3, 535],
+        [3, 537],
+        [3, 539],
+        [6, 521],
+        [6, 525],
+        [6, 528],
+        [6, 535],
+        [6, 537],
+        [6, 539],
+        [7, 521],
+        [7, 525],
+        [7, 528],
+        [7, 535],
+        [7, 537],
+        [7, 539],
+        [538, 1237],
+        [548, 1357],
+        [558, 1437],
+        [738, 1137],
+        [938, 1037],
+        [838, 1039],
+        [555, 1337]
     ]
 
     k_clusters = 3
-    init_centrs = [set([0]), set([550]), set([1100])]
+    init_centrs = [0, 550, 1100]
+
+    ml_cl_cons = sp.sparse.csr_matrix(np.zeros((x_data_2d_arr.shape[0], x_data_2d_arr.shape[0]), dtype=np.int))
+    for ml1, ml2 in must_lnk_con:
+        ml_cl_cons[ml1, ml2] = 1
+    for cl1, cl2 in cannot_lnk_con:
+        ml_cl_cons[cl1, cl2] = -1
+
     print "Running HMRF Kmeans"
-    hkmeans = HMRFKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
+    hkmeans = HMRFKmeans(k_clusters,  ml_cl_cons, init_centroids=init_centrs,
                          max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5,
                          w_violations=np.random.uniform(1.0, 1.0, size=(1500, 1500)),
-                         d_params=np.random.uniform(0.9, 1.7, size=test_dims), norm_part=False,
+                         d_params=np.random.uniform(1.0, 1.0, size=test_dims), norm_part=False,
                          globj='non-normed')
     res = hkmeans.fit(x_data_2d_arr)
 
