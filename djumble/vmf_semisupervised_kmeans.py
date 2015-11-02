@@ -7,6 +7,7 @@ import scipy.stats as sps
 import random as rnd
 import matplotlib.pyplot as plt
 import scipy.special as special
+import time as tm
 
 
 class HMRFKmeans(object):
@@ -137,6 +138,7 @@ class HMRFKmeans(object):
 
             print
             print conv_step
+            start_tm = tm.time()
 
             # The E-Step.
 
@@ -155,6 +157,9 @@ class HMRFKmeans(object):
 
             # Calculating Global JObjective function.
             glob_jobj = self.GlobJObjCosA(x_data, mu_lst, clstr_idxs_set_lst)
+
+            timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
+            print "Time elapsed : %d:%d:%d" % timel
 
             # Terminating upon difference of the last two Global JObej values.
             if np.abs(last_gobj - glob_jobj) < self.cvg or glob_jobj < self.cvg:
@@ -207,6 +212,8 @@ class HMRFKmeans(object):
 
         print "In ICM..."
 
+        start_tm = tm.time()
+
         no_change_cnt = 0
         while no_change_cnt < 2:
 
@@ -245,6 +252,9 @@ class HMRFKmeans(object):
             # ...re-assingment process stops.
             if no_change:
                 no_change_cnt += 1
+
+        timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
+        print "Time elapsed : %d:%d:%d" % timel
 
         # Returning clstr_idxs_sets_lst.
         return clstr_idxs_sets_lst
@@ -431,6 +441,8 @@ class HMRFKmeans(object):
 
         """
 
+        start_tm = tm.time()
+
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
         dist = self.CosDistA(x_data[x_idx, :], mu)
 
@@ -476,6 +488,9 @@ class HMRFKmeans(object):
 
         # print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
         # print "Params are: ", self.A
+
+        timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
+        print "Jobj time: %d:%d:%d" % timel
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
@@ -592,7 +607,7 @@ class HMRFKmeans(object):
 
                         x = list(x_cons)
 
-                        mlcost_pderiv += self.w_violations[x[0], x[1]] *\
+                        mlcost_pderiv -= self.w_violations[x[0], x[1]] *\
                             self.PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
             # print "Partial Must-Link", mlcost_pderiv
 
@@ -615,12 +630,12 @@ class HMRFKmeans(object):
                         # ...must-link constraints** OR NOT.
                         cl_pd = self.PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
 
-                        minus_max_clpd = 0.0
-                        if cl_pd < 0.0:
-                            minus_max_clpd = np.floor(cl_pd) - cl_pd
-                        elif cl_pd > 0.0:
-                            minus_max_clpd = np.ceil(cl_pd) - cl_pd
-
+                        # minus_max_clpd = 0.0
+                        # if cl_pd < 0.0:
+                        #     minus_max_clpd = np.floor(cl_pd) - cl_pd
+                        # elif cl_pd > 0.0:
+                        #     minus_max_clpd = np.ceil(cl_pd) - cl_pd
+                        minus_max_clpd = cl_pd
                         clcost_pderiv += self.w_violations[x[0], x[1]] * minus_max_clpd
 
             # print "Partial Cannot-Link", clcost_pderiv
@@ -836,7 +851,7 @@ def CosDist(x1, x2):
 
 if __name__ == '__main__':
 
-    test_dims = 10
+    test_dims = 1000
 
     print "Creating Sample"
     x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 0.6, size=(1, test_dims)), scale=1, size=(500, test_dims))
@@ -932,18 +947,16 @@ if __name__ == '__main__':
     init_centrs = [set([0]), set([550]), set([1100])]
     print "Running HMRF Kmeans"
     hkmeans = HMRFKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
-                         max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5,
+                         max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=1.0,
                          w_violations=np.random.uniform(1.0, 1.0, size=(1500, 1500)),
-                         d_params=np.random.uniform(0.9, 1.7, size=test_dims), norm_part=False,
+                         d_params=np.random.uniform(1.0, 1.0, size=test_dims), norm_part=False,
                          globj='non-normed')
     res = hkmeans.fit(x_data_2d_arr)
 
     for mu_idx, clstr_idxs in enumerate(res[1]):
-        # print res[0][mu_idx][:, 0], res[0][mu_idx][:, 1]
-        # plt.plot(res[0][mu_idx][:, 0], res[0][mu_idx][:, 1], '*', markersize=30)
-        #  if mu_idx == 2:
-        #    break
+
         print mu_idx+1, len(clstr_idxs), np.sort(clstr_idxs)
+
         for xy in x_data_2d_arr[list(clstr_idxs)]:
             plt.text(xy[0], xy[1], str(mu_idx+1), color='red', fontsize=15)
         # plt.plot(x_data_2d_arr2, '^')
