@@ -11,6 +11,124 @@ import multiprocessing as mp
 import time as tm
 
 
+def UpdateParam(a_idx_range, x_data, mu_arr, clstr_tags_arr,
+                w_violations, mst_lnk_idxs, cnt_lnk_idxs, A, lrn_rate, ray_sigma):
+
+    update_tups_lst = list()
+
+    for a_idx, a in enumerate(np.diag(A)[a_idx_range[0]:a_idx_range[1]]):
+
+        # Initializing...
+        xm_pderiv, mlcost_pderiv, clcost_pderiv = 0.0, 0.0, 0.0
+
+        for i, mu in enumerate(mu_arr):
+
+            # Getting the indeces for the i cluster.
+            clstr_idxs = np.where(clstr_tags_arr == i)[0]
+
+            # Calculating the partial derivatives of each parameter for all cluster's member...
+            # ...for each cluster.
+            # ---------------------------------------------------------------------------------
+            for x_clstr_idx in clstr_idxs:
+                xm_pderiv += PartialDerivative(a_idx, 1.0, x_data[x_clstr_idx, :], mu, A)
+
+            # Calculating Must-Link violation cost.
+            # -------------------------------------
+
+            # Getting the must-link left side of the pair constraints, i.e. the row...
+            # ...indeces of the constraints matrix that are in the cluster's set of...
+            # ...indeces.
+            in_clstr_ml_rows = np.in1d(mst_lnk_idxs[0], clstr_idxs)
+
+            # Getting the indeces of must-link than are not in the cluster as they should...
+            # ...have been.
+            viol_idxs = mst_lnk_idxs[1][
+                ~np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs)
+            ]
+
+            if viol_idxs.shape[0]:
+
+                # Calculating the partial derivatives of all pairs of violations for...
+                # ...must-link constraints.
+                for x in zip(mst_lnk_idxs[0][in_clstr_ml_rows], viol_idxs):
+                    mlcost_pderiv -= PartialDerivative(
+                        a_idx, w_violations[x[0], x[1]],
+                        x_data[x[0], :], x_data[x[1], :], A
+                    )
+
+            # Calculating Cannot-Link violation cost.
+            # ---------------------------------------
+
+            # Getting the cannot-link left side of the pair constraints, i.e. the row...
+            # ...indeces of the constraints matrix that are in the cluster's set of indeces.
+            in_clstr_cl_rows = np.in1d(cnt_lnk_idxs[0], clstr_idxs)
+
+            # Getting the indeces of cannot-link than are in the cluster as they...
+            # ...shouldn't have been.
+            viol_idxs = cnt_lnk_idxs[1][np.in1d(cnt_lnk_idxs[1][in_clstr_cl_rows], clstr_idxs)]
+
+            if viol_idxs.shape[0]:
+
+                # Calculating all pairs of violation costs for cannot-link constraints.
+                # NOTE: The violation cost is equivalent to the maxCosine distance
+                for x in zip(cnt_lnk_idxs[0][in_clstr_cl_rows], viol_idxs):
+                    clcost_pderiv += PartialDerivative(
+                        a_idx, w_violations[x[0], x[1]],
+                        x_data[x[0], :], x_data[x[1], :], A
+                    )
+
+        # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
+        a_pderiv = (1 / a) - (a / np.square(ray_sigma))
+        # print 'Rayleigh Partial', a_pderiv
+
+        new_val = a + (lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv))
+
+        update_tups_lst.append((a_idx, new_val))
+
+    # Changing a diagonal value of the A cosine similarity parameters measure.
+    return update_tups_lst
+
+
+def PartialDerivative(a_idx, wg, x1, x2, A):
+    """ Partial Derivative: This method is calculating the partial derivative of a specific
+        parameter given the proper vectors. That is, for the cosine distance is a x_i with the
+        centroid vector (mu) of the cluster where x_i is belonging into. As for the constraint
+        violations is the x_1 and x_2 of a specific pair of constraints each time this method
+        is called.
+        **for detail see documentation.
+
+        Arguments
+        ---------
+            a_idx: The index of the parameter on the diagonal of the A diagonal sparse
+                parameters matrix.
+            x1, x2: The vectors will be used for the partial derivative calculation.
+
+        Output
+        ------
+            res_a: The partial derivative's value.
+
+    """
+
+    # Calculating parametrized Norms ||Σ xi||(A)
+    x1_pnorm = np.sqrt(np.dot(np.dot(x1, A), x1.reshape(x1.shape[0], 1)))
+    x2_pnorm = np.sqrt(np.dot(np.dot(x2, A), x1.reshape(x2.shape[0], 1)))
+
+    res_a = (
+                (x1[a_idx] * x2[a_idx] * x1_pnorm * x2_pnorm) -
+                (
+                    np.dot(np.dot(x1, A), x2.reshape(x2.shape[0], 1)) *
+                    (
+                        (
+                            np.square(x1[a_idx]) * np.square(x2_pnorm) +
+                            np.square(x2[a_idx]) * np.square(x1_pnorm)
+                        ) / (2 * x1_pnorm * x2_pnorm)
+                    )
+                )
+            ) / (np.square(x1_pnorm) * np.square(x2_pnorm))
+
+    return wg*res_a
+
+
 class HMRFKmeans(object):
     """ HMRF Kmeans: A Semi-supervised clustering algorithm based on Hidden Markov Random Fields
         Clustering model optimized by Expectation Maximization (EM) algorithm with Hard clustering
@@ -44,10 +162,9 @@ class HMRFKmeans(object):
 
     def __init__(self, k_clusters, ml_cl_cons, init_centroids=None, max_iter=300,
                  cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5, w_violations=None, d_params=None,
-                 norm_part=False, globj='non-normed'):
+                 norm_part=False, globj='non-normed', _pool=None):
 
-        self._pool = mp.Pool(mp.cpu_count()*10)
-
+        self._pool = _pool
         self.k_clusters = k_clusters
         self.ml_cl_cons = ml_cl_cons
         self.init_centroids = init_centroids
@@ -494,8 +611,8 @@ class HMRFKmeans(object):
         # print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
         # print "Params are: ", self.A
 
-        timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
-        print "Jobj time: %d:%d:%d" % timel
+        #timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
+        #print "Jobj time: %d:%d:%d" % timel
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
@@ -663,292 +780,42 @@ class HMRFKmeans(object):
         # Getting all the cannot-link (if any) indeces.
         cnt_lnk_idxs = np.where(self.ml_cl_cons == -1)
 
-        # Initializing the lists where the partial derivative function results will be stored...
-        # ...in order to be calculated asynchronously and concretely.
-        xm_pderiv_lst, mlcost_pderiv_lst, clcost_pderiv_lst = list(), list(), list()
+        print "Dispatching"
 
-        for a_idx, a in enumerate(np.diag(A)):
+        update_lsts_chank = list()
 
-            for i, mu in enumerate(mu_arr):
-
-                # Getting the indeces for the i cluster.
-                clstr_idxs = np.where(clstr_tags_arr == i)[0]
-
-                # Calculating the partial derivatives of each parameter for all cluster's member...
-                # ...for each cluster. NOTE: The calculations dispatched to a process pull and...
-                # ...summed up at the end.
-                # ---------------------------------------------------------------------------------
-                for x_clstr_idx in clstr_idxs:
-                    xm_pderiv_lst.append(
-                        self._pool.apply_async(
-                            PartialDerivative,
-                            args=(a_idx, 1.0, x_data[x_clstr_idx], mu, A)
-                        )
+        for a_idx_range in [(0, 250), (250, 500), (500, 750), (750, 1000)]:
+            print a_idx_range
+            update_lsts_chank.append(
+                self._pool.apply_async(
+                    UpdateParam,
+                    args=(
+                        a_idx_range, x_data, mu_arr, clstr_tags_arr,
+                        self.w_violations, mst_lnk_idxs, cnt_lnk_idxs,
+                        A, self.lrn_rate, self.ray_sigma,
                     )
+                )
+            )
 
-                # Calculating Must-Link violation cost.
-                # -------------------------------------
-
-                # Getting the must-link left side of the pair constraints, i.e. the row...
-                # ...indeces of the constraints matrix that are in the cluster's set of...
-                # ...indeces.
-                in_clstr_ml_rows = np.in1d(mst_lnk_idxs[0], clstr_idxs)
-
-                # Getting the indeces of must-link than are not in the cluster as they should...
-                # ...have been.
-                viol_idxs = mst_lnk_idxs[1][
-                    ~np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs)
-                ]
-
-                if viol_idxs.shape[0]:
-
-                    # Calculating the partial derivatives of all pairs of violations for...
-                    # ...must-link constraints. NOTE: Calculation occur concurrently.
-                    for x in zip(mst_lnk_idxs[0][in_clstr_ml_rows], viol_idxs):
-                        mlcost_pderiv_lst.append(
-                            self._pool.apply_async(
-                                PartialDerivative,
-                                args=(
-                                    a_idx, self.w_violations[x[0], x[1]],
-                                    x_data[x[0], :], x_data[x[1], :], A
-                                )
-                            )
-                        )
-
-                # Calculating Cannot-Link violation cost.
-                # ---------------------------------------
-
-                # Getting the cannot-link left side of the pair constraints, i.e. the row...
-                # ...indeces of the constraints matrix that are in the cluster's set of indeces.
-                in_clstr_cl_rows = np.in1d(cnt_lnk_idxs[0], clstr_idxs)
-
-                # Getting the indeces of cannot-link than are in the cluster as they...
-                # ...shouldn't have been.
-                viol_idxs = cnt_lnk_idxs[1][np.in1d(cnt_lnk_idxs[1][in_clstr_cl_rows], clstr_idxs)]
-
-                if viol_idxs.shape[0]:
-
-                    # Calculating all pairs of violation costs for cannot-link constraints.
-                    # NOTE: The violation cost is equivalent to the maxCosine distance
-                    for x in zip(cnt_lnk_idxs[0][in_clstr_cl_rows], viol_idxs):
-                        clcost_pderiv_lst.append(
-                            self._pool.apply_async(
-                                PartialDerivative,
-                                args=(
-                                    a_idx, self.w_violations[x[0], x[1]],
-                                    x_data[x[0], :], x_data[x[1], :], A
-                                )
-                            )
-                        )
-
-        # Updating every parameter's value one-by-one.
-
-        # Summing up the partial derivatives for intra-clusters elements.
         timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
-        print "Dispatching time: %d:%d:%d" % timel
+        print "Dispatch time: %d:%d:%d" % timel
+
         start_tm = tm.time()
 
-        print 'Collecting'
-        # print [xm for xm in xm_pderiv_lst]
-        xm_pderiv = np.sum([xm.get() for xm in xm_pderiv_lst])
-        # print xm_pderiv
-        # print 'SUM ML'
-        # Sum-ing up Weighted violations costs. NOTE: Here the matrix multiply should be...
-        # ...element-by-element.
-        mlcost_pderiv = np.sum([-ml.get() for ml in mlcost_pderiv_lst])
-        # print mlcost_pderiv
-        # print 'SUM CL'
-        # Sum-ing up Weighted violations costs. NOTE: Here the matrix multiply should be...
-        # ...element-by-element. NOTE#2: We are getting only the lower triangle because...
-        # ...we need the cosine distance of the constraints pairs only ones.
-        clcost_pderiv = np.sum([cl for cl in clcost_pderiv_lst])
-        # print clcost_pderiv
+        print "Collecting/Updating"
+
+        # Updating every parameter's value one-by-one.
+        for i, update_tup_lst in enumerate(update_lsts_chank):
+
+            for a_idx, a in update_tup_lst.get():
+
+                A[a_idx, a_idx] = a
 
         timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
-        print "Collecting time: %d:%d:%d" % timel
-
-        # NOTE: The (Delta max(CosA) / Delta a) it is a constant according to the...
-        # ...assuption that max(CosA) == 1 above (see documentation). However...
-        # ...based on Chapelle et al. in the partial derivative a proper constant...
-        # ...should be selected in order to keep the cannot-link constraints...
-        # ...contribution positive. **Here it is just using the outcome of the...
-        # ...partial derivative it self as to be equally weighted with the...
-        # ...must-link constraints** OR NOT.
-
-        # ### cl_pd = self.PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
-        # minus_max_clpd = 0.0
-        # if cl_pd < 0.0:
-        #    minus_max_clpd = np.floor(cl_pd) - cl_pd
-        # elif cl_pd > 0.0:
-        #    minus_max_clpd = np.ceil(cl_pd) - cl_pd
-
-        #            clcost_pderiv += self.w_violations[x[0], x[1]] * minus_max_clpd
-        # print "Partial Cannot-Link", clcost_pderiv
-
-        # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
-        a_pderiv = (1 / a) - (a / np.square(self.ray_sigma))
-        # print 'Rayleigh Partial', a_pderiv
-
-        # Changing a diagonal value of the A cosine similarity parameters measure.
-        A[a_idx, a_idx] = (a + (self.lrn_rate *
-                                (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
-                                )
-                           )
+        print "Collect/Update time: %d:%d:%d" % timel
 
         # Returning the A parameters. This is actually a dump return for coding constance reasons.
         return A
-
-
-def PartialDerivative(a_idx, wg, x1, x2, A):
-    """ Partial Derivative: This method is calculating the partial derivative of a specific
-        parameter given the proper vectors. That is, for the cosine distance is a x_i with the
-        centroid vector (mu) of the cluster where x_i is belonging into. As for the constraint
-        violations is the x_1 and x_2 of a specific pair of constraints each time this method
-        is called.
-        **for detail see documentation.
-
-        Arguments
-        ---------
-            a_idx: The index of the parameter on the diagonal of the A diagonal sparse
-                parameters matrix.
-            x1, x2: The vectors will be used for the partial derivative calculation.
-
-        Output
-        ------
-            res_a: The partial derivative's value.
-
-    """
-
-    # Calculating parametrized Norms ||Σ xi||(A)
-    x1_pnorm = np.sqrt(np.dot(np.dot(x1, A), x1.reshape(x1.shape[0], 1)))
-    x2_pnorm = np.sqrt(np.dot(np.dot(x2, A), x1.reshape(x2.shape[0], 1)))
-
-    res_a = (
-                (x1[a_idx] * x2[a_idx] * x1_pnorm * x2_pnorm) -
-                (
-                    np.dot(np.dot(x1, A), x2.reshape(x2.shape[0], 1)) *
-                    (
-                        (
-                            np.square(x1[a_idx]) * np.square(x2_pnorm) +
-                            np.square(x2[a_idx]) * np.square(x1_pnorm)
-                        ) / (2 * x1_pnorm * x2_pnorm)
-                    )
-                )
-            ) / (np.square(x1_pnorm) * np.square(x2_pnorm))
-
-    return wg*res_a
-
-
-def FarFirstCosntraint(x_data, k_clusters):
-
-    # ########### NOT PROPERLY IMPLEMENTED FOR THIS GIT COMMIT ###
-    """
-        pick any z ∈ S and set T = {z}
-        while |T| < k:
-            z = arg maxx∈S ρ(x, T)
-            T = T ∪ {z}
-
-        Here ρ(x, T) is the distance from point x to the closest point in set T,
-        that is to say, infz∈T ρ(x, z).
-
-    """
-
-    # Initiating the list of array indices for all forthcoming neighborhoods Np.
-    neibs_sets = [set([])]
-
-    data_num = x_data.shape[0]
-
-    # Adding a random point in the neighborhood N0.
-    rnd_idx = np.random.randint(0, data_num)
-
-    neibs_sets[0].add(rnd_idx)
-    neib_c = 1
-
-    farthest_x_idx = data_num + 99  # Not sure for this initialization.
-
-    # Initializing for finding the farthest x array index form all N neighborhoods.
-
-    all_neibs = []
-    while neib_c < k_clusters and len(all_neibs) < data_num:
-
-        max_dist = 0
-        # Getting the farthest x from all neighborhoods.
-        for i in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]/10):
-
-            all_neibs = [idx for neib in neibs_sets for idx in neib]
-
-            for neib_x_idx in all_neibs:
-
-                    if i not in all_neibs:
-
-                        dist = distor_measure(x_data[neib_x_idx], x_data[i])
-
-                        if dist > max_dist:
-                            max_dist = dist
-                            farthest_x_idx = i
-
-        # Looking for Must-Link
-        must_link_neib_indx = None
-        if farthest_x_idx in self.must_lnk:
-            for ml_idx in self.must_lnk[farthest_x_idx]:
-                for n_idx, neib in enumerate(neibs_sets):
-                    if ml_idx in neib:
-                        must_link_neib_indx = n_idx
-
-        # Looking for Cannot-Link
-        cannot_link = False
-        if farthest_x_idx in cannnot_lnk_cons:
-            for cl_idx in cannnot_lnk_cons[farthest_x_idx]:
-                for neib in neibs_sets:
-                    if cl_idx in neib:
-                        cannot_link = True
-
-        # Putting the x in the proper N neighborhood.
-        if must_link_neib_indx:
-
-            neibs_sets[must_link_neib_indx].add(farthest_x_idx)
-
-        elif cannot_link:
-
-            neib_c += 1
-            neibs_sets.append(set([farthest_x_idx]))
-
-        else:
-            neibs_sets[neib_c-1].add(farthest_x_idx)
-
-    return neibs_sets
-
-
-def ConsolidateAL(neibs_sets, x_data):
-
-    # ########### NOT PROPERLY IMPLEMENTED FOR THIS GIT COMMIT ###
-
-    """
-    """
-    # Estimating centroids.
-    # print np.mean(x_data[[1,2,3], :], axis=0)
-    neibs_mu = [np.mean(x_data[neib, :], axis=0) for neib in neibs_sets]
-
-    cnt = 0
-
-    # I think that randomization factor is required  replacing --> # range(data_num):
-    for rnd_idx in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]):
-
-        cnt += 1
-
-        # Ascending order.
-        srted_dists_neib_idx = np.argsort(
-            [distor_measure(mu, x_data[rnd_idx, :])[0, 0] for mu in neibs_mu],
-            axis=0
-        )
-
-        for neib_idx in srted_dists_neib_idx:
-            if rnd_idx in self.must_lnk:
-                for ml_idx in self.must_lnk[rnd_idx]:
-                    if ml_idx in neibs_sets[neib_idx] and rnd_idx not in neibs_sets[neib_idx]:
-                        neibs_sets[neib_idx].append(rnd_idx)
-
-    return neibs_sets
 
 
 if __name__ == '__main__':
@@ -1057,12 +924,15 @@ if __name__ == '__main__':
 
     # ml_cl_cons = sp.sparse.coo_matrix(ml_cl_cons)
 
+    print 'CPUs', mp.cpu_count()
+    _pool = mp.Pool(processes=mp.cpu_count())
+
     print "Running HMRF Kmeans"
     hkmeans = HMRFKmeans(k_clusters,  ml_cl_cons, init_centroids=init_centrs,
                          max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=1.0,
                          w_violations=np.random.uniform(1.0, 1.0, size=(1500, 1500)),
                          d_params=np.random.uniform(1.0, 1.0, size=test_dims), norm_part=False,
-                         globj='non-normed')
+                         globj='non-normed', _pool=_pool)
     res = hkmeans.fit(x_data_2d_arr)
 
     print list(res[1])

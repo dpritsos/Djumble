@@ -489,8 +489,8 @@ class HMRFKmeans(object):
         # print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
         # print "Params are: ", self.A
 
-        timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
-        print "Jobj time: %d:%d:%d" % timel
+        #timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
+        #print "Jobj time: %d:%d:%d" % timel
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
