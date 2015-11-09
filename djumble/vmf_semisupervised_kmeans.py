@@ -286,9 +286,14 @@ class HMRFKmeans(object):
         else:
             x2 = sp.matrix(x2)
 
+        if not np.any(x1):
+            print x1
+        if not np.any(x2):
+            print x2
+
         # Calculating and returning the parameterized cosine distance.
-        return 1 - (x1 * self.A * x2.T /
-                    (np.sqrt(np.abs(x1 * self.A * x1.T)) * np.sqrt(np.abs(x2 * self.A * x2.T)))
+        return 1 - (x1 * self.A[:, :] * x2.T /
+                    (np.sqrt(np.abs(x1 * self.A[:, :] * x1.T)) * np.sqrt(np.abs(x2 * self.A[:, :] * x2.T)))
                     )
 
     def MeanCosA(self, x_data, clstr_idxs_lsts):
@@ -316,7 +321,15 @@ class HMRFKmeans(object):
             xi_sum = sp.matrix(xi_sum)
 
             # Calculating denominator ||Σ xi||(A)
-            parametrized_norm_xi = np.sqrt(np.abs(xi_sum * self.A * xi_sum.T))
+            parametrized_norm_xi = np.sqrt(np.abs(xi_sum * self.A[:, :] * xi_sum.T))
+
+            if xi_sum[0, 0] == -np.inf:
+
+                print 'xi_sum', xi_sum
+                print 'parametrized_norm_xi == ', parametrized_norm_xi
+
+                for xxx in list(clstr_ilst):
+                    print "DATA", xxx, x_data[xxx, 0]
 
             # Calculating the Centroid of the (assumed) hyper-sphear. Then appended to the mu list.
             mu_lst.append(xi_sum / parametrized_norm_xi)
