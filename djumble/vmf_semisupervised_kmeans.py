@@ -67,7 +67,7 @@ class HMRFKmeans(object):
         else:
             raise Exception("globj: can be either 'proper' or 'non-normed'.")
 
-    def fit(self, x_data):
+    def fit(self, x_data, neg_idxs4clstring=set([])):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
             data in the Mixture of the von Misses Fisher (vMF) distributions. However, the vMF(s)
             are considered to have the same shape at the end of the process. That is, Kmeans and
@@ -123,6 +123,9 @@ class HMRFKmeans(object):
             # ...the number of self.k_clusters.
             k_rand_idx = np.random.randint(0, self.k_clusters, size=x_data.shape[0])
             clstr_idxs_set_lst.extend([set(idx) for idx in k_rand_idx])
+
+        # Set of indices not participating in clustering. NOTE: For particular experiments only.
+        self.neg_idxs4clstring = neg_idxs4clstring
 
         # Calculating the initial Centroids of the assumed hyper-shperical clusters.
         mu_lst = self.MeanCosA(x_data, clstr_idxs_set_lst)
@@ -220,8 +223,12 @@ class HMRFKmeans(object):
             # Calculating the new Clusters.
             for x_idx in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]):
 
+                # Skipping the indices should not participate in clustering.
+                if x_idx in self.neg_idxs4clstring:
+                    continue
+
                 # Setting the initial value for the previews J-Objective value.
-                last_jobj = np.Inf
+                last_jobj = np.inf
 
                 # Calculating the J-Objective for every x_i vector of the x_data set.
                 for i, (mu, clstr_idxs_set) in enumerate(zip(mu_lst, clstr_idxs_sets_lst)):
@@ -864,7 +871,7 @@ def CosDist(x1, x2):
 
 if __name__ == '__main__':
 
-    test_dims = 1000
+    test_dims = 10
 
     print "Creating Sample"
     x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 0.6, size=(1, test_dims)), scale=1, size=(500, test_dims))
@@ -964,7 +971,7 @@ if __name__ == '__main__':
                          w_violations=np.random.uniform(1.0, 1.0, size=(1500, 1500)),
                          d_params=np.random.uniform(1.0, 1.0, size=test_dims), norm_part=False,
                          globj='non-normed')
-    res = hkmeans.fit(x_data_2d_arr)
+    res = hkmeans.fit(x_data_2d_arr, set([50]))
 
     for mu_idx, clstr_idxs in enumerate(res[1]):
 
