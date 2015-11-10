@@ -228,7 +228,7 @@ class HMRFKmeans(object):
                     continue
 
                 # Setting the initial value for the previews J-Objective value.
-                last_jobj = np.inf
+                last_jobj = np.Inf
 
                 # Calculating the J-Objective for every x_i vector of the x_data set.
                 for i, (mu, clstr_idxs_set) in enumerate(zip(mu_lst, clstr_idxs_sets_lst)):
@@ -329,14 +329,6 @@ class HMRFKmeans(object):
 
             # Calculating denominator ||Σ xi||(A)
             parametrized_norm_xi = np.sqrt(np.abs(xi_sum * self.A[:, :] * xi_sum.T))
-
-            if xi_sum[0, 0] == -np.inf:
-
-                print 'xi_sum', xi_sum
-                print 'parametrized_norm_xi == ', parametrized_norm_xi
-
-                for xxx in list(clstr_ilst):
-                    print "DATA", xxx, x_data[xxx, 0]
 
             # Calculating the Centroid of the (assumed) hyper-sphear. Then appended to the mu list.
             mu_lst.append(xi_sum / parametrized_norm_xi)
@@ -669,6 +661,15 @@ class HMRFKmeans(object):
                                     (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
                                     )
                                )
+
+            # ΝΟΤΕ: Invalid patch for let the experiments to be completed.###########################
+            if A[a_idx, a_idx] < 0.0:
+                print "Invalid patch while distortion parameters update triggered ! ! !"
+                A[a_idx, a_idx] = np.finfo(np.float32).min
+
+            if A[a_idx, a_idx] == 0.0:
+                print "Invalid patch while distortion parameters update triggered (Zero) ! ! !"
+                A[a_idx, a_idx] = np.finfo(np.float32).min
 
         # Returning the A parameters. This is actually a dump return for coding constance reasons.
         return A
