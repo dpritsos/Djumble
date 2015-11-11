@@ -456,7 +456,8 @@ class HMRFKmeans(object):
         start_tm = tm.time()
 
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
-        dist = self.CosDistA(x_data[x_idx, :], mu)
+        dist = self.CosDistA(x_data[x_idx, :], mu) *\
+            (1.0 / float(x_data.shape[0] - len(self.neg_idxs4clstring)))
 
         # Calculating Must-Link violation cost.
         ml_cost = 0.0
@@ -467,8 +468,8 @@ class HMRFKmeans(object):
                 if not (x_cons <= clstr_idxs_set):
 
                     x = list(x_cons)
-
-                    ml_cost += self.w_violations[x[0], x[1]] *\
+                    # self.w_violations[x[0], x[1]] *\
+                    ml_cost += (1.0 / float(len(self.must_lnk))) *\
                         self.CosDistA(x_data[x[0], :], x_data[x[1], :])
 
         # Calculating Cannot-Link violation cost.
@@ -480,8 +481,8 @@ class HMRFKmeans(object):
                 if x_cons <= clstr_idxs_set:
 
                     x = list(x_cons)
-
-                    cl_cost += self.w_violations[x[0], x[1]] *\
+                    # self.w_violations[x[0], x[1]] *\
+                    cl_cost += (1.0 / float(len(self.cannot_lnk))) *\
                         (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
@@ -501,8 +502,8 @@ class HMRFKmeans(object):
         # print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
         # print "Params are: ", self.A
 
-        #timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
-        #print "Jobj time: %d:%d:%d" % timel
+        # timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
+        # print "Jobj time: %d:%d:%d" % timel
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
@@ -516,7 +517,8 @@ class HMRFKmeans(object):
         sum_d = 0.0
         for mu, clstr_idxs in zip(mu_lst, clstr_idxs_set_lst):
             for x_clstr_idx in clstr_idxs:
-                sum_d += self.CosDistA(x_data[x_clstr_idx], mu)
+                sum_d += self.CosDistA(x_data[x_clstr_idx], mu) *\
+                    (1.0 / float(x_data.shape[0] - len(self.neg_idxs4clstring)))
 
         # Calculating Must-Link violation cost.
         ml_cost = 0.0
@@ -527,8 +529,8 @@ class HMRFKmeans(object):
                 if not (x_cons <= clstr_idxs_set):
 
                     x = list(x_cons)
-
-                    ml_cost += self.w_violations[x[0], x[1]] *\
+                    # self.w_violations[x[0], x[1]] *\
+                    ml_cost += (1.0 / float(len(self.must_lnk))) *\
                         self.CosDistA(x_data[x[0], :], x_data[x[1], :])
 
         # Calculating Cannot-Link violation cost.
@@ -540,8 +542,8 @@ class HMRFKmeans(object):
                 if x_cons <= clstr_idxs_set:
 
                     x = list(x_cons)
-
-                    cl_cost += self.w_violations[x[0], x[1]] *\
+                    # self.w_violations[x[0], x[1]] *\
+                    cl_cost += (1.0 / float(len(self.cannot_lnk))) *\
                         (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
@@ -605,7 +607,8 @@ class HMRFKmeans(object):
             xm_pderiv = 0.0
             for mu, clstr_idxs in zip(mu_lst, clstr_idxs_lst):
                 for x_clstr_idx in clstr_idxs:
-                    xm_pderiv += (self.PartialDerivative(a_idx, x_data[x_clstr_idx], mu, A))
+                    xm_pderiv += (self.PartialDerivative(a_idx, x_data[x_clstr_idx], mu, A)) *\
+                        (1.0 / float(x_data.shape[0] - len(self.neg_idxs4clstring)))
             # print "Partial Distance", xm_pderiv
 
             # [idx for neib in clstr_idxs_lst for idx in neib]
@@ -618,8 +621,8 @@ class HMRFKmeans(object):
                     if not (x_cons <= clstr_idxs_set):
 
                         x = list(x_cons)
-
-                        mlcost_pderiv -= self.w_violations[x[0], x[1]] *\
+                        # self.w_violations[x[0], x[1]]
+                        mlcost_pderiv -= (1.0 / float(len(self.must_lnk))) *\
                             self.PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
             # print "Partial Must-Link", mlcost_pderiv
 
@@ -648,13 +651,25 @@ class HMRFKmeans(object):
                         # elif cl_pd > 0.0:
                         #     minus_max_clpd = np.ceil(cl_pd) - cl_pd
                         minus_max_clpd = cl_pd
-                        clcost_pderiv += self.w_violations[x[0], x[1]] * minus_max_clpd
+                        # self.w_violations[x[0], x[1]]
+                        clcost_pderiv += (1.0 / float(len(self.cannot_lnk))) * minus_max_clpd
 
             # print "Partial Cannot-Link", clcost_pderiv
 
             # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
+            # new_a = a + (self.lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv))
+
             a_pderiv = (1 / a) - (a / np.square(self.ray_sigma))
+
             # print 'Rayleigh Partial', a_pderiv
+
+            if np.abs(a_pderiv) == np.inf:
+                print "Invalid patch for Rayleighs P'(A) triggered: (+/-)INF P'(A)=", a_pderiv
+                A[a_idx, a_idx] = np.finfo(np.float).resolution
+
+            elif a_pderiv == np.nan:
+                print "Invalid patch for Rayleighs P(A) triggered: NaN P'(A)=", a_pderiv
+                A[a_idx, a_idx] = np.finfo(np.float).resolution
 
             # Changing a diagonal value of the A cosine similarity parameters measure.
             A[a_idx, a_idx] = (a + (self.lrn_rate *
@@ -664,12 +679,20 @@ class HMRFKmeans(object):
 
             # ΝΟΤΕ: Invalid patch for let the experiments to be completed.###########################
             if A[a_idx, a_idx] < 0.0:
-                print "Invalid patch while distortion parameters update triggered ! ! !"
-                A[a_idx, a_idx] = np.finfo(np.float32).min
+                print "Invalid patch for A triggered: (-) Negative A=", A[a_idx, a_idx], a_pderiv
+                A[a_idx, a_idx] = np.finfo(np.float).resolution
 
-            if A[a_idx, a_idx] == 0.0:
-                print "Invalid patch while distortion parameters update triggered (Zero) ! ! !"
-                A[a_idx, a_idx] = np.finfo(np.float32).min
+            elif A[a_idx, a_idx] == 0.0:
+                print "Invalid patch for A triggered: (0) Zero A=", A[a_idx, a_idx], a_pderiv
+                A[a_idx, a_idx] = np.finfo(np.float).resolution
+
+            elif np.abs(A[a_idx, a_idx]) == np.Inf:
+                print "Invalid patch for A triggered: (+/-)INF A=", A[a_idx, a_idx], a_pderiv
+                A[a_idx, a_idx] = np.finfo(np.float).resolution
+
+            elif A[a_idx, a_idx] == np.NaN:
+                print "Invalid patch for A triggered: NaN A=", A[a_idx, a_idx], a_pderiv
+                A[a_idx, a_idx] = np.finfo(np.float).resolution
 
         # Returning the A parameters. This is actually a dump return for coding constance reasons.
         return A
