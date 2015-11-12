@@ -9,6 +9,11 @@ import matplotlib.pyplot as plt
 import scipy.special as special
 import multiprocessing as mp
 import time as tm
+import sys
+
+sys.path.append('../../synergeticprocessing')
+
+import synergeticprocessing.synergeticpool as mymp
 
 
 class HMRFKmeans(object):
@@ -674,8 +679,7 @@ class HMRFKmeans(object):
                     args=(
                         a_idx_range, x_data, mu_arr, clstr_tags_arr,
                         self.w_violations, mst_lnk_idxs, cnt_lnk_idxs,
-                        A, self.lrn_rate, self.ray_sigma,
-                    )
+                        A, self.lrn_rate, self.ray_sigma)
                 )
             )
 
@@ -688,7 +692,8 @@ class HMRFKmeans(object):
 
         # Updating every parameter's value one-by-one.
         for i, update_tup_lst in enumerate(update_lsts_chank):
-
+            print update_tup_lst
+            # for ret in update_tup_lst:
             for a_idx, a in update_tup_lst.get():
 
                 A[a_idx, a_idx] = a
@@ -699,14 +704,13 @@ class HMRFKmeans(object):
         # Returning the A parameters. This is actually a dump return for coding constance reasons.
         return A
 
-
 def UpdateParam(a_idx_range, x_data, mu_arr, clstr_tags_arr,
                 w_violations, mst_lnk_idxs, cnt_lnk_idxs, A, lrn_rate, ray_sigma):
 
     update_tups_lst = list()
 
-    for a_idx, a in enumerate(np.diag(A)[a_idx_range[0]:a_idx_range[1]]):
-
+    for a_idx, a in zip(range(a_idx_range[0], a_idx_range[1]), np.diag(A)[a_idx_range[0]:a_idx_range[1]]):
+        print 'updating', a_idx
         # Initializing...
         xm_pderiv, mlcost_pderiv, clcost_pderiv = 0.0, 0.0, 0.0
 
@@ -777,7 +781,6 @@ def UpdateParam(a_idx_range, x_data, mu_arr, clstr_tags_arr,
     # Changing a diagonal value of the A cosine similarity parameters measure.
     return update_tups_lst
 
-
 def PartialDerivative(a_idx, wg, x1, x2, A):
     """ Partial Derivative: This method is calculating the partial derivative of a specific
         parameter given the proper vectors. That is, for the cosine distance is a x_i with the
@@ -820,7 +823,7 @@ def PartialDerivative(a_idx, wg, x1, x2, A):
 
 if __name__ == '__main__':
 
-    test_dims = 1000
+    test_dims = 100
 
     print "Creating Sample"
     x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 0.6, size=(1, test_dims)), scale=1, size=(500, test_dims))
@@ -925,7 +928,8 @@ if __name__ == '__main__':
     # ml_cl_cons = sp.sparse.coo_matrix(ml_cl_cons)
 
     print 'CPUs', mp.cpu_count()
-    da_pool = mp.Pool(processes=4)
+    da_pool = mp.Pool(mp.cpu_count())
+    # mymp.SynergeticPool(synergetic_servers=None, local_workers=mp.cpu_count())
 
     print "Running HMRF Kmeans"
     hkmeans = HMRFKmeans(k_clusters,  ml_cl_cons, init_centroids=init_centrs,

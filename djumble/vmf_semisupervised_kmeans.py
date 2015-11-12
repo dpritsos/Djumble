@@ -895,7 +895,7 @@ def CosDist(x1, x2):
 
 if __name__ == '__main__':
 
-    test_dims = 10
+    test_dims = 100
 
     print "Creating Sample"
     x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 0.6, size=(1, test_dims)), scale=1, size=(500, test_dims))
