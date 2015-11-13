@@ -261,7 +261,7 @@ class HMRFKmeans(object):
                 no_change_cnt += 1
 
         timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
-        print "Time elapsed : %d:%d:%d" % timel
+        print "ICM elapsed : %d:%d:%d" % timel
 
         # Returning clstr_idxs_sets_lst.
         return clstr_idxs_sets_lst
@@ -324,8 +324,14 @@ class HMRFKmeans(object):
         for clstr_ilst in clstr_idxs_lsts:
 
             # Summing up all the X data points for the current cluster.
-            xi_sum = x_data[list(clstr_ilst), :].sum(axis=0)
-            xi_sum = sp.matrix(xi_sum)
+            if len(clstr_ilst):
+                xi_sum = x_data[list(clstr_ilst), :].sum(axis=0)
+                xi_sum = sp.matrix(xi_sum)
+            else:
+                print "Zero Mean for a clucter triggered!!!"
+                zero_vect = np.zeros_like(x_data[0, :])
+                zero_vect[:] = np.finfo(np.float).resolution
+                xi_sum = sp.matrix(zero_vect)
 
             # Calculating denominator ||Σ xi||(A)
             parametrized_norm_xi = np.sqrt(np.abs(xi_sum * self.A[:, :] * xi_sum.T))
