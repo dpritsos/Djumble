@@ -42,8 +42,8 @@ class HMRFKmeans(object):
     """
 
     def __init__(self, k_clusters, must_lnk, cannot_lnk, init_centroids=None, max_iter=300,
-                 cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5, w_violations=None, d_params=None,
-                 norm_part=False, globj='non-normed'):
+                 cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5, d_params=None, norm_part=False,
+                 globj='non-normed'):
 
         self.k_clusters = k_clusters
         self.must_lnk = must_lnk
@@ -53,7 +53,6 @@ class HMRFKmeans(object):
         self.cvg = cvg
         self.lrn_rate = lrn_rate
         self.ray_sigma = ray_sigma
-        self.w_violations = w_violations
         self.A = d_params
         self.norm_part = norm_part
 
@@ -99,8 +98,8 @@ class HMRFKmeans(object):
         self.A = sp.sparse.csr_matrix(self.A)
 
         # Setting up the violation weights matrix if not have been passed as class argument.
-        if self.w_violations is None:
-            self.w_violations = np.random.uniform(0.9, 0.9, size=(x_data.shape[0], x_data.shape[0]))
+        #if self.w_violations is None:
+        #    self.w_violations = np.random.uniform(0.9, 0.9, size=(x_data.shape[0], x_data.shape[0]))
         # ### I am not sure what kind of values this weights should actually have.
 
         # Deriving initial centroids lists from the must-link an cannot-link constraints.
@@ -462,34 +461,46 @@ class HMRFKmeans(object):
         start_tm = tm.time()
 
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
-        dist = self.CosDistA(x_data[x_idx, :], mu) *\
-            (1.0 / float(x_data.shape[0] - len(self.neg_idxs4clstring)))
+        dist = self.CosDistA(x_data[x_idx, :], mu)
+        # NOTE: No need to be Averaged/Normalized because the score is only for one sample.
 
         # Calculating Must-Link violation cost.
         ml_cost = 0.0
+        ml_cnt = 0.0
         for x_cons in self.must_lnk:
 
             if x_idx in x_cons:
 
                 if not (x_cons <= clstr_idxs_set):
 
+                    ml_cnt += 1.0
+
                     x = list(x_cons)
-                    # self.w_violations[x[0], x[1]] *\
-                    ml_cost += (1.0 / float(len(self.must_lnk))) *\
-                        self.CosDistA(x_data[x[0], :], x_data[x[1], :])
+
+                    ml_cost += self.CosDistA(x_data[x[0], :], x_data[x[1], :])
+
+        # Averaging dividing be the number of must-link constrains of this cluster.
+        if ml_cnt:
+            ml_cost = ml_cost / ml_cnt
 
         # Calculating Cannot-Link violation cost.
         cl_cost = 0.0
+        cl_cnt = 0.0
         for x_cons in self.cannot_lnk:
 
             if x_idx in x_cons:
 
                 if x_cons <= clstr_idxs_set:
 
+                    cl_cnt += 1.0
+
                     x = list(x_cons)
-                    # self.w_violations[x[0], x[1]] *\
-                    cl_cost += (1.0 / float(len(self.cannot_lnk))) *\
-                        (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
+
+                    cl_cost += (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
+
+        # Averaging dividing be the number of cannot-link constrains of this cluster.
+        if cl_cnt:
+            cl_cost = cl_cost / cl_cnt
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
         sum1, sum2 = 0.0, 0.0
@@ -521,36 +532,61 @@ class HMRFKmeans(object):
         print "In GlobalJObjCosA..."
 
         sum_d = 0.0
+        smpls_cnt = 0.0
         for mu, clstr_idxs in zip(mu_lst, clstr_idxs_set_lst):
+
             for x_clstr_idx in clstr_idxs:
-                sum_d += self.CosDistA(x_data[x_clstr_idx], mu) *\
-                    (1.0 / float(x_data.shape[0] - len(self.neg_idxs4clstring)))
+
+                if x_clstr_idx not in self.neg_idxs4clstring:  # <---NOTE
+
+                    smpls_cnt += 1.0
+
+                    sum_d += self.CosDistA(x_data[x_clstr_idx], mu)
+
+        # Averaging dividing be the number of samples.
+        sum_d = sum_d / smpls_cnt
 
         # Calculating Must-Link violation cost.
         ml_cost = 0.0
+        ml_cnt = 0.0
         for clstr_idxs_set in clstr_idxs_set_lst:
 
             for x_cons in self.must_lnk:
 
-                if not (x_cons <= clstr_idxs_set):
+                if x_cons not in self.neg_idxs4clstring:  # <---NOTE
 
-                    x = list(x_cons)
-                    # self.w_violations[x[0], x[1]] *\
-                    ml_cost += (1.0 / float(len(self.must_lnk))) *\
-                        self.CosDistA(x_data[x[0], :], x_data[x[1], :])
+                    if not (x_cons <= clstr_idxs_set):
+
+                        ml_cnt += 1.0
+
+                        x = list(x_cons)
+
+                        ml_cost += self.CosDistA(x_data[x[0], :], x_data[x[1], :])
+
+        # Averaging dividing be the number of must-link constrains.
+        if ml_cnt:
+            ml_cost = ml_cost / ml_cnt
 
         # Calculating Cannot-Link violation cost.
         cl_cost = 0.0
+        cl_cnt = 0.0
         for clstr_idxs_set in clstr_idxs_set_lst:
 
             for x_cons in self.cannot_lnk:
 
-                if x_cons <= clstr_idxs_set:
+                if x_cons not in self.neg_idxs4clstring:  # <---NOTE
 
-                    x = list(x_cons)
-                    # self.w_violations[x[0], x[1]] *\
-                    cl_cost += (1.0 / float(len(self.cannot_lnk))) *\
-                        (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
+                    if x_cons <= clstr_idxs_set:
+
+                        cl_cnt += 1.0
+
+                        x = list(x_cons)
+
+                        cl_cost += (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
+
+        # Averaging dividing be the number of cannot-link constrains.
+        if cl_cnt:
+            cl_cost = cl_cost / cl_cnt
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
         if self.globj:
@@ -611,54 +647,82 @@ class HMRFKmeans(object):
 
             # Calculating Partial Derivative of D(xi, mu).
             xm_pderiv = 0.0
+            smpls_cnt = 0.0
             for mu, clstr_idxs in zip(mu_lst, clstr_idxs_lst):
-                for x_clstr_idx in clstr_idxs:
-                    xm_pderiv += (self.PartialDerivative(a_idx, x_data[x_clstr_idx], mu, A)) *\
-                        (1.0 / float(x_data.shape[0] - len(self.neg_idxs4clstring)))
-            # print "Partial Distance", xm_pderiv
 
-            # [idx for neib in clstr_idxs_lst for idx in neib]
+                for x_clstr_idx in clstr_idxs:
+
+                    if x_clstr_idx not in self.neg_idxs4clstring:  # <---NOTE
+
+                        smpls_cnt += 1.0
+
+                        xm_pderiv += (self.PartialDerivative(a_idx, x_data[x_clstr_idx], mu, A))
+
+            # Averaging dividing be the number of samples.
+            xm_pderiv = xm_pderiv / smpls_cnt
+
             # Calculating the Partial Derivative of D(xi, xj) of Must-Link Constraints.
             mlcost_pderiv = 0.0
+            ml_cnt = 0.0
             for clstr_idxs_set in clstr_idxs_lst:
 
                 for x_cons in self.must_lnk:
 
-                    if not (x_cons <= clstr_idxs_set):
+                    if x_cons not in self.neg_idxs4clstring:  # <---NOTE
 
-                        x = list(x_cons)
-                        # self.w_violations[x[0], x[1]]
-                        mlcost_pderiv -= (1.0 / float(len(self.must_lnk))) *\
-                            self.PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
-            # print "Partial Must-Link", mlcost_pderiv
+                        if not (x_cons <= clstr_idxs_set):
+
+                            ml_cnt += 1.0
+
+                            x = list(x_cons)
+
+                            mlcost_pderiv -= self.PartialDerivative(
+                                a_idx, x_data[x[0], :], x_data[x[1], :], A
+                            )
+
+            # Averaging dividing be the number of must-link constrains.
+            if ml_cnt:
+                mlcost_pderiv = mlcost_pderiv / ml_cnt
 
             # Calculating the Partial Derivative of D(xi, xj) of Cannot-Link Constraints.
             clcost_pderiv = 0.0
+            cl_cnt = 0.0
             for clstr_idxs_set in clstr_idxs_lst:
 
                 for x_cons in self.cannot_lnk:
 
-                    if x_cons <= clstr_idxs_set:
+                    if x_cons not in self.neg_idxs4clstring:  # <---NOTE
 
-                        x = list(x_cons)
+                        if x_cons <= clstr_idxs_set:
 
-                        # NOTE: The (Delta max(CosA) / Delta a) it is a constant according to the...
-                        # ...assuption that max(CosA) == 1 above (see documentation). However...
-                        # ...based on Chapelle et al. in the partial derivative a proper constant...
-                        # ...should be selected in order to keep the cannot-link constraints...
-                        # ...contribution positive. **Here it is just using the outcome of the...
-                        # ...partial derivative it self as to be equally weighted with the...
-                        # ...must-link constraints** OR NOT.
-                        cl_pd = self.PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
+                            cl_cnt += 1.0
 
-                        # minus_max_clpd = 0.0
-                        # if cl_pd < 0.0:
-                        #     minus_max_clpd = np.floor(cl_pd) - cl_pd
-                        # elif cl_pd > 0.0:
-                        #     minus_max_clpd = np.ceil(cl_pd) - cl_pd
-                        minus_max_clpd = cl_pd
-                        # self.w_violations[x[0], x[1]]
-                        clcost_pderiv += (1.0 / float(len(self.cannot_lnk))) * minus_max_clpd
+                            x = list(x_cons)
+
+                            # NOTE: The (Delta max(CosA) / Delta a) it is a constant according to the...
+                            # ...assuption that max(CosA) == 1 above (see documentation). However...
+                            # ...based on Chapelle et al. in the partial derivative a proper constant...
+                            # ...should be selected in order to keep the cannot-link constraints...
+                            # ...contribution positive. **Here it is just using the outcome of the...
+                            # ...partial derivative it self as to be equally weighted with the...
+                            # ...must-link constraints** OR NOT.
+                            # cl_pd = self.PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
+
+                            # minus_max_clpd = 0.0
+                            # if cl_pd < 0.0:
+                            #     minus_max_clpd = np.floor(cl_pd) - cl_pd
+                            # elif cl_pd > 0.0:
+                            #     minus_max_clpd = np.ceil(cl_pd) - cl_pd
+
+                            # minus_max_clpd = cl_pd
+
+                            clcost_pderiv += self.PartialDerivative(
+                                a_idx, x_data[x[0], :], x_data[x[1], :], A
+                            )
+
+            # Averaging dividing be the number of cannot-link constrains.
+            if cl_cnt:
+                mlcost_pderiv = mlcost_pderiv / cl_cnt
 
             # print "Partial Cannot-Link", clcost_pderiv
 
@@ -997,8 +1061,7 @@ if __name__ == '__main__':
     init_centrs = [set([0]), set([550]), set([1100])]
     print "Running HMRF Kmeans"
     hkmeans = HMRFKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
-                         max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=1.0,
-                         w_violations=np.random.uniform(1.0, 1.0, size=(1500, 1500)),
+                         max_iter=300, cvg=0.0001, lrn_rate=0.0003, ray_sigma=1.0,
                          d_params=np.random.uniform(1.0, 1.0, size=test_dims), norm_part=False,
                          globj='non-normed')
     res = hkmeans.fit(x_data_2d_arr, set([50]))
