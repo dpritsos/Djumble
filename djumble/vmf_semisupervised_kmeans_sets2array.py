@@ -256,7 +256,7 @@ class HMRFKmeans(object):
         while no_change_cnt < 2:
 
             # Calculating the new Clusters.
-            for x_idx in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]):
+            for x_idx in np.random.permutation(np.arange(x_data.shape[0])):
 
                 # Setting the initial value for the previews J-Objective value.
                 last_jobj = np.Inf

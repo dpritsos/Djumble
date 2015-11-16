@@ -554,11 +554,11 @@ class HMRFKmeans(object):
 
                 if x_cons not in self.neg_idxs4clstring:  # <---NOTE
 
-                    if not (x_cons <= clstr_idxs_set):
+                    x = list(x_cons)
+
+                    if (x[0] in clstr_idxs_set or x[1] in clstr_idxs_set) and not (x_cons <= clstr_idxs_set):
 
                         ml_cnt += 1.0
-
-                        x = list(x_cons)
 
                         ml_cost += self.CosDistA(x_data[x[0], :], x_data[x[1], :])
 
@@ -669,11 +669,11 @@ class HMRFKmeans(object):
 
                     if x_cons not in self.neg_idxs4clstring:  # <---NOTE
 
-                        if not (x_cons <= clstr_idxs_set):
+                        x = list(x_cons)
+
+                        if (x[0] in clstr_idxs_set or x[1] in clstr_idxs_set) and not (x_cons <= clstr_idxs_set):
 
                             ml_cnt += 1.0
-
-                            x = list(x_cons)
 
                             mlcost_pderiv -= self.PartialDerivative(
                                 a_idx, x_data[x[0], :], x_data[x[1], :], A
@@ -1024,7 +1024,7 @@ if __name__ == '__main__':
         set([5, 521]),
         set([5, 525]),
         set([5, 528]),
-        set([5, 35]),
+        set([5, 535]),
         set([8, 521]),
         set([8, 525]),
         set([8, 528]),
@@ -1060,7 +1060,7 @@ if __name__ == '__main__':
     init_centrs = [set([0]), set([550]), set([1100])]
     print "Running HMRF Kmeans"
     hkmeans = HMRFKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
-                         max_iter=300, cvg=0.0001, lrn_rate=0.0003, ray_sigma=1.0,
+                         max_iter=300, cvg=0.0001, lrn_rate=0.01, ray_sigma=1.0,
                          d_params=np.random.uniform(1.0, 1.0, size=test_dims), norm_part=False,
                          globj='non-normed')
     res = hkmeans.fit(x_data_2d_arr, set([50]))
