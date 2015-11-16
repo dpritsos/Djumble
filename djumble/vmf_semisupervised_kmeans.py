@@ -31,7 +31,7 @@ class HMRFKmeans(object):
                 applied over the distortion parameters values for enforcing the J-Objective
                 function to decrease.
             w_violations: A weights matrix for must-link and cannot-link violations in the
-                clustering process.
+                clustering process. (NOT IN USE FOR NOW)
             d_params: Distortion parameters vector. It is actually a compressed form of the
                 distortion parameters matrix of N x N size. Where N is the size of the vector
                 (or feature) space, exactly as it is recommended in bibliography for making the
@@ -188,7 +188,6 @@ class HMRFKmeans(object):
             'convg_diff': self.cvg,
             'lrn_rate': self.lrn_rate,
             'ray_sigma': self.ray_sigma,
-            'w_violations': self.w_violations,
             'dist_msur_params': self.A,
             'norm_part': self.norm_part
         }
