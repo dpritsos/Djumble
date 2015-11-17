@@ -160,8 +160,8 @@ class HMRFKmeans(object):
             # Calculating Global JObjective function.
             glob_jobj = self.GlobJObjCosA(x_data, mu_lst, clstr_idxs_set_lst)
 
-            timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
-            print "Time elapsed : %d:%d:%d" % timel
+            timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
+            print "Time elapsed : %d:%d:%d:%d" % timel
 
             # Terminating upon difference of the last two Global JObej values.
             if np.abs(last_gobj - glob_jobj) < self.cvg or glob_jobj < self.cvg:
@@ -258,8 +258,8 @@ class HMRFKmeans(object):
             if no_change:
                 no_change_cnt += 1
 
-        timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
-        print "ICM elapsed : %d:%d:%d" % timel
+        timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
+        print "ICM elapsed : %d:%d:%d:%d" % timel
 
         # Returning clstr_idxs_sets_lst.
         return clstr_idxs_sets_lst
@@ -518,8 +518,8 @@ class HMRFKmeans(object):
         # print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
         # print "Params are: ", self.A
 
-        # timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
-        # print "Jobj time: %d:%d:%d" % timel
+        # timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
+        # print "Jobj time: %d:%d:%d:%d" % timel
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
