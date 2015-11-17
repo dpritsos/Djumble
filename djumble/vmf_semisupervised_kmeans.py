@@ -513,7 +513,7 @@ class HMRFKmeans(object):
             sum1 += np.log(a)
             sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
         params_pdf = sum1 - sum2 - (2 * self.A.data.shape[0] * np.log(self.ray_sigma))
-
+        params_pdf = 0.0
         # Calculating the log normalization function of the von Mises-Fisher distribution...
         # ...NOTE: Only for this cluster i.e. this vMF of the whole PDF mixture.
         if self.norm_part:
@@ -733,8 +733,8 @@ class HMRFKmeans(object):
 
             # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
             # new_a = a + (self.lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv))
-
             a_pderiv = (1 / a) - (a / np.square(self.ray_sigma))
+            a_pderiv = 0.0
 
             # print 'Rayleigh Partial', a_pderiv
 
@@ -970,7 +970,7 @@ def CosDist(x1, x2):
 
 if __name__ == '__main__':
 
-    test_dims = 100
+    test_dims = 700
 
     print "Creating Sample"
     x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 0.6, size=(1, test_dims)), scale=1, size=(500, test_dims))

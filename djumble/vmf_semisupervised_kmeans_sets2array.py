@@ -10,10 +10,12 @@ import scipy.special as special
 import multiprocessing as mp
 import time as tm
 import sys
-
+import os
 sys.path.append('../../synergeticprocessing')
-
 import synergeticprocessing.synergeticpool as mymp
+
+#os.system("OPENBLAS_MAIN_FREE=1")
+
 
 
 class HMRFKmeans(object):
@@ -48,7 +50,7 @@ class HMRFKmeans(object):
     """
 
     def __init__(self, k_clusters, ml_cl_cons, init_centroids=None, max_iter=300,
-                 cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5, w_violations=None, d_params=None,
+                 cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5, d_params=None,
                  norm_part=False, globj='non-normed', da_pool=None):
 
         self.da_pool = da_pool
@@ -59,7 +61,6 @@ class HMRFKmeans(object):
         self.cvg = cvg
         self.lrn_rate = lrn_rate
         self.ray_sigma = ray_sigma
-        self.w_violations = w_violations
         self.A = d_params
         self.norm_part = norm_part
 
@@ -106,14 +107,14 @@ class HMRFKmeans(object):
         self.A = np.diag(self.A)
 
         # Setting up the violation weights matrix if not have been passed as class argument.
-        if self.w_violations is None:
-            self.w_violations = np.random.uniform(0.9, 0.9, size=(x_data.shape[0], x_data.shape[0]))
-            # ### I am not sure what kind of values this weights should actually have.
+        # if self.w_violations is None:
+        #     self.w_violations = np.random.uniform(0.9, 0.9, size=(x_data.shape[0], x_data.shape[0]))
+        #     # ### I am not sure what kind of values this weights should actually have.
 
         # Converting the weights violation matrix into a sparse matrix.
         non_zero = np.where(self.ml_cl_cons != 0, 1, 0)
         # self.w_violations = sp.sparse.csr_matrix(np.multiply(self.w_violations, non_zero))
-        self.w_violations = np.multiply(self.w_violations, non_zero)
+        # self.w_violations = np.multiply(self.w_violations, non_zero)
 
         # Deriving initial centroids lists from the must-link an cannot-link constraints.
         # Not ready yet...
@@ -193,8 +194,8 @@ class HMRFKmeans(object):
             # Calculating Global JObjective function.
             glob_jobj = self.GlobJObjCosA(x_data, mu_arr, clstr_tags_arr)
 
-            timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
-            print "Time elapsed : %d:%d:%d" % timel
+            timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
+            print "Time elapsed : %d:%d:%d:%d" % timel
 
             # Terminating upon the difference of the last two Global JObej values.
             if np.abs(last_gobj - glob_jobj) < self.cvg or glob_jobj < self.cvg:
@@ -225,7 +226,6 @@ class HMRFKmeans(object):
             'convg_diff': self.cvg,
             'lrn_rate': self.lrn_rate,
             'ray_sigma': self.ray_sigma,
-            'w_violations': self.w_violations,
             'dist_msur_params': self.A,
             'norm_part': self.norm_part
         }
@@ -290,8 +290,8 @@ class HMRFKmeans(object):
             if no_change:
                 no_change_cnt += 1
 
-        timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
-        print "ICM time: %d:%d:%d" % timel
+        timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
+        print "ICM time: %d:%d:%d:%d" % timel
 
         # Returning clstr_tags_arr.
         return clstr_tags_arr
@@ -445,13 +445,14 @@ class HMRFKmeans(object):
             )
 
             # Sum-ing up Weighted violations costs.
-            ml_cost = np.sum(
-                np.multiply(self.w_violations[x_idx, viol_idxs], viol_costs)
-            )
+            ml_cost = np.sum(viol_costs)
+            # np.multiply(self.w_violations[x_idx, viol_idxs], viol_costs)
 
             # Equivalent to: (in a for-loop implementation)
             # cl_cost += self.w_violations[x[0], x[1]] *\
             #  self.CosDistA(x_data[x[0], :], x_data[x[1], :])
+
+            ml_cost = ml_cost / float(len(viol_idxs))
 
         # Calculating Cannot-Link violation cost.
         # ---------------------------------------
@@ -474,13 +475,14 @@ class HMRFKmeans(object):
             # viol_costs = np.ones_like(viol_costs) - viol_costs
 
             # Sum-ing up Weighted violations costs.
-            cl_cost = np.sum(
-                np.multiply(self.w_violations[x_idx, viol_idxs], viol_costs)
-            )
+            cl_cost = np.sum(viol_costs)
+            # np.multiply(self.w_violations[x_idx, viol_idxs], viol_costs)
 
             # Equivalent to: (in a for-loop implementation)
             # cl_cost += self.w_violations[x[0], x[1]] *\
             # (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
+
+            cl_cost = cl_cost / float(len(viol_idxs))
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
         sum1, sum2 = 0.0, 0.0
@@ -488,6 +490,7 @@ class HMRFKmeans(object):
             sum1 += np.log(a)
             sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
         params_pdf = sum1 - sum2 - (2 * np.diag(self.A).shape[0] * np.log(self.ray_sigma))
+        params_pdf = 0.0
 
         # Calculating the log normalization function of the von Mises-Fisher distribution...
         # ...NOTE: Only for this cluster i.e. this vMF of the whole PDF mixture.
@@ -498,8 +501,8 @@ class HMRFKmeans(object):
         # print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
         # print "Params are: ", self.A
 
-        #timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
-        #print "Jobj time: %d:%d:%d" % timel
+        #timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
+        #print "Jobj time: %d:%d:%d:%d" % timel
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
@@ -518,11 +521,15 @@ class HMRFKmeans(object):
 
         # Calculating the distance of all vectors, the must-link and cannot-link violations scores.
         sum_d, ml_cost, cl_cost, norm_part_value, params_pdf = 0.0, 0.0, 0.0, 0.0, 0.0
+        smlps_cnt, ml_cnt, cl_cnt = 0.0, 0.0, 0.0
 
         for i, mu in enumerate(mu_arr):
 
             # Getting the indeces for the i cluster.
             clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
+
+            #
+            smlps_cnt += clstr_idxs_arr
 
             # Calculating the cosine distances and add the to the total sum of distances.
             # ---------------------------------------------------------------------------
@@ -545,6 +552,9 @@ class HMRFKmeans(object):
                 ~np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs_arr)
             ]
 
+            #
+            ml_cnt += float(len(viol_idxs))
+
             if viol_idxs.shape[0]:
 
                     # Calculating all pairs of violation costs for must-link constraints.
@@ -562,12 +572,12 @@ class HMRFKmeans(object):
                     # Sum-ing up Weighted violations costs. NOTE: Here the matrix multiply...
                     # ...should be element-by-element.
 
-                    ml_cost += np.sum(
-                        np.multiply(
-                            self.w_violations[viol_pair_idx, viol_idxs],
-                            viol_costs_onetime
-                        )
-                    )
+                    ml_cost += np.sum(viol_costs_onetime)
+                    #     np.multiply(
+                    #         self.w_violations[viol_pair_idx, viol_idxs],
+                    #         viol_costs_onetime
+                    #     )
+                    # )
 
             # Calculating Cannot-Link violation cost.
             # ---------------------------------------
@@ -585,6 +595,9 @@ class HMRFKmeans(object):
             viol_pair_idx = cnt_lnk_idxs[0][
                 np.in1d(cnt_lnk_idxs[1][in_clstr_cl_rows], clstr_idxs_arr)
             ]
+
+            #
+            cl_cost += float(len(viol_idxs))
 
             if viol_idxs.shape[0]:
 
@@ -604,17 +617,24 @@ class HMRFKmeans(object):
                 # ...should be element-by-element. NOTE#2: We are getting only the lower...
                 # ...triangle because we need the cosine distance of the constraints pairs...
                 # ...only ones.
-                ml_cost += np.sum(
-                    np.multiply(
-                        self.w_violations[viol_pair_idx, viol_idxs],
-                        viol_costs_onetime
-                    )
-                )
+                cl_cost += np.sum(viol_idxs)
+                #     np.multiply(
+                #         self.w_violations[viol_pair_idx, viol_idxs],
+                #         viol_costs_onetime
+                #     )
+                # )
 
-                # Calculating the log normalization function of the von Mises-Fisher...
-                # ...distribution of the whole mixture.
-                if self.norm_part and self.globj:
-                    norm_part_value += self.NormPart(x_data[clstr_idxs_arr])
+        # Averaging EVERYTHING.
+        smlps_cnt = sum_d / smlps_cnt
+        if ml_cnt:
+            ml_cost = ml_cost / ml_cnt
+        if cl_cnt:
+            cl_cost = cl_cost / cl_cnt
+
+        # Calculating the log normalization function of the von Mises-Fisher...
+        # ...distribution of the whole mixture.
+        if self.norm_part and self.globj:
+            norm_part_value += self.NormPart(x_data[clstr_idxs_arr])
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
         if self.globj:
@@ -671,20 +691,20 @@ class HMRFKmeans(object):
 
         update_lsts_chank = list()
 
-        for a_idx_range in [(0, 250), (250, 500), (500, 750), (750, 1000)]:
+        for a_idx_range in [(0, 350), (350, 700)]:
             print a_idx_range
             update_lsts_chank.append(
                 self.da_pool.apply_async(
                     UpdateParam,
                     args=(
                         a_idx_range, x_data, mu_arr, clstr_tags_arr,
-                        self.w_violations, mst_lnk_idxs, cnt_lnk_idxs,
+                        mst_lnk_idxs, cnt_lnk_idxs,
                         A, self.lrn_rate, self.ray_sigma)
                 )
             )
 
-        timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
-        print "Dispatch time: %d:%d:%d" % timel
+        timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
+        print "Dispatch time: %d:%d:%d:%d" % timel
 
         start_tm = tm.time()
 
@@ -692,38 +712,44 @@ class HMRFKmeans(object):
 
         # Updating every parameter's value one-by-one.
         for i, update_tup_lst in enumerate(update_lsts_chank):
-            print update_tup_lst
+            # print update_tup_lst
             # for ret in update_tup_lst:
             for a_idx, a in update_tup_lst.get():
-
+                # print a_idx, a
                 A[a_idx, a_idx] = a
 
-        timel = tm.gmtime(tm.time() - start_tm)[4:6] + ((tm.time() - int(start_tm))*1000,)
-        print "Collect/Update time: %d:%d:%d" % timel
+        timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
+        print "Collect/Update time: %d:%d:%d:%d" % timel
 
         # Returning the A parameters. This is actually a dump return for coding constance reasons.
         return A
 
+
 def UpdateParam(a_idx_range, x_data, mu_arr, clstr_tags_arr,
-                w_violations, mst_lnk_idxs, cnt_lnk_idxs, A, lrn_rate, ray_sigma):
+                mst_lnk_idxs, cnt_lnk_idxs, A, lrn_rate, ray_sigma):
 
     update_tups_lst = list()
 
     for a_idx, a in zip(range(a_idx_range[0], a_idx_range[1]), np.diag(A)[a_idx_range[0]:a_idx_range[1]]):
-        print 'updating', a_idx
+
+        # print 'IDX', a_idx
+
         # Initializing...
         xm_pderiv, mlcost_pderiv, clcost_pderiv = 0.0, 0.0, 0.0
+        smpls_cnt, ml_cnt, cl_cnt = 0.0, 0.0, 0.0
 
         for i, mu in enumerate(mu_arr):
 
             # Getting the indeces for the i cluster.
             clstr_idxs = np.where(clstr_tags_arr == i)[0]
 
+            smpls_cnt += clstr_idxs.shape[0]
+
             # Calculating the partial derivatives of each parameter for all cluster's member...
             # ...for each cluster.
             # ---------------------------------------------------------------------------------
             for x_clstr_idx in clstr_idxs:
-                xm_pderiv += PartialDerivative(a_idx, 1.0, x_data[x_clstr_idx, :], mu, A)
+                xm_pderiv += PartialDerivative(a_idx, x_data[x_clstr_idx, :], mu, A)
 
             # Calculating Must-Link violation cost.
             # -------------------------------------
@@ -739,14 +765,15 @@ def UpdateParam(a_idx_range, x_data, mu_arr, clstr_tags_arr,
                 ~np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs)
             ]
 
+            ml_cnt += float(len(viol_idxs))
+
             if viol_idxs.shape[0]:
 
                 # Calculating the partial derivatives of all pairs of violations for...
                 # ...must-link constraints.
                 for x in zip(mst_lnk_idxs[0][in_clstr_ml_rows], viol_idxs):
                     mlcost_pderiv -= PartialDerivative(
-                        a_idx, w_violations[x[0], x[1]],
-                        x_data[x[0], :], x_data[x[1], :], A
+                        a_idx, x_data[x[0], :], x_data[x[1], :], A
                     )
 
             # Calculating Cannot-Link violation cost.
@@ -760,28 +787,44 @@ def UpdateParam(a_idx_range, x_data, mu_arr, clstr_tags_arr,
             # ...shouldn't have been.
             viol_idxs = cnt_lnk_idxs[1][np.in1d(cnt_lnk_idxs[1][in_clstr_cl_rows], clstr_idxs)]
 
+            cl_cnt += float(viol_idxs.shape[0])
+
             if viol_idxs.shape[0]:
 
                 # Calculating all pairs of violation costs for cannot-link constraints.
                 # NOTE: The violation cost is equivalent to the maxCosine distance
                 for x in zip(cnt_lnk_idxs[0][in_clstr_cl_rows], viol_idxs):
                     clcost_pderiv += PartialDerivative(
-                        a_idx, w_violations[x[0], x[1]],
-                        x_data[x[0], :], x_data[x[1], :], A
+                        a_idx, x_data[x[0], :], x_data[x[1], :], A
                     )
+
+        # Averaging EVERYTHING
+        xm_pderiv = xm_pderiv / smpls_cnt
+        if ml_cnt:
+            mlcost_pderiv = mlcost_pderiv / ml_cnt
+        if cl_cnt:
+            clcost_pderiv = clcost_pderiv / cl_cnt
 
         # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
         a_pderiv = (1 / a) - (a / np.square(ray_sigma))
         # print 'Rayleigh Partial', a_pderiv
+        a_pderiv = 0.0
+        # print 'a', a
+        # print 'xm', xm_pderiv
+        # print 'ml', mlcost_pderiv
+        # print 'cl', clcost_pderiv
 
         new_val = a + (lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv))
-
+        # print (xm_pderiv[0] + mlcost_pderiv + clcost_pderiv - a_pderiv)
+        # print 'ln', lrn_rate
+        # print 'new_val', new_val
         update_tups_lst.append((a_idx, new_val))
 
     # Changing a diagonal value of the A cosine similarity parameters measure.
     return update_tups_lst
 
-def PartialDerivative(a_idx, wg, x1, x2, A):
+
+def PartialDerivative(a_idx, x1, x2, A):
     """ Partial Derivative: This method is calculating the partial derivative of a specific
         parameter given the proper vectors. That is, for the cosine distance is a x_i with the
         centroid vector (mu) of the cluster where x_i is belonging into. As for the constraint
@@ -818,12 +861,12 @@ def PartialDerivative(a_idx, wg, x1, x2, A):
                 )
             ) / (np.square(x1_pnorm) * np.square(x2_pnorm))
 
-    return wg*res_a
+    return res_a
 
 
 if __name__ == '__main__':
 
-    test_dims = 100
+    test_dims = 700
 
     print "Creating Sample"
     x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 0.6, size=(1, test_dims)), scale=1, size=(500, test_dims))
@@ -927,14 +970,15 @@ if __name__ == '__main__':
 
     # ml_cl_cons = sp.sparse.coo_matrix(ml_cl_cons)
 
+    # os.system("taskset -p 0xff %d" % os.getpid())
+
     print 'CPUs', mp.cpu_count()
-    da_pool = mp.Pool(mp.cpu_count())
+    da_pool = mp.Pool(2)
     # mymp.SynergeticPool(synergetic_servers=None, local_workers=mp.cpu_count())
 
     print "Running HMRF Kmeans"
     hkmeans = HMRFKmeans(k_clusters,  ml_cl_cons, init_centroids=init_centrs,
                          max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=1.0,
-                         w_violations=np.random.uniform(1.0, 1.0, size=(1500, 1500)),
                          d_params=np.random.uniform(1.0, 1.0, size=test_dims), norm_part=False,
                          globj='non-normed', da_pool=da_pool)
     res = hkmeans.fit(x_data_2d_arr)
