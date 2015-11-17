@@ -675,13 +675,6 @@ class HMRFKmeans(object):
 
                     if x_cons not in self.neg_idxs4clstring:  # <---NOTE
 
-<<<<<<< HEAD
-                        x = list(x_cons)
-                        # self.w_violations[x[0], x[1]]
-                        mlcost_pderiv += (1.0 / float(len(self.must_lnk))) *\
-                            self.PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
-            # print "Partial Must-Link", mlcost_pderiv
-=======
                         if not (x_cons <= clstr_idxs_set):
 
                             ml_cnt += 1.0
@@ -695,7 +688,6 @@ class HMRFKmeans(object):
             # Averaging dividing be the number of must-link constrains.
             if ml_cnt:
                 mlcost_pderiv = mlcost_pderiv / ml_cnt
->>>>>>> origin/master
 
             # Calculating the Partial Derivative of D(xi, xj) of Cannot-Link Constraints.
             clcost_pderiv = 0.0
