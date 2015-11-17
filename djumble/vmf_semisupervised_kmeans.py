@@ -299,9 +299,15 @@ class HMRFKmeans(object):
             print x2
 
         # Calculating and returning the parameterized cosine distance.
-        return 1 - (x1 * self.A[:, :] * x2.T /
-                    (np.sqrt(np.abs(x1 * self.A[:, :] * x1.T)) * np.sqrt(np.abs(x2 * self.A[:, :] * x2.T)))
-                    )
+        return (
+            1 - (
+                 x1 * self.A[:, :] * x2.T /
+                 (
+                  np.sqrt(np.abs(x1 * self.A[:, :] * x1.T)) *
+                  np.sqrt(np.abs(x2 * self.A[:, :] * x2.T))
+                  )
+                )
+        )
 
     def MeanCosA(self, x_data, clstr_idxs_lsts):
         """ MeanCosA method: It is calculating the centroids of the hyper-spherical clusters.
@@ -330,7 +336,7 @@ class HMRFKmeans(object):
             else:
                 print "Zero Mean for a clucter triggered!!!"
                 zero_vect = np.zeros_like(x_data[0, :])
-                zero_vect[:] = np.finfo(np.float).resolution
+                zero_vect[:] = 1e-15
                 xi_sum = sp.matrix(zero_vect)
 
             # Calculating denominator ||Σ xi||(A)
@@ -628,7 +634,7 @@ class HMRFKmeans(object):
 
                         x = list(x_cons)
                         # self.w_violations[x[0], x[1]]
-                        mlcost_pderiv -= (1.0 / float(len(self.must_lnk))) *\
+                        mlcost_pderiv += (1.0 / float(len(self.must_lnk))) *\
                             self.PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
             # print "Partial Must-Link", mlcost_pderiv
 
@@ -671,11 +677,11 @@ class HMRFKmeans(object):
 
             if np.abs(a_pderiv) == np.inf:
                 print "Invalid patch for Rayleighs P'(A) triggered: (+/-)INF P'(A)=", a_pderiv
-                A[a_idx, a_idx] = np.finfo(np.float).resolution
+                A[a_idx, a_idx] = 1e-15
 
             elif a_pderiv == np.nan:
                 print "Invalid patch for Rayleighs P(A) triggered: NaN P'(A)=", a_pderiv
-                A[a_idx, a_idx] = np.finfo(np.float).resolution
+                A[a_idx, a_idx] = 1e-15
 
             # Changing a diagonal value of the A cosine similarity parameters measure.
             A[a_idx, a_idx] = (a + (self.lrn_rate *
@@ -686,19 +692,19 @@ class HMRFKmeans(object):
             # ΝΟΤΕ: Invalid patch for let the experiments to be completed.###########################
             if A[a_idx, a_idx] < 0.0:
                 print "Invalid patch for A triggered: (-) Negative A=", A[a_idx, a_idx], a_pderiv
-                A[a_idx, a_idx] = np.finfo(np.float).resolution
+                A[a_idx, a_idx] = 1e-15
 
             elif A[a_idx, a_idx] == 0.0:
                 print "Invalid patch for A triggered: (0) Zero A=", A[a_idx, a_idx], a_pderiv
-                A[a_idx, a_idx] = np.finfo(np.float).resolution
+                A[a_idx, a_idx] = 1e-15
 
             elif np.abs(A[a_idx, a_idx]) == np.Inf:
                 print "Invalid patch for A triggered: (+/-)INF A=", A[a_idx, a_idx], a_pderiv
-                A[a_idx, a_idx] = np.finfo(np.float).resolution
+                A[a_idx, a_idx] = 1e-15
 
             elif A[a_idx, a_idx] == np.NaN:
                 print "Invalid patch for A triggered: NaN A=", A[a_idx, a_idx], a_pderiv
-                A[a_idx, a_idx] = np.finfo(np.float).resolution
+                A[a_idx, a_idx] = 1e-15
 
         # Returning the A parameters. This is actually a dump return for coding constance reasons.
         return A
