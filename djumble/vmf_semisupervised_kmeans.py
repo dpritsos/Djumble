@@ -681,7 +681,7 @@ class HMRFKmeans(object):
 
                             ml_cnt += 1.0
 
-                            mlcost_pderiv -= self.PartialDerivative(
+                            mlcost_pderiv += self.PartialDerivative(
                                 a_idx, x_data[x[0], :], x_data[x[1], :], A
                             )
 
@@ -711,7 +711,10 @@ class HMRFKmeans(object):
                             # ...contribution positive. **Here it is just using the outcome of the...
                             # ...partial derivative it self as to be equally weighted with the...
                             # ...must-link constraints** OR NOT.
-                            # cl_pd = self.PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
+
+                            cl_pd = self.PartialDerivative(
+                                a_idx, x_data[x[0], :], x_data[x[1], :], A
+                            )
 
                             # minus_max_clpd = 0.0
                             # if cl_pd < 0.0:
@@ -721,9 +724,7 @@ class HMRFKmeans(object):
 
                             # minus_max_clpd = cl_pd
 
-                            clcost_pderiv += self.PartialDerivative(
-                                a_idx, x_data[x[0], :], x_data[x[1], :], A
-                            )
+                            clcost_pderiv += cl_pd
 
             # Averaging dividing be the number of cannot-link constrains.
             if cl_cnt:
@@ -751,6 +752,12 @@ class HMRFKmeans(object):
                                     (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
                                     )
                                )
+            if A[a_idx, a_idx] < 0.0:
+                print self.lrn_rate
+                print xm_pderiv
+                print mlcost_pderiv
+                print clcost_pderiv
+                print a_pderiv
 
             # ΝΟΤΕ: Invalid patch for let the experiments to be completed.###########################
             if A[a_idx, a_idx] < 0.0:

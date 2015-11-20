@@ -16,6 +16,15 @@ import synergeticprocessing.synergeticpool as mymp
 
 #os.system("OPENBLAS_MAIN_FREE=1")
 
+G_a_idx_range = None
+G_x_data = None
+G_mu_arr = None
+G_clstr_tags_arr = None
+G_mst_lnk_idxs = None
+G_cnt_lnk_idxs = None
+G_A = None
+G_lrn_rate = None
+G_ray_sigma = None
 
 
 class HMRFKmeans(object):
@@ -691,15 +700,24 @@ class HMRFKmeans(object):
 
         update_lsts_chank = list()
 
+        G_x_data = x_data
+        G_mu_arr = mu_arr
+        G_clstr_tags_arr = clstr_tags_arr
+        G_mst_lnk_idxs = mst_lnk_idxs
+        G_cnt_lnk_idxs = cnt_lnk_idxs
+        G_A = A
+        G_lrn_rate = self.lrn_rate
+        G_ray_sigma = self.ray_sigma
+
         for a_idx_range in [(0, 350), (350, 700)]:
             print a_idx_range
             update_lsts_chank.append(
                 self.da_pool.apply_async(
                     UpdateParam,
-                    args=(
-                        a_idx_range, x_data, mu_arr, clstr_tags_arr,
-                        mst_lnk_idxs, cnt_lnk_idxs,
-                        A, self.lrn_rate, self.ray_sigma)
+                    args=(a_idx_range, G_x_data, G_mu_arr, G_clstr_tags_arr, G_mst_lnk_idxs, G_cnt_lnk_idxs, G_A, G_lrn_rate, G_ray_sigma,)
+                        # a_idx_range, x_data, mu_arr, clstr_tags_arr,
+                        # mst_lnk_idxs, cnt_lnk_idxs,
+                        # A, self.lrn_rate, self.ray_sigma)
                 )
             )
 
@@ -970,7 +988,7 @@ if __name__ == '__main__':
 
     # ml_cl_cons = sp.sparse.coo_matrix(ml_cl_cons)
 
-    # os.system("taskset -p 0xff %d" % os.getpid())
+    os.system("taskset -p 0xff %d" % os.getpid())
 
     print 'CPUs', mp.cpu_count()
     da_pool = mp.Pool(2)
