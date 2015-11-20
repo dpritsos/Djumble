@@ -11,11 +11,12 @@ import multiprocessing as mp
 import time as tm
 import sys
 import os
+import copy
+
 sys.path.append('../../synergeticprocessing')
-import synergeticprocessing.synergeticpool as mymp
+# import synergeticprocessing.synergeticpool as mymp
 
-#os.system("OPENBLAS_MAIN_FREE=1")
-
+G_x_data = None
 
 
 class HMRFKmeans(object):
@@ -689,34 +690,37 @@ class HMRFKmeans(object):
 
         print "Dispatching"
 
-        update_lsts_chank = list()
+        process_lst = list()
+        update_tups_lst = mp.Manager().list()
 
-        for a_idx_range in [(0, 350), (350, 700)]:
+        for i, a_idx_range in enumerate([(0, 350), (350, 700)]):
+
             print a_idx_range
-            update_lsts_chank.append(
-                self.da_pool.apply_async(
-                    UpdateParam,
+
+            process_lst.append(
+                mp.Process(
+                    target=UpdateParam,
                     args=(
-                        a_idx_range, x_data, mu_arr, clstr_tags_arr,
+                        update_tups_lst, a_idx_range, x_data, mu_arr, clstr_tags_arr,
                         mst_lnk_idxs, cnt_lnk_idxs,
-                        A, self.lrn_rate, self.ray_sigma)
+                        np.diag(A), self.lrn_rate, self.ray_sigma)
                 )
             )
+            process_lst[i].start()
 
         timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
         print "Dispatch time: %d:%d:%d:%d" % timel
+
+        for p in process_lst:
+            p.join()
 
         start_tm = tm.time()
 
         print "Collecting/Updating"
 
-        # Updating every parameter's value one-by-one.
-        for i, update_tup_lst in enumerate(update_lsts_chank):
-            # print update_tup_lst
-            # for ret in update_tup_lst:
-            for a_idx, a in update_tup_lst.get():
-                # print a_idx, a
-                A[a_idx, a_idx] = a
+        for a_idx, a in update_tups_lst:
+            # print a_idx, a
+            A[a_idx, a_idx] = a
 
         timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
         print "Collect/Update time: %d:%d:%d:%d" % timel
@@ -725,14 +729,14 @@ class HMRFKmeans(object):
         return A
 
 
-def UpdateParam(a_idx_range, x_data, mu_arr, clstr_tags_arr,
-                mst_lnk_idxs, cnt_lnk_idxs, A, lrn_rate, ray_sigma):
+def UpdateParam(update_tups_lst, a_idx_range, x_data_in, mu_arr, clstr_tags_arr,
+                mst_lnk_idxs, cnt_lnk_idxs, A_in, lrn_rate, ray_sigma):
 
-    update_tups_lst = list()
+    # update_tups_lst = list()
 
-    for a_idx, a in zip(range(a_idx_range[0], a_idx_range[1]), np.diag(A)[a_idx_range[0]:a_idx_range[1]]):
+    for a_idx, a in zip(range(a_idx_range[0], a_idx_range[1]), A[a_idx_range[0]:a_idx_range[1]]):
 
-        # print 'IDX', a_idx
+        print 'IDX', a_idx
 
         # Initializing...
         xm_pderiv, mlcost_pderiv, clcost_pderiv = 0.0, 0.0, 0.0
@@ -821,7 +825,8 @@ def UpdateParam(a_idx_range, x_data, mu_arr, clstr_tags_arr,
         update_tups_lst.append((a_idx, new_val))
 
     # Changing a diagonal value of the A cosine similarity parameters measure.
-    return update_tups_lst
+    # return update_tups_lst
+    # q.put(update_tups_lst)
 
 
 def PartialDerivative(a_idx, x1, x2, A):
@@ -845,13 +850,13 @@ def PartialDerivative(a_idx, x1, x2, A):
     """
 
     # Calculating parametrized Norms ||Σ xi||(A)
-    x1_pnorm = np.sqrt(np.dot(np.dot(x1, A), x1.reshape(x1.shape[0], 1)))
-    x2_pnorm = np.sqrt(np.dot(np.dot(x2, A), x1.reshape(x2.shape[0], 1)))
+    x1_pnorm = np.sqrt(np.dot(np.dot(x1, np.diag(A)), x1.reshape(x1.shape[0], 1)))
+    x2_pnorm = np.sqrt(np.dot(np.dot(x2, np.diag(A)), x1.reshape(x2.shape[0], 1)))
 
     res_a = (
                 (x1[a_idx] * x2[a_idx] * x1_pnorm * x2_pnorm) -
                 (
-                    np.dot(np.dot(x1, A), x2.reshape(x2.shape[0], 1)) *
+                    np.dot(np.dot(x1, np.diag(A)), x2.reshape(x2.shape[0], 1)) *
                     (
                         (
                             np.square(x1[a_idx]) * np.square(x2_pnorm) +
@@ -971,9 +976,10 @@ if __name__ == '__main__':
     # ml_cl_cons = sp.sparse.coo_matrix(ml_cl_cons)
 
     # os.system("taskset -p 0xff %d" % os.getpid())
+    # os.system("OPENBLAS_MAIN_FREE=1")
 
     print 'CPUs', mp.cpu_count()
-    da_pool = mp.Pool(2)
+    da_pool = None # mp.Pool(2)
     # mymp.SynergeticPool(synergetic_servers=None, local_workers=mp.cpu_count())
 
     print "Running HMRF Kmeans"
