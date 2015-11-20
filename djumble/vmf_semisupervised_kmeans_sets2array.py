@@ -16,8 +16,6 @@ import copy
 sys.path.append('../../synergeticprocessing')
 # import synergeticprocessing.synergeticpool as mymp
 
-G_x_data = None
-
 
 class HMRFKmeans(object):
     """ HMRF Kmeans: A Semi-supervised clustering algorithm based on Hidden Markov Random Fields
@@ -703,7 +701,8 @@ class HMRFKmeans(object):
                     args=(
                         update_tups_lst, a_idx_range, x_data, mu_arr, clstr_tags_arr,
                         mst_lnk_idxs, cnt_lnk_idxs,
-                        np.diag(A), self.lrn_rate, self.ray_sigma)
+                        np.diag(A), self.lrn_rate, self.ray_sigma
+                    )
                 )
             )
             process_lst[i].start()
