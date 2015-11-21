@@ -647,6 +647,8 @@ class HMRFKmeans(object):
 
         print "In UpdateDistorParams..."
 
+        new_A = np.zeros_like(np.diag(A), dtype=np.float)
+
         # Updating every parameter's value one-by-one.
         for a_idx, a in enumerate(A.data):
 
@@ -741,18 +743,19 @@ class HMRFKmeans(object):
 
             if np.abs(a_pderiv) == np.inf:
                 print "Invalid patch for Rayleighs P'(A) triggered: (+/-)INF P'(A)=", a_pderiv
-                A[a_idx, a_idx] = 1e-15
+                a_pderiv = 1e-15
 
             elif a_pderiv == np.nan:
                 print "Invalid patch for Rayleighs P(A) triggered: NaN P'(A)=", a_pderiv
-                A[a_idx, a_idx] = 1e-15
+                a_pderiv = 1e-15
 
             # Changing a diagonal value of the A cosine similarity parameters measure.
-            A[a_idx, a_idx] = (a + (self.lrn_rate *
+            new_A[a_idx, a_idx] = (a + (self.lrn_rate *
                                     (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
-                                    )
-                               )
-            if A[a_idx, a_idx] < 0.0:
+                                   )
+                                  )
+
+            if new_A[a_idx, a_idx] < 0.0:
                 print self.lrn_rate
                 print xm_pderiv
                 print mlcost_pderiv
@@ -760,21 +763,24 @@ class HMRFKmeans(object):
                 print a_pderiv
 
             # ΝΟΤΕ: Invalid patch for let the experiments to be completed.###########################
-            if A[a_idx, a_idx] < 0.0:
-                print "Invalid patch for A triggered: (-) Negative A=", A[a_idx, a_idx], a_pderiv
-                A[a_idx, a_idx] = 1e-15
+            if new_A[a_idx, a_idx] < 0.0:
+                print "Invalid patch for A triggered: (-) Negative A=", new_A[a_idx, a_idx], a_pderiv
+                new_A[a_idx, a_idx] = 1e-15
 
-            elif A[a_idx, a_idx] == 0.0:
-                print "Invalid patch for A triggered: (0) Zero A=", A[a_idx, a_idx], a_pderiv
-                A[a_idx, a_idx] = 1e-15
+            elif new_A[a_idx, a_idx] == 0.0:
+                print "Invalid patch for A triggered: (0) Zero A=", new_A[a_idx, a_idx], a_pderiv
+                new_A[a_idx, a_idx] = 1e-15
 
-            elif np.abs(A[a_idx, a_idx]) == np.Inf:
-                print "Invalid patch for A triggered: (+/-)INF A=", A[a_idx, a_idx], a_pderiv
-                A[a_idx, a_idx] = 1e-15
+            elif np.abs(new_A[a_idx, a_idx]) == np.Inf:
+                print "Invalid patch for A triggered: (+/-)INF A=", new_A[a_idx, a_idx], a_pderiv
+                new_A[a_idx, a_idx] = 1e-15
 
-            elif A[a_idx, a_idx] == np.NaN:
-                print "Invalid patch for A triggered: NaN A=", A[a_idx, a_idx], a_pderiv
-                A[a_idx, a_idx] = 1e-15
+            elif new_A[a_idx, a_idx] == np.NaN:
+                print "Invalid patch for A triggered: NaN A=", new_A[a_idx, a_idx], a_pderiv
+                new_A[a_idx, a_idx] = 1e-15
+
+        # ######
+        A = np.diag(new_A)
 
         # Returning the A parameters. This is actually a dump return for coding constance reasons.
         return A

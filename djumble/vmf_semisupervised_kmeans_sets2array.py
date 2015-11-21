@@ -8,10 +8,12 @@ import random as rnd
 import matplotlib.pyplot as plt
 import scipy.special as special
 import multiprocessing as mp
+from multiprocessing import sharedctypes as mp_sct
 import time as tm
 import sys
 import os
 import copy
+import warnings
 
 sys.path.append('../../synergeticprocessing')
 # import synergeticprocessing.synergeticpool as mymp
@@ -211,8 +213,8 @@ class HMRFKmeans(object):
         self.conv_step = conv_step
 
         # Closing the internal process pool.
-        self.da_pool.close()
-        self.da_pool.join()
+        # self.da_pool.close()
+        # self.da_pool.join()
 
         # Returning the Centroids and the Clusters,i.e. the set of indeces for each cluster.
         return mu_arr, clstr_tags_arr
@@ -528,7 +530,7 @@ class HMRFKmeans(object):
             clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
 
             #
-            smlps_cnt += clstr_idxs_arr
+            smlps_cnt += clstr_idxs_arr.shape[0]
 
             # Calculating the cosine distances and add the to the total sum of distances.
             # ---------------------------------------------------------------------------
@@ -596,7 +598,7 @@ class HMRFKmeans(object):
             ]
 
             #
-            cl_cost += float(len(viol_idxs))
+            cl_cnt += float(len(viol_idxs))
 
             if viol_idxs.shape[0]:
 
@@ -691,6 +693,47 @@ class HMRFKmeans(object):
         process_lst = list()
         update_tups_lst = mp.Manager().list()
 
+        tmp = np.ctypeslib.as_ctypes(x_data)
+        x_data_share = mp_sct.Array(tmp._type_, tmp, lock=False)
+        x_data_shape = x_data.shape
+        print 'Shape', x_data_shape
+
+        tmp = np.ctypeslib.as_ctypes(A)
+        A_share = mp_sct.Array(tmp._type_, tmp, lock=False)
+        A_shape = A.shape
+
+        tmp = np.ctypeslib.as_ctypes(mu_arr)
+        mu_arr_share = mp_sct.Array(tmp._type_, tmp, lock=False)
+        mu_arr_shape = mu_arr.shape
+
+        tmp = np.ctypeslib.as_ctypes(clstr_tags_arr)
+        clstr_tags_arr_share = mp_sct.Array(tmp._type_, tmp, lock=False)
+        clstr_tags_arr_shape = clstr_tags_arr.shape
+
+        mst_lnk_idxs0 = np.zeros_like(mst_lnk_idxs[0])
+        mst_lnk_idxs0[:] = mst_lnk_idxs[0][:]
+        tmp = np.ctypeslib.as_ctypes(mst_lnk_idxs0)
+        mst_lnk_idxs0_share = mp_sct.Array(tmp._type_, tmp, lock=False)
+        mst_lnk_idxs0_shape = mst_lnk_idxs0.shape
+
+        mst_lnk_idxs1 = np.zeros_like(mst_lnk_idxs[1])
+        mst_lnk_idxs1[:] = mst_lnk_idxs[1][:]
+        tmp = np.ctypeslib.as_ctypes(mst_lnk_idxs1)
+        mst_lnk_idxs1_share = mp_sct.Array(tmp._type_, tmp, lock=False)
+        mst_lnk_idxs1_shape = mst_lnk_idxs1.shape
+
+        cnt_lnk_idxs0 = np.zeros_like(cnt_lnk_idxs[0])
+        cnt_lnk_idxs0[:] = cnt_lnk_idxs[0][:]
+        tmp = np.ctypeslib.as_ctypes(cnt_lnk_idxs0)
+        cnt_lnk_idxs0_share = mp_sct.Array(tmp._type_, tmp, lock=False)
+        cnt_lnk_idxs0_shape = cnt_lnk_idxs0.shape
+
+        cnt_lnk_idxs1 = np.zeros_like(cnt_lnk_idxs[1])
+        cnt_lnk_idxs1[:] = cnt_lnk_idxs[1][:]
+        tmp = np.ctypeslib.as_ctypes(cnt_lnk_idxs1)
+        cnt_lnk_idxs1_share = mp_sct.Array(tmp._type_, tmp, lock=False)
+        cnt_lnk_idxs1_shape = cnt_lnk_idxs1.shape
+
         for i, a_idx_range in enumerate([(0, 350), (350, 700)]):
 
             print a_idx_range
@@ -699,9 +742,15 @@ class HMRFKmeans(object):
                 mp.Process(
                     target=UpdateParam,
                     args=(
-                        update_tups_lst, a_idx_range, x_data, mu_arr, clstr_tags_arr,
-                        mst_lnk_idxs, cnt_lnk_idxs,
-                        np.diag(A), self.lrn_rate, self.ray_sigma
+                        update_tups_lst, a_idx_range,
+                        x_data_share, mu_arr_share, clstr_tags_arr_share,
+                        mst_lnk_idxs0_share, mst_lnk_idxs1_share,
+                        cnt_lnk_idxs0_share, cnt_lnk_idxs1_share,
+                        A_share, x_data_shape, mu_arr_shape, clstr_tags_arr_shape,
+                        mst_lnk_idxs0_shape, mst_lnk_idxs1_shape,
+                        cnt_lnk_idxs0_shape, cnt_lnk_idxs1_shape,
+                        A_shape,
+                        self.lrn_rate, self.ray_sigma
                     )
                 )
             )
@@ -728,12 +777,30 @@ class HMRFKmeans(object):
         return A
 
 
-def UpdateParam(update_tups_lst, a_idx_range, x_data_in, mu_arr, clstr_tags_arr,
-                mst_lnk_idxs, cnt_lnk_idxs, A_in, lrn_rate, ray_sigma):
+def UpdateParam(update_tups_lst, a_idx_range, x_data_share, mu_arr_share, clstr_tags_arr_share,
+                mst_lnk_idxs0_share, mst_lnk_idxs1_share, cnt_lnk_idxs0_share, cnt_lnk_idxs1_share,
+                A_share, x_data_shape, mu_arr_shape, clstr_tags_arr_shape,
+                mst_lnk_idxs0_shape, mst_lnk_idxs1_shape,
+                cnt_lnk_idxs0_shape, cnt_lnk_idxs1_shape,
+                A_shape, lrn_rate, ray_sigma):
+
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', RuntimeWarning)
+        print 'IN'
+        x_data = np.ctypeslib.as_array(x_data_share, x_data_shape)
+        mu_arr = np.ctypeslib.as_array(mu_arr_share, mu_arr_shape)
+        clstr_tags_arr = np.ctypeslib.as_array(clstr_tags_arr_share, clstr_tags_arr_shape)
+        mst_lnk_idxs0 = np.ctypeslib.as_array(mst_lnk_idxs0_share, mst_lnk_idxs0_shape)
+        cnt_lnk_idxs0 = np.ctypeslib.as_array(cnt_lnk_idxs0_share, cnt_lnk_idxs0_shape)
+        mst_lnk_idxs1 = np.ctypeslib.as_array(mst_lnk_idxs1_share, mst_lnk_idxs1_shape)
+        cnt_lnk_idxs1 = np.ctypeslib.as_array(cnt_lnk_idxs1_share, cnt_lnk_idxs1_shape)
+        mst_lnk_idxs = (mst_lnk_idxs0, mst_lnk_idxs1)
+        cnt_lnk_idxs = (cnt_lnk_idxs0, cnt_lnk_idxs1)
+        A = np.ctypeslib.as_array(A_share, A_shape)
 
     # update_tups_lst = list()
 
-    for a_idx, a in zip(range(a_idx_range[0], a_idx_range[1]), A[a_idx_range[0]:a_idx_range[1]]):
+    for a_idx, a in zip(range(a_idx_range[0], a_idx_range[1]), np.diag(A)[a_idx_range[0]:a_idx_range[1]]):
 
         print 'IDX', a_idx
 
@@ -746,7 +813,7 @@ def UpdateParam(update_tups_lst, a_idx_range, x_data_in, mu_arr, clstr_tags_arr,
             # Getting the indeces for the i cluster.
             clstr_idxs = np.where(clstr_tags_arr == i)[0]
 
-            smpls_cnt += clstr_idxs.shape[0]
+            smpls_cnt += float(clstr_idxs.shape[0])
 
             # Calculating the partial derivatives of each parameter for all cluster's member...
             # ...for each cluster.
@@ -768,7 +835,7 @@ def UpdateParam(update_tups_lst, a_idx_range, x_data_in, mu_arr, clstr_tags_arr,
                 ~np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs)
             ]
 
-            ml_cnt += float(len(viol_idxs))
+            ml_cnt += float(viol_idxs.shape[0])
 
             if viol_idxs.shape[0]:
 
@@ -817,11 +884,12 @@ def UpdateParam(update_tups_lst, a_idx_range, x_data_in, mu_arr, clstr_tags_arr,
         # print 'ml', mlcost_pderiv
         # print 'cl', clcost_pderiv
 
-        new_val = a + (lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv))
+        A[a_idx, a_idx] = a + (lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv))
+        # print new_val
         # print (xm_pderiv[0] + mlcost_pderiv + clcost_pderiv - a_pderiv)
         # print 'ln', lrn_rate
         # print 'new_val', new_val
-        update_tups_lst.append((a_idx, new_val))
+        #update_tups_lst.append((a_idx, new_val))
 
     # Changing a diagonal value of the A cosine similarity parameters measure.
     # return update_tups_lst
@@ -849,13 +917,13 @@ def PartialDerivative(a_idx, x1, x2, A):
     """
 
     # Calculating parametrized Norms ||Σ xi||(A)
-    x1_pnorm = np.sqrt(np.dot(np.dot(x1, np.diag(A)), x1.reshape(x1.shape[0], 1)))
-    x2_pnorm = np.sqrt(np.dot(np.dot(x2, np.diag(A)), x1.reshape(x2.shape[0], 1)))
+    x1_pnorm = np.sqrt(np.dot(np.dot(x1, A), x1.reshape(x1.shape[0], 1)))
+    x2_pnorm = np.sqrt(np.dot(np.dot(x2, A), x1.reshape(x2.shape[0], 1)))
 
     res_a = (
                 (x1[a_idx] * x2[a_idx] * x1_pnorm * x2_pnorm) -
                 (
-                    np.dot(np.dot(x1, np.diag(A)), x2.reshape(x2.shape[0], 1)) *
+                    np.dot(np.dot(x1, A), x2.reshape(x2.shape[0], 1)) *
                     (
                         (
                             np.square(x1[a_idx]) * np.square(x2_pnorm) +
