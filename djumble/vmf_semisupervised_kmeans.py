@@ -42,8 +42,8 @@ class HMRFKmeans(object):
     """
 
     def __init__(self, k_clusters, must_lnk, cannot_lnk, init_centroids=None, max_iter=300,
-                 cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5, d_params=None, norm_part=False,
-                 globj='non-normed'):
+                 cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5, d_params=None,
+                 norm_part=False, globj='non-normed'):
 
         self.k_clusters = k_clusters
         self.must_lnk = must_lnk
@@ -647,7 +647,7 @@ class HMRFKmeans(object):
 
         print "In UpdateDistorParams..."
 
-        new_A = np.zeros_like(np.diag(A), dtype=np.float)
+        new_A = np.zeros_like(A.data, dtype=np.float)
 
         # Updating every parameter's value one-by-one.
         for a_idx, a in enumerate(A.data):
@@ -750,12 +750,11 @@ class HMRFKmeans(object):
                 a_pderiv = 1e-15
 
             # Changing a diagonal value of the A cosine similarity parameters measure.
-            new_A[a_idx, a_idx] = (a + (self.lrn_rate *
-                                    (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
-                                   )
-                                  )
+            new_A[a_idx] = a + (self.lrn_rate *
+                                (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
+                                )
 
-            if new_A[a_idx, a_idx] < 0.0:
+            if new_A[a_idx] < 0.0:
                 print self.lrn_rate
                 print xm_pderiv
                 print mlcost_pderiv
@@ -763,24 +762,24 @@ class HMRFKmeans(object):
                 print a_pderiv
 
             # ΝΟΤΕ: Invalid patch for let the experiments to be completed.###########################
-            if new_A[a_idx, a_idx] < 0.0:
-                print "Invalid patch for A triggered: (-) Negative A=", new_A[a_idx, a_idx], a_pderiv
-                new_A[a_idx, a_idx] = 1e-15
+            if new_A[a_idx] < 0.0:
+                print "Invalid patch for A triggered: (-) Negative A=", new_A[a_idx], a_pderiv
+                new_A[a_idx] = 1e-15
 
-            elif new_A[a_idx, a_idx] == 0.0:
-                print "Invalid patch for A triggered: (0) Zero A=", new_A[a_idx, a_idx], a_pderiv
-                new_A[a_idx, a_idx] = 1e-15
+            elif new_A[a_idx] == 0.0:
+                print "Invalid patch for A triggered: (0) Zero A=", new_A[a_idx], a_pderiv
+                new_A[a_idx] = 1e-15
 
-            elif np.abs(new_A[a_idx, a_idx]) == np.Inf:
-                print "Invalid patch for A triggered: (+/-)INF A=", new_A[a_idx, a_idx], a_pderiv
-                new_A[a_idx, a_idx] = 1e-15
+            elif np.abs(new_A[a_idx]) == np.Inf:
+                print "Invalid patch for A triggered: (+/-)INF A=", new_A[a_idx], a_pderiv
+                new_A[a_idx] = 1e-15
 
-            elif new_A[a_idx, a_idx] == np.NaN:
-                print "Invalid patch for A triggered: NaN A=", new_A[a_idx, a_idx], a_pderiv
-                new_A[a_idx, a_idx] = 1e-15
+            elif new_A[a_idx] == np.NaN:
+                print "Invalid patch for A triggered: NaN A=", new_A[a_idx], a_pderiv
+                new_A[a_idx] = 1e-15
 
         # ######
-        A = np.diag(new_A)
+        A = sp.sparse.csr_matrix(np.diag(new_A))
 
         # Returning the A parameters. This is actually a dump return for coding constance reasons.
         return A
@@ -1079,7 +1078,7 @@ if __name__ == '__main__':
     init_centrs = [set([0]), set([550]), set([1100])]
     print "Running HMRF Kmeans"
     hkmeans = HMRFKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
-                         max_iter=300, cvg=0.0001, lrn_rate=0.01, ray_sigma=1.0,
+                         max_iter=300, cvg=0.0001, lrn_rate=0.0001, ray_sigma=1.0,
                          d_params=np.random.uniform(1.0, 1.0, size=test_dims), norm_part=False,
                          globj='non-normed')
     res = hkmeans.fit(x_data_2d_arr, set([50]))
