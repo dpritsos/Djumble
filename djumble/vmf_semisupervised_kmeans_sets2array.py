@@ -734,7 +734,7 @@ class HMRFKmeans(object):
         cnt_lnk_idxs1_share = mp_sct.Array(tmp._type_, tmp, lock=False)
         cnt_lnk_idxs1_shape = cnt_lnk_idxs1.shape
 
-        for i, a_idx_range in enumerate([(0, 175), (175, 350), (350, 572), (575, 700)]):
+        for i, a_idx_range in enumerate([(0, 175), (175, 350), (350, 525), (525, 700)]):
 
             print a_idx_range
 
@@ -756,22 +756,22 @@ class HMRFKmeans(object):
             )
             process_lst[i].start()
 
-        timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
-        print "Dispatch time: %d:%d:%d:%d" % timel
+        #timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
+        #print "Dispatch time: %d:%d:%d:%d" % timel
 
         for p in process_lst:
             p.join()
 
-        start_tm = tm.time()
+        #start_tm = tm.time()
 
-        print "Collecting/Updating"
+        #print "Collecting/Updating"
 
-        for a_idx, a in update_tups_lst:
+        #for a_idx, a in update_tups_lst:
             # print a_idx, a
-            A[a_idx, a_idx] = a
+        #    A[a_idx, a_idx] = a
 
         timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
-        print "Collect/Update time: %d:%d:%d:%d" % timel
+        print "Update params time: %d:%d:%d:%d" % timel
 
         # Returning the A parameters. This is actually a dump return for coding constance reasons.
         return A
@@ -799,8 +799,10 @@ def UpdateParam(update_tups_lst, a_idx_range, x_data_share, mu_arr_share, clstr_
         A = np.ctypeslib.as_array(A_share, A_shape)
 
     # update_tups_lst = list()
-
-    new_A = np.zeros(len(np.arange(a_idx_range[0],a_idx_range[1])), dtype=np.float)
+    diagA = np.diag(A)
+    new_A = np.zeros_like(diagA, dtype=np.float)
+    #print 'AAA', a_idx_range[1]-a_idx_range[0]
+    #0/0
 
     for a_idx, a in zip(range(a_idx_range[0], a_idx_range[1]), np.diag(A)[a_idx_range[0]:a_idx_range[1]]):
 
@@ -893,8 +895,8 @@ def UpdateParam(update_tups_lst, a_idx_range, x_data_share, mu_arr_share, clstr_
         # print 'new_val', new_val
         #update_tups_lst.append((a_idx, new_val))
 
-    for i, a_idx in enumerate(range(a_idx_range[0], a_idx_range[1])):
-        A[a_idx, a_idx] = new_A[i]
+    for a_idx in range(a_idx_range[0], a_idx_range[1]):
+        A[a_idx, a_idx] = new_A[a_idx]
 
     # Changing a diagonal value of the A cosine similarity parameters measure.
     # return update_tups_lst
