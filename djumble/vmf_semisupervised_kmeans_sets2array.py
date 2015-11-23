@@ -734,7 +734,7 @@ class HMRFKmeans(object):
         cnt_lnk_idxs1_share = mp_sct.Array(tmp._type_, tmp, lock=False)
         cnt_lnk_idxs1_shape = cnt_lnk_idxs1.shape
 
-        for i, a_idx_range in enumerate([(0, 350), (350, 700)]):
+        for i, a_idx_range in enumerate([(0, 175), (175, 350), (350, 572), (575, 700)]):
 
             print a_idx_range
 
@@ -799,6 +799,8 @@ def UpdateParam(update_tups_lst, a_idx_range, x_data_share, mu_arr_share, clstr_
         A = np.ctypeslib.as_array(A_share, A_shape)
 
     # update_tups_lst = list()
+
+    new_A = np.zeros(len(np.arange(a_idx_range[0],a_idx_range[1])), dtype=np.float)
 
     for a_idx, a in zip(range(a_idx_range[0], a_idx_range[1]), np.diag(A)[a_idx_range[0]:a_idx_range[1]]):
 
@@ -884,12 +886,15 @@ def UpdateParam(update_tups_lst, a_idx_range, x_data_share, mu_arr_share, clstr_
         # print 'ml', mlcost_pderiv
         # print 'cl', clcost_pderiv
 
-        A[a_idx, a_idx] = a + (lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv))
+        new_A[a_idx] = a + (lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv))
         # print new_val
         # print (xm_pderiv[0] + mlcost_pderiv + clcost_pderiv - a_pderiv)
         # print 'ln', lrn_rate
         # print 'new_val', new_val
         #update_tups_lst.append((a_idx, new_val))
+
+    for i, a_idx in enumerate(range(a_idx_range[0], a_idx_range[1])):
+        A[a_idx, a_idx] = new_A[i]
 
     # Changing a diagonal value of the A cosine similarity parameters measure.
     # return update_tups_lst
