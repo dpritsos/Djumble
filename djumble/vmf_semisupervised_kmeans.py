@@ -652,7 +652,7 @@ class HMRFKmeans(object):
         new_A = np.zeros_like(A.data, dtype=np.float)
 
         # Updating every parameter's value one-by-one.
-        for a_idx, a in enumerate(A.data):
+        for a_idx, a in enumerate(np.array([a[0] for a in A.data])):
 
             # Calculating Partial Derivative of D(xi, mu).
             xm_pderiv = 0.0
@@ -846,7 +846,7 @@ class HMRFKmeans(object):
 
 if __name__ == '__main__':
 
-    test_dims = 70
+    test_dims = 7
 
     print "Creating Sample"
     x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 200.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
