@@ -8,7 +8,7 @@ import random as rnd
 import matplotlib.pyplot as plt
 import scipy.special as special
 import multiprocessing as mp
-from multiprocessing import sharedctypes as mp_sct
+import multiprocessing.sharedctypes as mp_sct
 import time as tm
 import sys
 import os
@@ -688,219 +688,225 @@ class HMRFKmeans(object):
         # Getting all the cannot-link (if any) indeces.
         cnt_lnk_idxs = np.where(self.ml_cl_cons == -1)
 
-        print "Dispatching"
-
-        process_lst = list()
-        update_tups_lst = mp.Manager().list()
-
-        tmp = np.ctypeslib.as_ctypes(x_data)
-        x_data_share = mp_sct.Array(tmp._type_, tmp, lock=False)
-        x_data_shape = x_data.shape
-        print 'Shape', x_data_shape
-
         tmp = np.ctypeslib.as_ctypes(A)
         A_share = mp_sct.Array(tmp._type_, tmp, lock=False)
         A_shape = A.shape
 
-        tmp = np.ctypeslib.as_ctypes(mu_arr)
-        mu_arr_share = mp_sct.Array(tmp._type_, tmp, lock=False)
-        mu_arr_shape = mu_arr.shape
+        tmp = np.ctypeslib.as_ctypes(x_data)
+        x_data_share = mp_sct.Array(tmp._type_, tmp, lock=False)
+        x_data_shape = x_data.shape
 
-        tmp = np.ctypeslib.as_ctypes(clstr_tags_arr)
-        clstr_tags_arr_share = mp_sct.Array(tmp._type_, tmp, lock=False)
-        clstr_tags_arr_shape = clstr_tags_arr.shape
+        new_A = np.zeros_like(np.diag(A), dtype=np.float)
 
-        mst_lnk_idxs0 = np.zeros_like(mst_lnk_idxs[0])
-        mst_lnk_idxs0[:] = mst_lnk_idxs[0][:]
-        tmp = np.ctypeslib.as_ctypes(mst_lnk_idxs0)
-        mst_lnk_idxs0_share = mp_sct.Array(tmp._type_, tmp, lock=False)
-        mst_lnk_idxs0_shape = mst_lnk_idxs0.shape
+        for a_idx, a in enumerate(np.diag(A)):
 
-        mst_lnk_idxs1 = np.zeros_like(mst_lnk_idxs[1])
-        mst_lnk_idxs1[:] = mst_lnk_idxs[1][:]
-        tmp = np.ctypeslib.as_ctypes(mst_lnk_idxs1)
-        mst_lnk_idxs1_share = mp_sct.Array(tmp._type_, tmp, lock=False)
-        mst_lnk_idxs1_shape = mst_lnk_idxs1.shape
+            print 'IDX', a_idx
 
-        cnt_lnk_idxs0 = np.zeros_like(cnt_lnk_idxs[0])
-        cnt_lnk_idxs0[:] = cnt_lnk_idxs[0][:]
-        tmp = np.ctypeslib.as_ctypes(cnt_lnk_idxs0)
-        cnt_lnk_idxs0_share = mp_sct.Array(tmp._type_, tmp, lock=False)
-        cnt_lnk_idxs0_shape = cnt_lnk_idxs0.shape
+            # Initializing...
+            xm_pderiv, mlcost_pderiv, clcost_pderiv = 0.0, 0.0, 0.0
+            smpls_cnt, ml_cnt, cl_cnt = 0.0, 0.0, 0.0
 
-        cnt_lnk_idxs1 = np.zeros_like(cnt_lnk_idxs[1])
-        cnt_lnk_idxs1[:] = cnt_lnk_idxs[1][:]
-        tmp = np.ctypeslib.as_ctypes(cnt_lnk_idxs1)
-        cnt_lnk_idxs1_share = mp_sct.Array(tmp._type_, tmp, lock=False)
-        cnt_lnk_idxs1_shape = cnt_lnk_idxs1.shape
+            xm_pderiv = mp.Manager().Value('d', 0.0)
+            mlcost_pderiv = mp.Manager().Value('d', 0.0)
+            clcost_pderiv = mp.Manager().Value('d', 0.0)
 
-        for i, a_idx_range in enumerate([(0, 175), (175, 350), (350, 525), (525, 700)]):
+            for i, mu in enumerate(mu_arr):
 
-            print a_idx_range
+                tmp = np.ctypeslib.as_ctypes(mu)
+                mu_share = mp_sct.Array(tmp._type_, tmp, lock=False)
+                mu_shape = mu.shape
 
-            process_lst.append(
-                mp.Process(
-                    target=UpdateParam,
+                # Getting the indeces for the i cluster.
+                clstr_idxs = np.where(clstr_tags_arr == i)[0]
+
+                smpls_cnt += clstr_idxs.shape[0]
+
+                # Calculating the partial derivatives of each parameter for all cluster's member...
+                # ...for each cluster.
+                # ---------------------------------------------------------------------------------
+
+                tmp = np.ctypeslib.as_ctypes(clstr_idxs)
+                clstr_idxs_share = mp_sct.Array(tmp._type_, tmp, lock=False)
+                clstr_idxs_shape = clstr_idxs.shape
+
+                prcss_xmd = mp.Process(
+                    target=PartialDerivativeXM,
                     args=(
-                        update_tups_lst, a_idx_range,
-                        x_data_share, mu_arr_share, clstr_tags_arr_share,
-                        mst_lnk_idxs0_share, mst_lnk_idxs1_share,
-                        cnt_lnk_idxs0_share, cnt_lnk_idxs1_share,
-                        A_share, x_data_shape, mu_arr_shape, clstr_tags_arr_shape,
-                        mst_lnk_idxs0_shape, mst_lnk_idxs1_shape,
-                        cnt_lnk_idxs0_shape, cnt_lnk_idxs1_shape,
-                        A_shape,
-                        self.lrn_rate, self.ray_sigma
+                        xm_pderiv,
+                        clstr_idxs_share, clstr_idxs_shape,
+                        a_idx, x_data_share, x_data_shape,
+                        mu_share, mu_shape, A_share, A_shape
                     )
                 )
-            )
-            process_lst[i].start()
 
-        #timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
-        #print "Dispatch time: %d:%d:%d:%d" % timel
+                prcss_xmd.start()
 
-        for p in process_lst:
-            p.join()
+                # Calculating Must-Link violation cost.
+                # -------------------------------------
 
-        #start_tm = tm.time()
+                # Getting the must-link left side of the pair constraints, i.e. the row...
+                # ...indeces of the constraints matrix that are in the cluster's set of...
+                # ...indeces.
+                in_clstr_ml_rows = np.in1d(mst_lnk_idxs[0], clstr_idxs)
 
-        #print "Collecting/Updating"
+                # Getting the indeces of must-link than are not in the cluster as they should...
+                # ...have been.
+                viol_idxs = mst_lnk_idxs[1][
+                    ~np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs)
+                ]
 
-        #for a_idx, a in update_tups_lst:
-            # print a_idx, a
-        #    A[a_idx, a_idx] = a
+                ml_cnt += float(len(viol_idxs))
+
+                if viol_idxs.shape[0]:
+
+                    # Calculating the partial derivatives of all pairs of violations for...
+                    # ...must-link constraints.
+
+                    viol_idxs1 = viol_idxs.copy()
+                    viol_idxs0 = mst_lnk_idxs[0][in_clstr_ml_rows].copy()
+
+                    tmp = np.ctypeslib.as_ctypes(viol_idxs1)
+                    viol_idxs1_share = mp_sct.Array(tmp._type_, tmp, lock=False)
+                    viol_idxs1_shape = viol_idxs1.shape
+
+                    tmp = np.ctypeslib.as_ctypes(viol_idxs0)
+                    viol_idxs0_share = mp_sct.Array(tmp._type_, tmp, lock=False)
+                    viol_idxs0_shape = viol_idxs0.shape
+
+                    prcss_mlc = mp.Process(
+                        target=PartialDerivativeVC,
+                        args=(
+                            mlcost_pderiv,
+                            viol_idxs1_share, viol_idxs1_shape,
+                            viol_idxs0_share, viol_idxs0_shape,
+                            a_idx, x_data_share, x_data_shape,
+                            A_share, A_shape
+                        )
+                    )
+
+                    prcss_mlc.start()
+
+                # Calculating Cannot-Link violation cost.
+                # ---------------------------------------
+
+                # Getting the cannot-link left side of the pair constraints, i.e. the row...
+                # ...indeces of the constraints matrix that are in the cluster's set of indeces.
+                in_clstr_cl_rows = np.in1d(cnt_lnk_idxs[0], clstr_idxs)
+
+                # Getting the indeces of cannot-link than are in the cluster as they...
+                # ...shouldn't have been.
+                viol_idxs = cnt_lnk_idxs[1][np.in1d(cnt_lnk_idxs[1][in_clstr_cl_rows], clstr_idxs)]
+
+                cl_cnt += float(viol_idxs.shape[0])
+
+                if viol_idxs.shape[0]:
+
+                    # Calculasting all pairs of violation costs for cannot-link constraints.
+                    # NOTE: The violation cost is equivalent to the maxCosine distance
+
+                    viol_idxs1 = viol_idxs.copy()
+                    viol_idxs0 = mst_lnk_idxs[0][in_clstr_ml_rows].copy()
+
+                    tmp = np.ctypeslib.as_ctypes(viol_idxs1)
+                    viol_idxs1_share = mp_sct.Array(tmp._type_, tmp, lock=False)
+                    viol_idxs1_shape = viol_idxs1.shape
+
+                    tmp = np.ctypeslib.as_ctypes(viol_idxs0)
+                    viol_idxs0_share = mp_sct.Array(tmp._type_, tmp, lock=False)
+                    viol_idxs0_shape = viol_idxs0.shape
+
+                    prcss_clc = mp.Process(
+                        target=PartialDerivativeVC,
+                        args=(
+                            clcost_pderiv,
+                            viol_idxs1_share, viol_idxs1_shape,
+                            viol_idxs0_share, viol_idxs0_shape,
+                            a_idx, x_data_share, x_data_shape,
+                            A_share, A_shape
+                        )
+                    )
+
+                    prcss_clc.start()
+
+            print "Dispatch Done"
+            # Processes Joining...
+            prcss_xmd.join()
+            if cl_cnt:
+                prcss_clc.join()
+            if ml_cnt:
+                prcss_mlc.join()
+            print "Processes Joined"
+
+            # Averaging EVERYTHING
+            xm_pderiv.value = xm_pderiv.value / smpls_cnt
+            if ml_cnt:
+                mlcost_pderiv.value = mlcost_pderiv.value / ml_cnt
+            if cl_cnt:
+                clcost_pderiv.value = clcost_pderiv.value / cl_cnt
+
+            # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
+            a_pderiv = (1 / a) - (a / np.square(self.ray_sigma))
+            # print 'Rayleigh Partial', a_pderiv
+            a_pderiv = 0.0
+            # print 'a', a
+            # print 'xm', xm_pderiv
+            # print 'ml', mlcost_pderiv
+            # print 'cl', clcost_pderiv
+
+            new_A[a_idx] = a + (self.lrn_rate *
+                                (
+                                    xm_pderiv.value +
+                                    mlcost_pderiv.value +
+                                    clcost_pderiv.value -
+                                    a_pderiv
+                                 )
+                                )
+            print xm_pderiv
+            print mlcost_pderiv
+            print clcost_pderiv
+            print a_pderiv
+            print 'ln', self.lrn_rate
+            # print 'new_val', new_val
+
+        # The actual update of the A parameters of the distortion measure.
+        A[:, :] = np.diag(new_A)
 
         timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
-        print "Update params time: %d:%d:%d:%d" % timel
+        print "Update time: %d:%d:%d:%d" % timel
 
         # Returning the A parameters. This is actually a dump return for coding constance reasons.
         return A
 
 
-def UpdateParam(update_tups_lst, a_idx_range, x_data_share, mu_arr_share, clstr_tags_arr_share,
-                mst_lnk_idxs0_share, mst_lnk_idxs1_share, cnt_lnk_idxs0_share, cnt_lnk_idxs1_share,
-                A_share, x_data_shape, mu_arr_shape, clstr_tags_arr_shape,
-                mst_lnk_idxs0_shape, mst_lnk_idxs1_shape,
-                cnt_lnk_idxs0_shape, cnt_lnk_idxs1_shape,
-                A_shape, lrn_rate, ray_sigma):
+def PartialDerivativeXM(xm_pderiv, clstr_idxs_share, clstr_idxs_shape,
+                        a_idx, x_data_share, x_data_shape, mu_share, mu_shape, A_share, A_shape):
 
     with warnings.catch_warnings():
         warnings.simplefilter('ignore', RuntimeWarning)
-        print 'IN'
+        clstr_idxs = np.ctypeslib.as_array(clstr_idxs_share, clstr_idxs_shape)
         x_data = np.ctypeslib.as_array(x_data_share, x_data_shape)
-        mu_arr = np.ctypeslib.as_array(mu_arr_share, mu_arr_shape)
-        clstr_tags_arr = np.ctypeslib.as_array(clstr_tags_arr_share, clstr_tags_arr_shape)
-        mst_lnk_idxs0 = np.ctypeslib.as_array(mst_lnk_idxs0_share, mst_lnk_idxs0_shape)
-        cnt_lnk_idxs0 = np.ctypeslib.as_array(cnt_lnk_idxs0_share, cnt_lnk_idxs0_shape)
-        mst_lnk_idxs1 = np.ctypeslib.as_array(mst_lnk_idxs1_share, mst_lnk_idxs1_shape)
-        cnt_lnk_idxs1 = np.ctypeslib.as_array(cnt_lnk_idxs1_share, cnt_lnk_idxs1_shape)
-        mst_lnk_idxs = (mst_lnk_idxs0, mst_lnk_idxs1)
-        cnt_lnk_idxs = (cnt_lnk_idxs0, cnt_lnk_idxs1)
+        mu = np.ctypeslib.as_array(mu_share, mu_shape)
         A = np.ctypeslib.as_array(A_share, A_shape)
 
-    # update_tups_lst = list()
-    diagA = np.diag(A)
-    new_A = np.zeros_like(diagA, dtype=np.float)
-    #print 'AAA', a_idx_range[1]-a_idx_range[0]
-    #0/0
+    for x_clstr_idx in clstr_idxs:
 
-    for a_idx, a in zip(range(a_idx_range[0], a_idx_range[1]), np.diag(A)[a_idx_range[0]:a_idx_range[1]]):
+        xm_pderiv.value += PartialDerivative(a_idx, x_data[x_clstr_idx, :], mu, A)
 
-        print 'IDX', a_idx
 
-        # Initializing...
-        xm_pderiv, mlcost_pderiv, clcost_pderiv = 0.0, 0.0, 0.0
-        smpls_cnt, ml_cnt, cl_cnt = 0.0, 0.0, 0.0
+def PartialDerivativeVC(cost_pderiv, viol_idxs1_share, viol_idxs1_shape,
+                        viol_idxs0_share, viol_idxs0_shape, a_idx, x_data_share, x_data_shape,
+                        A_share, A_shape):
 
-        for i, mu in enumerate(mu_arr):
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', RuntimeWarning)
+        viol_idxs1 = np.ctypeslib.as_array(viol_idxs1_share, viol_idxs1_shape,)
+        viol_idxs0 = np.ctypeslib.as_array(viol_idxs0_share, viol_idxs0_shape,)
+        x_data = np.ctypeslib.as_array(x_data_share, x_data_shape)
+        A = np.ctypeslib.as_array(A_share, A_shape)
 
-            # Getting the indeces for the i cluster.
-            clstr_idxs = np.where(clstr_tags_arr == i)[0]
+    for x in zip(viol_idxs1, viol_idxs0):
 
-            smpls_cnt += float(clstr_idxs.shape[0])
-
-            # Calculating the partial derivatives of each parameter for all cluster's member...
-            # ...for each cluster.
-            # ---------------------------------------------------------------------------------
-            for x_clstr_idx in clstr_idxs:
-                xm_pderiv += PartialDerivative(a_idx, x_data[x_clstr_idx, :], mu, A)
-
-            # Calculating Must-Link violation cost.
-            # -------------------------------------
-
-            # Getting the must-link left side of the pair constraints, i.e. the row...
-            # ...indeces of the constraints matrix that are in the cluster's set of...
-            # ...indeces.
-            in_clstr_ml_rows = np.in1d(mst_lnk_idxs[0], clstr_idxs)
-
-            # Getting the indeces of must-link than are not in the cluster as they should...
-            # ...have been.
-            viol_idxs = mst_lnk_idxs[1][
-                ~np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs)
-            ]
-
-            ml_cnt += float(viol_idxs.shape[0])
-
-            if viol_idxs.shape[0]:
-
-                # Calculating the partial derivatives of all pairs of violations for...
-                # ...must-link constraints.
-                for x in zip(mst_lnk_idxs[0][in_clstr_ml_rows], viol_idxs):
-                    mlcost_pderiv -= PartialDerivative(
-                        a_idx, x_data[x[0], :], x_data[x[1], :], A
-                    )
-
-            # Calculating Cannot-Link violation cost.
-            # ---------------------------------------
-
-            # Getting the cannot-link left side of the pair constraints, i.e. the row...
-            # ...indeces of the constraints matrix that are in the cluster's set of indeces.
-            in_clstr_cl_rows = np.in1d(cnt_lnk_idxs[0], clstr_idxs)
-
-            # Getting the indeces of cannot-link than are in the cluster as they...
-            # ...shouldn't have been.
-            viol_idxs = cnt_lnk_idxs[1][np.in1d(cnt_lnk_idxs[1][in_clstr_cl_rows], clstr_idxs)]
-
-            cl_cnt += float(viol_idxs.shape[0])
-
-            if viol_idxs.shape[0]:
-
-                # Calculating all pairs of violation costs for cannot-link constraints.
-                # NOTE: The violation cost is equivalent to the maxCosine distance
-                for x in zip(cnt_lnk_idxs[0][in_clstr_cl_rows], viol_idxs):
-                    clcost_pderiv += PartialDerivative(
-                        a_idx, x_data[x[0], :], x_data[x[1], :], A
-                    )
-
-        # Averaging EVERYTHING
-        xm_pderiv = xm_pderiv / smpls_cnt
-        if ml_cnt:
-            mlcost_pderiv = mlcost_pderiv / ml_cnt
-        if cl_cnt:
-            clcost_pderiv = clcost_pderiv / cl_cnt
-
-        # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
-        a_pderiv = (1 / a) - (a / np.square(ray_sigma))
-        # print 'Rayleigh Partial', a_pderiv
-        a_pderiv = 0.0
-        # print 'a', a
-        # print 'xm', xm_pderiv
-        # print 'ml', mlcost_pderiv
-        # print 'cl', clcost_pderiv
-
-        new_A[a_idx] = a + (lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv))
-        # print new_val
-        # print (xm_pderiv[0] + mlcost_pderiv + clcost_pderiv - a_pderiv)
-        # print 'ln', lrn_rate
-        # print 'new_val', new_val
-        #update_tups_lst.append((a_idx, new_val))
-
-    for a_idx in range(a_idx_range[0], a_idx_range[1]):
-        A[a_idx, a_idx] = new_A[a_idx]
-
-    # Changing a diagonal value of the A cosine similarity parameters measure.
-    # return update_tups_lst
-    # q.put(update_tups_lst)
+        cost_pderiv.value += PartialDerivative(a_idx, x_data[x[0], :], x_data[x[1], :], A)
 
 
 def PartialDerivative(a_idx, x1, x2, A):
@@ -927,7 +933,7 @@ def PartialDerivative(a_idx, x1, x2, A):
     x1_pnorm = np.sqrt(np.dot(np.dot(x1, A), x1.reshape(x1.shape[0], 1)))
     x2_pnorm = np.sqrt(np.dot(np.dot(x2, A), x1.reshape(x2.shape[0], 1)))
 
-    res_a = (
+    delta_a = (
                 (x1[a_idx] * x2[a_idx] * x1_pnorm * x2_pnorm) -
                 (
                     np.dot(np.dot(x1, A), x2.reshape(x2.shape[0], 1)) *
@@ -940,7 +946,7 @@ def PartialDerivative(a_idx, x1, x2, A):
                 )
             ) / (np.square(x1_pnorm) * np.square(x2_pnorm))
 
-    return res_a
+    return delta_a
 
 
 if __name__ == '__main__':
@@ -951,7 +957,6 @@ if __name__ == '__main__':
     x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 0.6, size=(1, test_dims)), scale=1, size=(500, test_dims))
     x_data_2d_arr2 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.3, 0.7, size=(1, test_dims)), scale=1, size=(500, test_dims))
     x_data_2d_arr3 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.6, 0.9, size=(1, test_dims)), scale=1, size=(500, test_dims))
-
 
 # (0.7, 0.2, 0.7, 0.2, 0.6, 0.6, 0.1, 0.3, 0.8, 0.5)
 # (0.6, 0.6, 0.7, 0.2, 0.6, 0.6, 0.8, 0.3, 0.9, 0.1)
