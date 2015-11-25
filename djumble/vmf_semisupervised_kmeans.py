@@ -93,9 +93,9 @@ class HMRFKmeans(object):
         if self.A is None:
             self.A = np.random.uniform(0.50, 100.0, size=x_data.shape[1])
         # A should be a diagonal matrix form for the calculations in the functions bellow. The...
-        # ...sparse form will save space and the csr_matrix will make the dia_matrix write-able.
+        # ...sparse form will save space and the lil_matrix will make the dia_matrix write-able.
         self.A = sp.sparse.dia_matrix((self.A, [0]), shape=(self.A.shape[0], self.A.shape[0]))
-        self.A = sp.sparse.csr_matrix(self.A)
+        self.A = sp.sparse.lil_matrix(self.A)
 
         # Setting up the violation weights matrix if not have been passed as class argument.
         #if self.w_violations is None:
@@ -232,7 +232,7 @@ class HMRFKmeans(object):
                 for i, (mu, clstr_idxs_set) in enumerate(zip(mu_lst, clstr_idxs_sets_lst)):
 
                     # Calculating the J-Objective.
-                    j_obj = np.round(self.JObjCosA(x_idx, x_data, mu, clstr_idxs_set), 3)
+                    j_obj = self.JObjCosA(x_idx, x_data, mu, clstr_idxs_set)
 
                     if j_obj < last_jobj:
                         last_jobj = j_obj
@@ -474,13 +474,13 @@ class HMRFKmeans(object):
         ml_cnt = 0.0
         for x_cons in self.must_lnk:
 
+            x = list(x_cons)
+
             if x_idx in x_cons:
 
-                if not (x_cons <= clstr_idxs_set):
+                if (x[0] in clstr_idxs_set or x[1] in clstr_idxs_set) and not (x_cons <= clstr_idxs_set):
 
                     ml_cnt += 1.0
-
-                    x = list(x_cons)
 
                     ml_cost += self.CosDistA(x_data[x[0], :], x_data[x[1], :])
 
@@ -526,6 +526,8 @@ class HMRFKmeans(object):
 
         # timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
         # print "Jobj time: %d:%d:%d:%d" % timel
+        if cl_cost > 0.0:
+            print "Jobj: ", dist + ml_cost + cl_cost - params_pdf, " | ", dist, ml_cost, cl_cost, params_pdf, norm_part_value
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
@@ -750,16 +752,18 @@ class HMRFKmeans(object):
                 a_pderiv = 1e-15
 
             # Changing a diagonal value of the A cosine similarity parameters measure.
-            new_A[a_idx] = a + (self.lrn_rate *
-                                (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
-                                )
-
+            new_A[a_idx] = (a + (self.lrn_rate *
+                                    (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
+                                    )
+                               )
+            print self.lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
             if new_A[a_idx] < 0.0:
                 print self.lrn_rate
                 print xm_pderiv
                 print mlcost_pderiv
                 print clcost_pderiv
                 print a_pderiv
+                0/0
 
             # ΝΟΤΕ: Invalid patch for let the experiments to be completed.###########################
             if new_A[a_idx] < 0.0:
@@ -778,8 +782,10 @@ class HMRFKmeans(object):
                 print "Invalid patch for A triggered: NaN A=", new_A[a_idx], a_pderiv
                 new_A[a_idx] = 1e-15
 
-        # ######
-        A = sp.sparse.csr_matrix(np.diag(new_A))
+        A[:, :] = sp.sparse.lil_matrix(np.diag(new_A))
+
+        if sp.sparse.issparse(A):
+            print "ITS IS"
 
         # Returning the A parameters. This is actually a dump return for coding constance reasons.
         return A
@@ -837,158 +843,23 @@ class HMRFKmeans(object):
 
         return res_a
 
-    def FarFirstCosntraint(self, x_data, k_clusters):
-
-        # ########### NOT PROPERLY IMPLEMENTED FOR THIS GIT COMMIT ###
-        """
-            pick any z ∈ S and set T = {z}
-            while |T| < k:
-                z = arg maxx∈S ρ(x, T)
-                T = T ∪ {z}
-
-            Here ρ(x, T) is the distance from point x to the closest point in set T,
-            that is to say, infz∈T ρ(x, z).
-
-        """
-
-        # Initiating the list of array indices for all forthcoming neighborhoods Np.
-        neibs_sets = [set([])]
-
-        data_num = x_data.shape[0]
-
-        # Adding a random point in the neighborhood N0.
-        rnd_idx = np.random.randint(0, data_num)
-
-        neibs_sets[0].add(rnd_idx)
-        neib_c = 1
-
-        farthest_x_idx = data_num + 99  # Not sure for this initialization.
-
-        # Initializing for finding the farthest x array index form all N neighborhoods.
-
-        all_neibs = []
-        while neib_c < k_clusters and len(all_neibs) < data_num:
-
-            max_dist = 0
-            # Getting the farthest x from all neighborhoods.
-            for i in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]/10):
-
-                all_neibs = [idx for neib in neibs_sets for idx in neib]
-
-                for neib_x_idx in all_neibs:
-
-                        if i not in all_neibs:
-
-                            dist = distor_measure(x_data[neib_x_idx], x_data[i])
-
-                            if dist > max_dist:
-                                max_dist = dist
-                                farthest_x_idx = i
-
-            # Looking for Must-Link
-            must_link_neib_indx = None
-            if farthest_x_idx in self.must_lnk:
-                for ml_idx in self.must_lnk[farthest_x_idx]:
-                    for n_idx, neib in enumerate(neibs_sets):
-                        if ml_idx in neib:
-                            must_link_neib_indx = n_idx
-
-            # Looking for Cannot-Link
-            cannot_link = False
-            if farthest_x_idx in cannnot_lnk_cons:
-                for cl_idx in cannnot_lnk_cons[farthest_x_idx]:
-                    for neib in neibs_sets:
-                        if cl_idx in neib:
-                            cannot_link = True
-
-            # Putting the x in the proper N neighborhood.
-            if must_link_neib_indx:
-
-                neibs_sets[must_link_neib_indx].add(farthest_x_idx)
-
-            elif cannot_link:
-
-                neib_c += 1
-                neibs_sets.append(set([farthest_x_idx]))
-
-            else:
-                neibs_sets[neib_c-1].add(farthest_x_idx)
-
-        return neibs_sets
-
-    def ConsolidateAL(self, neibs_sets, x_data):
-
-        # ########### NOT PROPERLY IMPLEMENTED FOR THIS GIT COMMIT ###
-
-        """
-        """
-        # Estimating centroids.
-        # print np.mean(x_data[[1,2,3], :], axis=0)
-        neibs_mu = [np.mean(x_data[neib, :], axis=0) for neib in neibs_sets]
-
-        cnt = 0
-
-        # I think that randomization factor is required  replacing --> # range(data_num):
-        for rnd_idx in np.random.randint(0, x_data.shape[0], size=x_data.shape[0]):
-
-            cnt += 1
-
-            # Ascending order.
-            srted_dists_neib_idx = np.argsort(
-                [distor_measure(mu, x_data[rnd_idx, :])[0, 0] for mu in neibs_mu],
-                axis=0
-            )
-
-            for neib_idx in srted_dists_neib_idx:
-                if rnd_idx in self.must_lnk:
-                    for ml_idx in self.must_lnk[rnd_idx]:
-                        if ml_idx in neibs_sets[neib_idx] and rnd_idx not in neibs_sets[neib_idx]:
-                            neibs_sets[neib_idx].append(rnd_idx)
-
-        return neibs_sets
-
-
-# The following function most probably won't be needed.
-def FarFirstWeighted(x_data, k_clusters, must_lnk_con, cannnot_lnk_con, CosDist):
-    pass
-
-
-def MuCos(x_data, neibs_idxs_lsts):
-    mu_lst = list()
-    for neibs_idxlst in neibs_idxs_lsts:
-
-        xi_neib_sum = np.sum(x_data[neibs_idxlst, :], axis=0)
-        xi_neib_sum = sp.matrix(xi_neib_sum)
-
-        # Calculating denominator ||Σ xi||
-        parametrized_norm_xi = np.sqrt(np.abs(xi_neib_sum * xi_neib_sum.T))
-
-        mu_lst.append(xi_neib_sum / parametrized_norm_xi)
-
-    return mu_lst
-
-
-def CosDist(x1, x2):
-    """
-        Note: I the above function is equivalent if A is set to be the I identity matrix.
-
-    """
-
-    x1 = sp.matrix(x1)
-    x2 = sp.matrix(x2)
-
-    return x1 * x2.T / (np.sqrt(np.abs(x1 * x1.T)) * np.sqrt(np.abs(x2 * x2.T)))
-
 
 if __name__ == '__main__':
 
-    test_dims = 700
+    test_dims = 70
 
     print "Creating Sample"
-    x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 0.6, size=(1, test_dims)), scale=1, size=(500, test_dims))
-    x_data_2d_arr2 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.3, 0.7, size=(1, test_dims)), scale=1, size=(500, test_dims))
-    x_data_2d_arr3 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.6, 0.9, size=(1, test_dims)), scale=1, size=(500, test_dims))
+    x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 200.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
+    x_data_2d_arr2 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(300.0, 400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
+    x_data_2d_arr3 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(500.0, 700.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
 
+    x_data_2d_arr1 = x_data_2d_arr1 / np.max(x_data_2d_arr1, axis=1).reshape(500, 1)
+    x_data_2d_arr2 = x_data_2d_arr1 / np.max(x_data_2d_arr2, axis=1).reshape(500, 1)
+    x_data_2d_arr3 = x_data_2d_arr1 / np.max(x_data_2d_arr3, axis=1).reshape(500, 1)
+
+    # print x_data_2d_arr1
+
+    # 0/0
 
 # (0.7, 0.2, 0.7, 0.2, 0.6, 0.6, 0.1, 0.3, 0.8, 0.5)
 # (0.6, 0.6, 0.7, 0.2, 0.6, 0.6, 0.8, 0.3, 0.9, 0.1)
@@ -1078,7 +949,7 @@ if __name__ == '__main__':
     init_centrs = [set([0]), set([550]), set([1100])]
     print "Running HMRF Kmeans"
     hkmeans = HMRFKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
-                         max_iter=300, cvg=0.0001, lrn_rate=0.0001, ray_sigma=1.0,
+                         max_iter=300, cvg=0.001, lrn_rate=0.03, ray_sigma=1.0,
                          d_params=np.random.uniform(1.0, 1.0, size=test_dims), norm_part=False,
                          globj='non-normed')
     res = hkmeans.fit(x_data_2d_arr, set([50]))
