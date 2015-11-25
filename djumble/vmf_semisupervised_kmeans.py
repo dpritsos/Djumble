@@ -164,7 +164,7 @@ class HMRFKmeans(object):
             print "Time elapsed : %d:%d:%d:%d" % timel
 
             # Terminating upon difference of the last two Global JObej values.
-            if glob_jobj < self.cvg: # np.abs(last_gobj - glob_jobj) < self.cvg or
+            if glob_jobj < self.cvg:  # np.abs(last_gobj - glob_jobj) < self.cvg or
                 # second condition is TEMP!
                 print 'last_gobj - glob_jobj', last_gobj - glob_jobj
                 print "Global Objective", glob_jobj
@@ -224,6 +224,8 @@ class HMRFKmeans(object):
                 # Skipping the indices should not participate in clustering.
                 if x_idx in self.neg_idxs4clstring:
                     continue
+
+                # print "Sample:", x_idx
 
                 # Setting the initial value for the previews J-Objective value.
                 last_jobj = np.Inf
@@ -297,12 +299,14 @@ class HMRFKmeans(object):
             print x2
 
         # Calculating and returning the parameterized cosine distance.
+        # np.sqrt(np.abs(x1 * self.A[:, :] * x1.T)) *
+        # np.sqrt(np.abs(x2 * self.A[:, :] * x2.T))
         return (
             1 - (
                  x1 * self.A[:, :] * x2.T /
                  (
-                  np.sqrt(np.abs(x1 * self.A[:, :] * x1.T)) *
-                  np.sqrt(np.abs(x2 * self.A[:, :] * x2.T))
+                  np.sqrt(x1 * self.A[:, :] * x1.T) *
+                  np.sqrt(x2 * self.A[:, :] * x2.T)
                   )
                 )
         )
@@ -338,41 +342,13 @@ class HMRFKmeans(object):
                 xi_sum = sp.matrix(zero_vect)
 
             # Calculating denominator ||Σ xi||(A)
-            parametrized_norm_xi = np.sqrt(np.abs(xi_sum * self.A[:, :] * xi_sum.T))
+            parametrized_norm_xi = np.sqrt(xi_sum * self.A[:, :] * xi_sum.T)
+            # parametrized_norm_xi = np.sqrt(np.abs(xi_sum * self.A[:, :] * xi_sum.T))
 
             # Calculating the Centroid of the (assumed) hyper-sphear. Then appended to the mu list.
             mu_lst.append(xi_sum / parametrized_norm_xi)
 
         return mu_lst
-
-    def Jd(self, d, x):
-        """ Naive Bessel function approximation of the first kind.
-
-            TESTING purpose only!
-
-        """
-
-        t = 0.9
-        conv = False
-
-        R = 1.0
-        t1 = np.power((x*np.exp(1.0))/(2.0*d), d)
-        t2 = 1 + (1.0/(12.0*d)) + (1/(288*np.power(d, 2.0))) - (139.0/(51840.0*np.power(d, 3.0)))
-        t1 = t1*np.sqrt((d/(2.0*np.pi))/t2)
-        M = 1.0/d
-        k = 1.0
-
-        while not conv:
-
-            R = R*((0.25*np.power(x, 2.0))/(k*(d+k)))
-            M = M + R
-
-            if R/M < t:
-                conv = True
-
-            k += 1
-
-        return t1*M
 
     def NormPart(self, x_data_subset):
         """ The von Mises and von Mises - Fisher Logarithmic Normalization partition function:...
@@ -467,11 +443,9 @@ class HMRFKmeans(object):
 
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
         dist = self.CosDistA(x_data[x_idx, :], mu)
-        # NOTE: No need to be Averaged/Normalized because the score is only for one sample.
 
         # Calculating Must-Link violation cost.
         ml_cost = 0.0
-        ml_cnt = 0.0
         for x_cons in self.must_lnk:
 
             x = list(x_cons)
@@ -480,32 +454,19 @@ class HMRFKmeans(object):
 
                 if (x[0] in clstr_idxs_set or x[1] in clstr_idxs_set) and not (x_cons <= clstr_idxs_set):
 
-                    ml_cnt += 1.0
-
                     ml_cost += self.CosDistA(x_data[x[0], :], x_data[x[1], :])
-
-        # Averaging dividing be the number of must-link constrains of this cluster.
-        if ml_cnt:
-            ml_cost = ml_cost / ml_cnt
 
         # Calculating Cannot-Link violation cost.
         cl_cost = 0.0
-        cl_cnt = 0.0
         for x_cons in self.cannot_lnk:
 
             if x_idx in x_cons:
 
                 if x_cons <= clstr_idxs_set:
 
-                    cl_cnt += 1.0
-
                     x = list(x_cons)
 
                     cl_cost += (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
-
-        # Averaging dividing be the number of cannot-link constrains of this cluster.
-        if cl_cnt:
-            cl_cost = cl_cost / cl_cnt
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
         sum1, sum2 = 0.0, 0.0
@@ -526,9 +487,8 @@ class HMRFKmeans(object):
 
         # timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
         # print "Jobj time: %d:%d:%d:%d" % timel
-        # if cl_cost > 0.0:
-        # print "Jobj: ", dist + ml_cost + cl_cost - params_pdf, " | ",
-        # dist, ml_cost, cl_cost, params_pdf, norm_part_value
+        if cl_cost > 0.0 or ml_cost > 0.0:
+            print "Jobj: ", dist + ml_cost + cl_cost - params_pdf, " | ", dist, ml_cost, cl_cost, params_pdf, norm_part_value
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
@@ -669,7 +629,7 @@ class HMRFKmeans(object):
                         xm_pderiv += (self.PartialDerivative(a_idx, x_data[x_clstr_idx], mu, A))
 
             # Averaging dividing be the number of samples.
-            xm_pderiv = xm_pderiv / smpls_cnt
+            xm_pderiv = xm_pderiv #/ smpls_cnt
 
             # Calculating the Partial Derivative of D(xi, xj) of Must-Link Constraints.
             mlcost_pderiv = 0.0
@@ -692,7 +652,7 @@ class HMRFKmeans(object):
 
             # Averaging dividing be the number of must-link constrains.
             if ml_cnt:
-                mlcost_pderiv = mlcost_pderiv / ml_cnt
+                mlcost_pderiv = mlcost_pderiv #/ ml_cnt
 
             # Calculating the Partial Derivative of D(xi, xj) of Cannot-Link Constraints.
             clcost_pderiv = 0.0
@@ -733,7 +693,7 @@ class HMRFKmeans(object):
 
             # Averaging dividing be the number of cannot-link constrains.
             if cl_cnt:
-                mlcost_pderiv = mlcost_pderiv / cl_cnt
+                mlcost_pderiv = mlcost_pderiv #/ cl_cnt
 
             # print "Partial Cannot-Link", clcost_pderiv
 
@@ -826,8 +786,10 @@ class HMRFKmeans(object):
             x2 = sp.matrix(x2)
 
         # Calculating parametrized Norms ||Σ xi||(A)
-        x1_pnorm = np.sqrt(np.abs(x1 * A * x1.T))
-        x2_pnorm = np.sqrt(np.abs(x2 * A * x2.T))
+        # x1_pnorm = np.sqrt(np.abs(x1 * A * x1.T))
+        # x2_pnorm = np.sqrt(np.abs(x2 * A * x2.T))
+        x1_pnorm = np.sqrt(x1 * A * x1.T)
+        x2_pnorm = np.sqrt(x2 * A * x2.T)
 
         res_a = (
                     (x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x2_pnorm) -
@@ -847,16 +809,16 @@ class HMRFKmeans(object):
 
 if __name__ == '__main__':
 
-    test_dims = 7
+    test_dims = 100
 
     print "Creating Sample"
-    x_data_2d_arr1 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(0.0, 200.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
-    x_data_2d_arr2 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(300.0, 400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
-    x_data_2d_arr3 = sps.vonmises.rvs(1200.0, loc=np.random.uniform(500.0, 700.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
+    x_data_2d_arr1 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
+    x_data_2d_arr2 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
+    x_data_2d_arr3 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
 
-    x_data_2d_arr1 = x_data_2d_arr1 / np.max(x_data_2d_arr1, axis=1).reshape(500, 1)
-    x_data_2d_arr2 = x_data_2d_arr1 / np.max(x_data_2d_arr2, axis=1).reshape(500, 1)
-    x_data_2d_arr3 = x_data_2d_arr1 / np.max(x_data_2d_arr3, axis=1).reshape(500, 1)
+    #x_data_2d_arr1 = x_data_2d_arr1 / np.max(x_data_2d_arr1, axis=1).reshape(500, 1)
+    #x_data_2d_arr2 = x_data_2d_arr2 / np.max(x_data_2d_arr2, axis=1).reshape(500, 1)
+    #x_data_2d_arr3 = x_data_2d_arr3 / np.max(x_data_2d_arr3, axis=1).reshape(500, 1)
 
     # print x_data_2d_arr1
 
@@ -872,7 +834,7 @@ if __name__ == '__main__':
     # x_data_2d_arr3 = np.random.vonmises(0.5, 10000, size=(20, 2))
 
     x_data_2d_arr = np.vstack((x_data_2d_arr1, x_data_2d_arr2, x_data_2d_arr3))
-
+    print x_data_2d_arr
     for xy in x_data_2d_arr1:
         plt.text(xy[0], xy[1], str(1),  color="black", fontsize=20)
     for xy in x_data_2d_arr2:
@@ -883,6 +845,7 @@ if __name__ == '__main__':
     # plt.text(x_data_2d_arr3[:, 0], x_data_2d_arr3[:, 1], str(3),  color="red", fontsize=12)
     # plt.show()
     # 0/0
+    plt.show()
 
     must_lnk_con = [
         set([1, 5]),
@@ -950,7 +913,7 @@ if __name__ == '__main__':
     init_centrs = [set([0]), set([550]), set([1100])]
     print "Running HMRF Kmeans"
     hkmeans = HMRFKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
-                         max_iter=300, cvg=0.001, lrn_rate=0.03, ray_sigma=1.0,
+                         max_iter=300, cvg=0.0001, lrn_rate=0.0003, ray_sigma=1.0,
                          d_params=np.random.uniform(1.0, 1.0, size=test_dims), norm_part=False,
                          globj='non-normed')
     res = hkmeans.fit(x_data_2d_arr, set([50]))
