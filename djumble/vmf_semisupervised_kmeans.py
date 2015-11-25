@@ -164,7 +164,7 @@ class HMRFKmeans(object):
             print "Time elapsed : %d:%d:%d:%d" % timel
 
             # Terminating upon difference of the last two Global JObej values.
-            if np.abs(last_gobj - glob_jobj) < self.cvg or glob_jobj < self.cvg:
+            if glob_jobj < self.cvg: # np.abs(last_gobj - glob_jobj) < self.cvg or
                 # second condition is TEMP!
                 print 'last_gobj - glob_jobj', last_gobj - glob_jobj
                 print "Global Objective", glob_jobj
