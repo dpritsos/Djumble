@@ -487,8 +487,8 @@ class HMRFKmeans(object):
 
         # timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
         # print "Jobj time: %d:%d:%d:%d" % timel
-        if cl_cost > 0.0 or ml_cost > 0.0:
-            print "Jobj: ", dist + ml_cost + cl_cost - params_pdf, " | ", dist, ml_cost, cl_cost, params_pdf, norm_part_value
+        # if cl_cost > 0.0 or ml_cost > 0.0:
+        # print "Jobj: ", dist + ml_cost + cl_cost - params_pdf, " | ", dist, ml_cost, cl_cost, params_pdf, norm_part_value
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
@@ -689,7 +689,7 @@ class HMRFKmeans(object):
 
                             # minus_max_clpd = cl_pd
 
-                            clcost_pderiv += cl_pd
+                            clcost_pderiv -= cl_pd
 
             # Averaging dividing be the number of cannot-link constrains.
             if cl_cnt:
@@ -744,9 +744,6 @@ class HMRFKmeans(object):
                 new_A[a_idx] = 1e-15
 
         A[:, :] = sp.sparse.lil_matrix(np.diag(new_A))
-
-        if sp.sparse.issparse(A):
-            print "ITS IS"
 
         # Returning the A parameters. This is actually a dump return for coding constance reasons.
         return A
