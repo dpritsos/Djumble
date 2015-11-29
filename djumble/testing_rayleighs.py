@@ -1,9 +1,9 @@
 
 import numpy as np
 
-s = 2.0
+s = 0.6
 
-A = np.array([0.9]*500)
+A = np.array([1.55999999]*500)
 
 
 sum1, sum2 = 0.0, 0.0
