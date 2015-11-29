@@ -474,7 +474,7 @@ class HMRFKmeans(object):
             sum1 += np.log(a)
             sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
         params_pdf = sum1 - sum2 - (2 * self.A.data.shape[0] * np.log(self.ray_sigma))
-        params_pdf = 0.0
+
         # Calculating the log normalization function of the von Mises-Fisher distribution...
         # ...NOTE: Only for this cluster i.e. this vMF of the whole PDF mixture.
         if self.norm_part:
@@ -488,7 +488,7 @@ class HMRFKmeans(object):
         # timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
         # print "Jobj time: %d:%d:%d:%d" % timel
         # if cl_cost > 0.0 or ml_cost > 0.0:
-        # print "Jobj: ", dist + ml_cost + cl_cost - params_pdf, " | ", dist, ml_cost, cl_cost, params_pdf, norm_part_value
+        print "Jobj: ", dist + ml_cost + cl_cost - params_pdf, " | ", dist, ml_cost, cl_cost, params_pdf, norm_part_value
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
@@ -646,7 +646,7 @@ class HMRFKmeans(object):
 
                             ml_cnt += 1.0
 
-                            mlcost_pderiv += self.PartialDerivative(
+                            mlcost_pderiv -= self.PartialDerivative(
                                 a_idx, x_data[x[0], :], x_data[x[1], :], A
                             )
 
@@ -689,7 +689,7 @@ class HMRFKmeans(object):
 
                             # minus_max_clpd = cl_pd
 
-                            clcost_pderiv -= cl_pd
+                            clcost_pderiv += cl_pd
 
             # Averaging dividing be the number of cannot-link constrains.
             if cl_cnt:
@@ -700,7 +700,6 @@ class HMRFKmeans(object):
             # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
             # new_a = a + (self.lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv))
             a_pderiv = (1 / a) - (a / np.square(self.ray_sigma))
-            a_pderiv = 0.0
 
             # print 'Rayleigh Partial', a_pderiv
 
