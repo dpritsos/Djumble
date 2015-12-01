@@ -552,7 +552,7 @@ if __name__ == '__main__':
     init_centrs = [set([0]), set([550]), set([1100])]
     print "Running HMRF Kmeans"
     hkmeans = HMRFKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
-                         max_iter=300, cvg=0.000000001)
+                         max_iter=300, cvg=0.0001)
 
     res = hkmeans.fit(x_data_2d_arr, set([50]))
 
