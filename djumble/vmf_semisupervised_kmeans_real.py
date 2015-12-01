@@ -10,7 +10,7 @@ import scipy.special as special
 import time as tm
 
 
-class HMRFKmeans(object):
+class CosineKmeans(object):
     """ HMRF Kmeans: A Semi-supervised clustering algorithm based on Hidden Markov Random Fields
         Clustering model optimized by Expectation Maximization (EM) algorithm with Hard clustering
         constraints, i.e. a Kmeans Semi-supervised clustering variant.
@@ -42,8 +42,7 @@ class HMRFKmeans(object):
     """
 
     def __init__(self, k_clusters, must_lnk, cannot_lnk, init_centroids=None, max_iter=300,
-                 cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5, d_params=None,
-                 norm_part=False, globj='non-normed'):
+                 cvg=0.001):
 
         self.k_clusters = k_clusters
         self.must_lnk = must_lnk
@@ -51,20 +50,6 @@ class HMRFKmeans(object):
         self.init_centroids = init_centroids
         self.max_iter = max_iter
         self.cvg = cvg
-        self.lrn_rate = lrn_rate
-        self.ray_sigma = ray_sigma
-        self.A = d_params
-        self.norm_part = norm_part
-
-        # This option enables or disables the normalizations values to be included in the...
-        # ...calculation of the total values, other than the total cosine distances, the...
-        # ...total must-link and cannot-link violation scores.
-        if globj == 'non-normed':
-            self.globj = False
-        elif globj == 'proper':
-            self.globj = True
-        else:
-            raise Exception("globj: can be either 'proper' or 'non-normed'.")
 
     def fit(self, x_data, neg_idxs4clstring=set([])):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
@@ -88,14 +73,6 @@ class HMRFKmeans(object):
         """
 
         # Initializing clustering
-
-        # Setting up distortion parameters if not have been passed as class argument.
-        if self.A is None:
-            self.A = np.random.uniform(0.50, 100.0, size=x_data.shape[1])
-        # A should be a diagonal matrix form for the calculations in the functions bellow. The...
-        # ...sparse form will save space and the lil_matrix will make the dia_matrix write-able.
-        self.A = sp.sparse.dia_matrix((self.A, [0]), shape=(self.A.shape[0], self.A.shape[0]))
-        self.A = sp.sparse.lil_matrix(self.A)
 
         # Setting up the violation weights matrix if not have been passed as class argument.
         #if self.w_violations is None:
@@ -161,8 +138,8 @@ class HMRFKmeans(object):
             print "Time elapsed : %d:%d:%d:%d" % timel
 
             # Terminating upon difference of the last two Global JObej values.
-            if glob_jobj < self.cvg:  # np.abs(last_gobj - glob_jobj) < self.cvg or
-                # second condition is TEMP!
+            if np.abs(last_gobj - glob_jobj) < self.cvg or glob_jobj < self.cvg:
+
                 print 'last_gobj - glob_jobj', last_gobj - glob_jobj
                 print "Global Objective", glob_jobj
                 break
@@ -182,11 +159,7 @@ class HMRFKmeans(object):
             'k_clusters': self.k_clusters,
             'max_iter': self.max_iter,
             'final_iter': self.conv_step,
-            'convg_diff': self.cvg,
-            'lrn_rate': self.lrn_rate,
-            'ray_sigma': self.ray_sigma,
-            'dist_msur_params': self.A,
-            'norm_part': self.norm_part
+            'convg_diff': self.cvg
         }
 
     def ICM(self, x_data, mu_lst, clstr_idxs_sets_lst):
@@ -300,10 +273,10 @@ class HMRFKmeans(object):
         # np.sqrt(np.abs(x2 * self.A[:, :] * x2.T))
         return (
             1 - (
-                 x1 * self.A[:, :] * x2.T /
+                 x1 * x2.T /
                  (
-                  np.sqrt(x1 * self.A[:, :] * x1.T) *
-                  np.sqrt(x2 * self.A[:, :] * x2.T)
+                  np.sqrt(x1 * x1.T) *
+                  np.sqrt(x2 * x2.T)
                   )
                 )
         )
@@ -339,7 +312,7 @@ class HMRFKmeans(object):
                 xi_sum = sp.matrix(zero_vect)
 
             # Calculating denominator ||Σ xi||(A)
-            parametrized_norm_xi = np.sqrt(xi_sum * self.A[:, :] * xi_sum.T)
+            parametrized_norm_xi = np.sqrt(xi_sum * xi_sum.T)
             # parametrized_norm_xi = np.sqrt(np.abs(xi_sum * self.A[:, :] * xi_sum.T))
 
             # Calculating the Centroid of the (assumed) hyper-sphear. Then appended to the mu list.
@@ -464,34 +437,13 @@ class HMRFKmeans(object):
         if cl_cnt:
             cl_cost = cl_cost / cl_cnt
 
-        # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
-        if self.globj:
-            sum1, sum2 = 0.0, 0.0
-            for a in self.A.data:
-                sum1 += np.log(a)
-                sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
-            params_pdf = sum1 - sum2 - (2 * self.A.data.shape[0] * np.log(self.ray_sigma))
-        else:
-            params_pdf = 0.0
-
-        # Calculating the log normalization function of the von Mises-Fisher distribution...
-        # ...of the whole mixture.
-        if self.norm_part and self.globj:
-            norm_part_value = 0.0
-            for clstr_idxs_set in clstr_idxs_set_lst:
-                norm_part_value += self.NormPart(x_data[list(clstr_idxs_set)])
-        else:
-            norm_part_value = 0.0
-
         print 'dims', x_data.shape[1]
         print 'sum_d, ml_cost, cl_cost', sum_d, ml_cost, cl_cost
         print 'sum_d + ml_cost + cl_cost', sum_d + ml_cost + cl_cost
-        print 'np.log(Rayleigh)', params_pdf
-        print 'N*(np.log(cdk) + np.log(k))', norm_part_value
 
         # Calculating and returning the Global J-Objective value for the current Spherical...
         # ...vMF-Mixture set-up.
-        return sum_d + ml_cost + cl_cost - params_pdf + norm_part_value
+        return sum_d + ml_cost + cl_cost
 
 
 if __name__ == '__main__':
@@ -503,9 +455,9 @@ if __name__ == '__main__':
     x_data_2d_arr2 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
     x_data_2d_arr3 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
 
-    #x_data_2d_arr1 = x_data_2d_arr1 / np.max(x_data_2d_arr1, axis=1).reshape(500, 1)
-    #x_data_2d_arr2 = x_data_2d_arr2 / np.max(x_data_2d_arr2, axis=1).reshape(500, 1)
-    #x_data_2d_arr3 = x_data_2d_arr3 / np.max(x_data_2d_arr3, axis=1).reshape(500, 1)
+    x_data_2d_arr1 = x_data_2d_arr1 / np.max(x_data_2d_arr1, axis=1).reshape(500, 1)
+    x_data_2d_arr2 = x_data_2d_arr2 / np.max(x_data_2d_arr2, axis=1).reshape(500, 1)
+    x_data_2d_arr3 = x_data_2d_arr3 / np.max(x_data_2d_arr3, axis=1).reshape(500, 1)
 
     # print x_data_2d_arr1
 
@@ -532,7 +484,7 @@ if __name__ == '__main__':
     # plt.text(x_data_2d_arr3[:, 0], x_data_2d_arr3[:, 1], str(3),  color="red", fontsize=12)
     # plt.show()
     # 0/0
-    plt.show()
+    #plt.show()
 
     must_lnk_con = [
         set([1, 5]),
@@ -600,9 +552,8 @@ if __name__ == '__main__':
     init_centrs = [set([0]), set([550]), set([1100])]
     print "Running HMRF Kmeans"
     hkmeans = HMRFKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
-                         max_iter=300, cvg=0.0001, lrn_rate=0.0003, ray_sigma=1.0,
-                         d_params=np.random.uniform(1.0, 1.0, size=test_dims), norm_part=False,
-                         globj='non-normed')
+                         max_iter=300, cvg=0.000000001)
+
     res = hkmeans.fit(x_data_2d_arr, set([50]))
 
     for mu_idx, clstr_idxs in enumerate(res[1]):
