@@ -393,6 +393,7 @@ class CosineKmeans(object):
                     sum_d += self.CosDistA(x_data[x_clstr_idx], mu)
 
         # Averaging dividing be the number of samples.
+        print 'Samples:', smpls_cnt
         sum_d = sum_d / smpls_cnt
 
         # Calculating Must-Link violation cost.
@@ -448,7 +449,7 @@ class CosineKmeans(object):
 
 if __name__ == '__main__':
 
-    test_dims = 100
+    test_dims = 1000
 
     print "Creating Sample"
     x_data_2d_arr1 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
@@ -474,6 +475,7 @@ if __name__ == '__main__':
 
     x_data_2d_arr = np.vstack((x_data_2d_arr1, x_data_2d_arr2, x_data_2d_arr3))
     print x_data_2d_arr
+
     for xy in x_data_2d_arr1:
         plt.text(xy[0], xy[1], str(1),  color="black", fontsize=20)
     for xy in x_data_2d_arr2:
@@ -551,10 +553,10 @@ if __name__ == '__main__':
     k_clusters = 3
     init_centrs = [set([0]), set([550]), set([1100])]
     print "Running HMRF Kmeans"
-    hkmeans = HMRFKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
-                         max_iter=300, cvg=0.0001)
+    ckmeans = CosineKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
+                           max_iter=300, cvg=0.0001)
 
-    res = hkmeans.fit(x_data_2d_arr, set([50]))
+    res = ckmeans.fit(x_data_2d_arr)  # , set([50]))
 
     for mu_idx, clstr_idxs in enumerate(res[1]):
 
