@@ -372,6 +372,7 @@ class CosineKmeans(object):
 
                     cl_cost += (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
 
+        # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost
 
     def GlobJObjCosA(self, x_data, mu_lst, clstr_idxs_set_lst):
@@ -390,7 +391,7 @@ class CosineKmeans(object):
 
                     smpls_cnt += 1.0
 
-                    sum_d += self.CosDistA(x_data[x_clstr_idx], mu)
+                    sum_d += self.CosDistA(mu, x_data[x_clstr_idx])
 
         # Averaging dividing be the number of samples.
         print 'Samples:', smpls_cnt

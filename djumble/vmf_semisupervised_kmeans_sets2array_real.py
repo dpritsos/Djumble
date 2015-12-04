@@ -376,11 +376,6 @@ class HMRFKmeans(object):
             # cl_cost += self.w_violations[x[0], x[1]] *\
             # (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
 
-        print "In JObjCosA...", dist, ml_cost, cl_cost
-
-        # timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
-        # print "Jobj time: %d:%d:%d:%d" % timel
-
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost
 
@@ -495,7 +490,7 @@ class HMRFKmeans(object):
 
         # Averaging EVERYTHING.
         print 'SAMPLEs:', smlps_cnt
-        smlps_cnt = sum_d / smlps_cnt
+        sum_d = sum_d / smlps_cnt
         if ml_cnt:
             ml_cost = ml_cost / ml_cnt
         if cl_cnt:
