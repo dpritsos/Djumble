@@ -233,7 +233,7 @@ class HMRFKmeans(object):
                     clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
 
                     # Calculating the J-Objective.
-                    j_obj = np.round(self.JObjCosA(x_idx, x_data, mu, clstr_idxs_arr), 3)
+                    j_obj = self.JObjCosA(x_idx, x_data, mu, clstr_idxs_arr)
 
                     if j_obj < last_jobj:
                         last_jobj = j_obj
