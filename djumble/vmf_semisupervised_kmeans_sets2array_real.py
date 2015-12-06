@@ -50,12 +50,13 @@ class HMRFKmeans(object):
 
     """
 
-    def __init__(self, k_clusters, ml_cl_cons, init_centroids=None, max_iter=300,
+    def __init__(self, k_clusters, must_lnk_con, cannot_lnk_con, init_centroids=None, max_iter=300,
                  cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5, d_params=None,
                  norm_part=False, globj='non-normed'):
 
         self.k_clusters = k_clusters
-        self.ml_cl_cons = ml_cl_cons
+        self.mst_lnk_idxs = must_lnk_con
+        self.cnt_lnk_idxs = cannot_lnk_con
         self.init_centroids = init_centroids
         self.max_iter = max_iter
         self.cvg = cvg
@@ -327,10 +328,10 @@ class HMRFKmeans(object):
         ml_cost = 0.0
 
         # Getting the must-link (if any) indeces for this index (i.e. data sample).
-        mst_lnk_idxs = np.where(self.ml_cl_cons[x_idx, :] == 1)[0]
+        = np.where(self.mst_lnk_idxs[0, :] == idx)[0]######################################################################
 
         # Getting the indeces of must-link than are not in the cluster as they should have been.
-        viol_idxs = mst_lnk_idxs[~np.in1d(mst_lnk_idxs, clstr_idx_arr)]
+        viol_idxs = self.mst_lnk_idxs[~np.in1d(self.mst_lnk_idxs, clstr_idx_arr)]
 
         if viol_idxs.shape[0]:
 
@@ -353,10 +354,10 @@ class HMRFKmeans(object):
         cl_cost = 0.0
 
         # Getting the cannot-link (if any) indeces for this index (i.e. data sample).
-        cnt_lnk_idxs = np.where(self.ml_cl_cons[x_idx, :] == -1)[0]
+        self.cnt_lnk_idxs = np.where(self.ml_cl_cons[x_idx, :] == -1)[0]
 
         # Getting the indeces of cannot-link than are in the cluster as they shouldn't have been.
-        viol_idxs = cnt_lnk_idxs[np.in1d(cnt_lnk_idxs, clstr_idx_arr)]
+        viol_idxs = self.cnt_lnk_idxs[np.in1d(self.cnt_lnk_idxs, clstr_idx_arr)]
 
         if viol_idxs.shape[0]:
 
@@ -386,10 +387,10 @@ class HMRFKmeans(object):
         print "In GlobalJObjCosA..."
 
         # Getting all the must-link (if any) indeces.
-        mst_lnk_idxs = np.where(self.ml_cl_cons == 1)
+        self.mst_lnk_idxs = np.where(self.ml_cl_cons == 1)
 
         # Getting all the cannot-link (if any) indeces.
-        cnt_lnk_idxs = np.where(self.ml_cl_cons == -1)
+        self.cnt_lnk_idxs = np.where(self.ml_cl_cons == -1)
 
         # Calculating the distance of all vectors, the must-link and cannot-link violations scores.
         sum_d, ml_cost, cl_cost, norm_part_value, params_pdf = 0.0, 0.0, 0.0, 0.0, 0.0
@@ -412,16 +413,16 @@ class HMRFKmeans(object):
 
             # Getting the must-link left side of the pair constraints, i.e. the row indeces...
             # ...of the constraints matrix that are in the cluster's set of indeces.
-            in_clstr_ml_rows = np.in1d(mst_lnk_idxs[0], clstr_idxs_arr)
+            in_clstr_ml_rows = np.in1d(self.mst_lnk_idxs[0], clstr_idxs_arr)
 
             # Getting the indeces of must-link than are not in the cluster as they should...
             # ...have been.
 
-            ml_viols_true_fls = ~np.in1d(mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs_arr)
+            ml_viols_true_fls = ~np.in1d(self.mst_lnk_idxs[1][in_clstr_ml_rows], clstr_idxs_arr)
 
-            viol_idxs = mst_lnk_idxs[1][ml_viols_true_fls]
+            viol_idxs = self.mst_lnk_idxs[1][ml_viols_true_fls]
 
-            viol_pair_idx = mst_lnk_idxs[0][ml_viols_true_fls]
+            viol_pair_idx = self.mst_lnk_idxs[0][ml_viols_true_fls]
 
             #
             ml_cnt += float(len(viol_idxs))
@@ -452,16 +453,16 @@ class HMRFKmeans(object):
 
             # Getting the cannot-link left side of the pair constraints, i.e. the row indeces...
             # ...of the constraints matrix that are in the cluster's set of indeces.
-            in_clstr_cl_rows = np.in1d(cnt_lnk_idxs[0], clstr_idxs_arr)
+            in_clstr_cl_rows = np.in1d(self.cnt_lnk_idxs[0], clstr_idxs_arr)
 
             # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
             # ...have been.
 
-            cl_viols_true_fls = np.in1d(cnt_lnk_idxs[1][in_clstr_cl_rows], clstr_idxs_arr)
+            cl_viols_true_fls = np.in1d(self.cnt_lnk_idxs[1][in_clstr_cl_rows], clstr_idxs_arr)
 
-            viol_idxs = cnt_lnk_idxs[1][cl_viols_true_fls]
+            viol_idxs = self.cnt_lnk_idxs[1][cl_viols_true_fls]
 
-            viol_pair_idx = cnt_lnk_idxs[0][cl_viols_true_fls]
+            viol_pair_idx = self.cnt_lnk_idxs[0][cl_viols_true_fls]
 
             #
             cl_cnt += float(len(viol_idxs))
@@ -489,10 +490,12 @@ class HMRFKmeans(object):
                 # )
 
         # Averaging EVERYTHING.
-        print 'SAMPLEs:', smlps_cnt
+
         sum_d = sum_d / smlps_cnt
+
         if ml_cnt:
             ml_cost = ml_cost / ml_cnt
+
         if cl_cnt:
             cl_cost = cl_cost / cl_cnt
 
@@ -507,7 +510,7 @@ class HMRFKmeans(object):
 
 if __name__ == '__main__':
 
-    test_dims = 1000
+    test_dims = 100000
 
     print "Creating Sample"
     x_data_2d_arr1 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
@@ -541,82 +544,28 @@ if __name__ == '__main__':
     # plt.show()
     # 0/0
 
-    must_lnk_con = [
-        [1, 5],
-        [1, 3],
-        [1, 6],
-        [1, 8],
-        [7, 3],
-        [521, 525],
-        [521, 528],
-        [521, 539],
-        [535, 525],
-        [537, 539],
-        [1037, 1238],
-        [1057, 1358],
-        [1039, 1438],
-        [1045, 1138],
-        [1098, 1038],
-        [1019, 1138],
-        [1087, 1338]
-    ]
+    must_lnk_con = np.array(
+        [[1, 1, 1, 1, 7, 521, 521, 521, 535, 537, 1037, 1057, 1039, 1045, 1098, 1019, 1087],
+        [5, 3, 6, 8, 3, 525, 528, 539, 525, 539,  1238,  1358, 1438, 1138, 1038, 1138, 1338]],
+        dtype=np.int
+    )
 
-    cannot_lnk_con = [
-        [1, 521],
-        [1, 525],
-        [1, 528],
-        [1, 535],
-        [1, 537],
-        [1, 539],
-        [5, 521],
-        [5, 525],
-        [5, 528],
-        [5, 500],
-        [8, 521],
-        [8, 525],
-        [8, 528],
-        [8, 535],
-        [8, 537],
-        [8, 539],
-        [3, 521],
-        [3, 535],
-        [3, 537],
-        [3, 539],
-        [6, 521],
-        [6, 525],
-        [6, 528],
-        [6, 535],
-        [6, 537],
-        [6, 539],
-        [7, 521],
-        [7, 525],
-        [7, 528],
-        [7, 535],
-        [7, 537],
-        [7, 539],
-        [538, 1237],
-        [548, 1357],
-        [558, 1437],
-        [738, 1137],
-        [938, 1037],
-        [838, 1039],
-        [555, 1337]
-    ]
+    cannot_lnk_con = np.array(
+        [[1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 8, 8, 8, 8, 8, 8, 3, 3, 3, 3, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7,
+          7, 7, 538, 548, 558, 738, 938, 838, 555],
+         [521,  525,  528,  535,  537,  539,  521,  525,  528,  500,  521,  525,  528,  535,  537,
+          539,  521,  535,  537,  539,  521,  525,  528,  535,  537,  539,  521,  525,  528,  535,
+          537,  539, 1237, 1357, 1437, 1137, 1037, 1039, 1337]],
+        dtype=np.int
+    )
 
     k_clusters = 3
     init_centrs = [0, 550, 1100]
 
-    # ml_cl_cons = sp.sparse.csr_matrix(np.zeros((x_data_2d_arr.shape[0], x_data_2d_arr.shape[0]), dtype=np.int))
-    ml_cl_cons = np.zeros((x_data_2d_arr.shape[0], x_data_2d_arr.shape[0]), dtype=np.int)
-    for ml1, ml2 in must_lnk_con:
-        ml_cl_cons[ml1, ml2] = 1
-    for cl1, cl2 in cannot_lnk_con:
-        ml_cl_cons[cl1, cl2] = -1
-
     # ml_cl_cons = sp.sparse.coo_matrix(ml_cl_cons)
 
     print "Running HMRF Kmeans"
-    hkmeans = HMRFKmeans(k_clusters,  ml_cl_cons, init_centroids=init_centrs,
+    hkmeans = HMRFKmeans(k_clusters, must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
                          max_iter=300, cvg=0.0001)
 
     res = hkmeans.fit(x_data_2d_arr)

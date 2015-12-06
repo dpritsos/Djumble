@@ -208,17 +208,17 @@ class CosineKmeans(object):
 
                     if j_obj < last_jobj:
                         last_jobj = j_obj
-                        mu_neib_idx = i
+                        new_clstr_tag = i
 
                 # Re-assinging the x_i vector to the new cluster if not already.
-                if x_idx not in clstr_idxs_sets_lst[mu_neib_idx]:
+                if x_idx not in clstr_idxs_sets_lst[new_clstr_tag]:
 
                     # Remove x form all Clusters.
                     for clstr_idxs_set in clstr_idxs_sets_lst:
                         clstr_idxs_set.discard(x_idx)
                         # clstr_idxs_sets_lst[midx].discard(x_idx)
 
-                    clstr_idxs_sets_lst[mu_neib_idx].add(x_idx)
+                    clstr_idxs_sets_lst[new_clstr_tag].add(x_idx)
 
                     no_change = False
 
