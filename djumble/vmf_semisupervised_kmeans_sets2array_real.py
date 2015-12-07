@@ -327,11 +327,15 @@ class HMRFKmeans(object):
         # -------------------------------------
         ml_cost = 0.0
 
-        # Getting the must-link (if any) indeces for this index (i.e. data sample).
-        = np.where(self.mst_lnk_idxs[0, :] == idx)[0]######################################################################
+        # Getting the index(s) of the must-link-constraints index-table of this data sample.
+        idxzof_mli4smpli = np.where(self.mst_lnk_idxs == idx)
+
+        # Getting the must-link, with current, data points indeces which they should be in the...
+        # ...same cluster.
+        mliz_with_smpli = self.mst_lnk_idxs[~idxzof_mli4smpli[0], idxzof_mli4smpli[1]]
 
         # Getting the indeces of must-link than are not in the cluster as they should have been.
-        viol_idxs = self.mst_lnk_idxs[~np.in1d(self.mst_lnk_idxs, clstr_idx_arr)]
+        viol_idxs = self.mst_lnk_idxs[~np.in1d(mliz_with_smpli, clstr_idx_arr)]
 
         if viol_idxs.shape[0]:
 
@@ -353,11 +357,15 @@ class HMRFKmeans(object):
         # ---------------------------------------
         cl_cost = 0.0
 
-        # Getting the cannot-link (if any) indeces for this index (i.e. data sample).
-        self.cnt_lnk_idxs = np.where(self.ml_cl_cons[x_idx, :] == -1)[0]
+        # Getting the index(s) of the cannot-link-constraints index-table of this data sample.
+        idxzof_cli4smpli = np.where(self.cnt_lnk_idxs == idx)
+
+        # Getting the cannot-link, with current, data points indeces which they should not be in...
+        # ...the same cluster.
+        cliz_with_smpli = self.cnt_lnk_idxs[~idxzof_cli4smpli[0], idxzof_cli4smpli[1]]
 
         # Getting the indeces of cannot-link than are in the cluster as they shouldn't have been.
-        viol_idxs = self.cnt_lnk_idxs[np.in1d(self.cnt_lnk_idxs, clstr_idx_arr)]
+        viol_idxs = self.cnt_lnk_idxs[np.in1d(cliz_with_smpli, clstr_idx_arr)]
 
         if viol_idxs.shape[0]:
 
