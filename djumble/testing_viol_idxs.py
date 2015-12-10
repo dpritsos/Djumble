@@ -22,8 +22,13 @@ idxs = np.in1d(must_lnk_con, [1, 5, 528, 521, 1138, 1019, 1087])
 
 idxs = idxs.reshape(2, must_lnk_con.shape[1])
 
-print idxs
-print must_lnk_con[idxs]
+print must_lnk_con[:, np.intersect1d(np.where(idxs[0] != idxs[1])[0], np.hstack((idxs[0].nonzero()[0], idxs[1].nonzero()[0])))]
+print
+
+#print np.where((idxs[0] == idxs[1] & idxs[1] == True))
+
+#print idxs
+#print must_lnk_con[idxs]
 #print np.where((idxs[0] == idxs[1] & idxs[0] == T))
 
 #print cannot_lnk_con[idxs]
@@ -37,4 +42,9 @@ print must_lnk_con[idxs]
 
 [  1   1   1   1   1   1 521 528 539 521 528 521 528 539 521 539 521 528
  539 521 528 539]
+
+T T T T F T T T F F  F  F  F F  F  T T
+T F F F F F T F F F  F  F  F T  F  T F
+0       4   6   8 9 10 11 12   14 15
+^           ^                      ^
 """
