@@ -345,7 +345,7 @@ class HMRFKmeans(object):
                 # NOTE: The violation cost is equivalent to the parametrized Cosine distance which...
                 # ...here is equivalent to the (1 - dot product) because the data points assumed...
                 # ...to be normalized by the parametrized Norm of the vectors.
-                viol_costs = 1.0 - np.dot(x_data[viol_idxs[0]], x_data[viol_idxs[1]].T)
+                viol_costs = 1.0 - np.dot(x_data[x_idx], x_data[viol_idxs[1]].T)
 
                 # Sum-ing up Weighted violations costs.
                 ml_cost = np.sum(viol_costs)
@@ -380,7 +380,7 @@ class HMRFKmeans(object):
                 # ...parametrized Cosine distance of the vectors. Since MaxCosine is 1 then...
                 # ...maxCosineDistance - CosineDistance == CosineSimilarty of the vectors....
                 # ...Again the data points assumed to be normalized.
-                viol_costs = np.dot(x_data[viol_idxs[0]], x_data[viol_idxs[1]].T)
+                viol_costs = np.dot(x_data[x_idx], x_data[viol_idxs[1]].T)
                 # viol_costs = np.ones_like(viol_costs) - viol_costs
 
                 # Sum-ing up Weighted violations costs.
@@ -528,7 +528,7 @@ class HMRFKmeans(object):
 
 if __name__ == '__main__':
 
-    test_dims = 10
+    test_dims = 1000
 
     print "Creating Sample"
     x_data_2d_arr1 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
