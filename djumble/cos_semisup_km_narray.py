@@ -19,7 +19,7 @@ sys.path.append('../../synergeticprocessing')
 # import synergeticprocessing.synergeticpool as mymp
 
 
-class HMRFKmeans(object):
+class CosineKmeans(object):
     """ HMRF Kmeans: A Semi-supervised clustering algorithm based on Hidden Markov Random Fields
         Clustering model optimized by Expectation Maximization (EM) algorithm with Hard clustering
         constraints, i.e. a Kmeans Semi-supervised clustering variant.
@@ -524,79 +524,3 @@ class HMRFKmeans(object):
         # Calculating and returning the Global J-Objective value for the current Spherical...
         # ...vMF-Mixture set-up.
         return sum_d + ml_cost + cl_cost
-
-
-if __name__ == '__main__':
-
-    test_dims = 1000
-
-    print "Creating Sample"
-    x_data_2d_arr1 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
-    x_data_2d_arr2 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
-    x_data_2d_arr3 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
-
-    x_data_2d_arr1 = x_data_2d_arr1 / np.max(x_data_2d_arr1, axis=1).reshape(500, 1)
-    x_data_2d_arr2 = x_data_2d_arr2 / np.max(x_data_2d_arr2, axis=1).reshape(500, 1)
-    x_data_2d_arr3 = x_data_2d_arr3 / np.max(x_data_2d_arr3, axis=1).reshape(500, 1)
-
-# (0.7, 0.2, 0.7, 0.2, 0.6, 0.6, 0.1, 0.3, 0.8, 0.5)
-# (0.6, 0.6, 0.7, 0.2, 0.6, 0.6, 0.8, 0.3, 0.9, 0.1)
-# (0.2, 0.3, 0.7, 0.2, 0.6, 0.6, 0.2, 0.3, 0.6, 0.4)
-
-    # tuple(np.random.normal(0.0, 10.0, size=2))
-    # x_data_2d_arr1 = np.random.vonmises(0.5, 100, size=(20, 2))
-    # x_data_2d_arr2 = np.random.vonmises(0.5, 1000, size=(20, 2))
-    # x_data_2d_arr3 = np.random.vonmises(0.5, 10000, size=(20, 2))
-
-    x_data_2d_arr = np.vstack((x_data_2d_arr1, x_data_2d_arr2, x_data_2d_arr3))
-    print x_data_2d_arr
-
-    for xy in x_data_2d_arr1:
-        plt.text(xy[0], xy[1], str(1),  color="black", fontsize=20)
-    for xy in x_data_2d_arr2:
-        plt.text(xy[0], xy[1], str(2),  color="green", fontsize=20)
-    for xy in x_data_2d_arr3:
-        plt.text(xy[0], xy[1], str(3),  color="blue", fontsize=20)
-    # plt.text(x_data_2d_arr2[:, 0], x_data_2d_arr2[:, 1], str(2),  color="red", fontsize=12)
-    # plt.text(x_data_2d_arr3[:, 0], x_data_2d_arr3[:, 1], str(3),  color="red", fontsize=12)
-    # plt.show()
-    # 0/0
-
-    must_lnk_con = np.array(
-        [[1, 1, 1, 1, 7, 521, 521, 521, 535, 537, 1037, 1057, 1039, 1045, 1098, 1019, 1087],
-        [5, 3, 6, 8, 3, 525, 528, 539, 525, 539,  1238,  1358, 1438, 1138, 1038, 1138, 1338]],
-        dtype=np.int
-    )
-
-    cannot_lnk_con = np.array(
-        [[1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 8, 8, 8, 8, 8, 8, 3, 3, 3, 3, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7,
-          7, 7, 538, 548, 558, 738, 938, 838, 555],
-         [521,  525,  528,  535,  537,  539,  521,  525,  528,  500,  521,  525,  528,  535,  537,
-          539,  521,  535,  537,  539,  521,  525,  528,  535,  537,  539,  521,  525,  528,  535,
-          537,  539, 1237, 1357, 1437, 1137, 1037, 1039, 1337]],
-        dtype=np.int
-    )
-
-    k_clusters = 3
-    init_centrs = [0, 550, 1100]
-
-    # ml_cl_cons = sp.sparse.coo_matrix(ml_cl_cons)
-
-    print "Running HMRF Kmeans"
-    hkmeans = HMRFKmeans(k_clusters, must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
-                         max_iter=300, cvg=0.0001)
-
-    res = hkmeans.fit(x_data_2d_arr)
-
-    print list(res[1])
-
-    for mu_idx, mu in enumerate(res[0]):
-
-        clstr_idxs = np.where(res[1] == mu_idx)[0]
-
-        for xy in x_data_2d_arr[clstr_idxs]:
-            plt.text(xy[0], xy[1], str(mu_idx+1), color='red', fontsize=15)
-        # plt.plot(x_data_2d_arr2, '^')
-        # plt.plot(x_data_2d_arr3, '>')
-
-    plt.show()

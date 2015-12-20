@@ -10,7 +10,7 @@ import scipy.special as special
 import time as tm
 
 
-class CosineKmeans(object):
+class HMRFKmeans(object):
     """ HMRF Kmeans: A Semi-supervised clustering algorithm based on Hidden Markov Random Fields
         Clustering model optimized by Expectation Maximization (EM) algorithm with Hard clustering
         constraints, i.e. a Kmeans Semi-supervised clustering variant.
@@ -41,15 +41,32 @@ class CosineKmeans(object):
 
     """
 
-    def __init__(self, k_clusters, must_lnk, cannot_lnk, init_centroids=None, max_iter=300,
-                 cvg=0.001):
+    def __init__(self, k_clusters, must_lnk, cannot_lnk, init_centroids=None, ml_wg=1.0, cl_wg=1.0,
+                 max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5, d_params=None,
+                 norm_part=False, globj='non-normed'):
 
         self.k_clusters = k_clusters
         self.must_lnk = must_lnk
         self.cannot_lnk = cannot_lnk
         self.init_centroids = init_centroids
+        self.ml_wg = ml_wg
+        self.cl_wg = cl_wg
         self.max_iter = max_iter
         self.cvg = cvg
+        self.lrn_rate = lrn_rate
+        self.ray_sigma = ray_sigma
+        self.A = d_params
+        self.norm_part = norm_part
+
+        # This option enables or disables the normalizations values to be included in the...
+        # ...calculation of the total values, other than the total cosine distances, the...
+        # ...total must-link and cannot-link violation scores.
+        if globj == 'non-normed':
+            self.globj = False
+        elif globj == 'proper':
+            self.globj = True
+        else:
+            raise Exception("globj: can be either 'proper' or 'non-normed'.")
 
     def fit(self, x_data, neg_idxs4clstring=set([])):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
@@ -73,6 +90,14 @@ class CosineKmeans(object):
         """
 
         # Initializing clustering
+
+        # Setting up distortion parameters if not have been passed as class argument.
+        if self.A is None:
+            self.A = np.random.uniform(0.50, 100.0, size=x_data.shape[1])
+        # A should be a diagonal matrix form for the calculations in the functions bellow. The...
+        # ...sparse form will save space and the lil_matrix will make the dia_matrix write-able.
+        self.A = sp.sparse.dia_matrix((self.A, [0]), shape=(self.A.shape[0], self.A.shape[0]))
+        self.A = sp.sparse.lil_matrix(self.A)
 
         # Setting up the violation weights matrix if not have been passed as class argument.
         #if self.w_violations is None:
@@ -131,6 +156,9 @@ class CosineKmeans(object):
             mu_lst = self.MeanCosA(x_data, clstr_idxs_set_lst)
             # print mu_lst
 
+            # Re-estimating distortion measure parameters upon the new clusters set-up.
+            self.A = self.UpdateDistorParams(self.A, x_data, mu_lst, clstr_idxs_set_lst)
+
             # Calculating Global JObjective function.
             glob_jobj = self.GlobJObjCosA(x_data, mu_lst, clstr_idxs_set_lst)
 
@@ -138,8 +166,8 @@ class CosineKmeans(object):
             print "Time elapsed : %d:%d:%d:%d" % timel
 
             # Terminating upon difference of the last two Global JObej values.
-            if np.abs(last_gobj - glob_jobj) < self.cvg or glob_jobj < self.cvg:
-
+            if glob_jobj < self.cvg:  # np.abs(last_gobj - glob_jobj) < self.cvg or
+                # second condition is TEMP!
                 print 'last_gobj - glob_jobj', last_gobj - glob_jobj
                 print "Global Objective", glob_jobj
                 break
@@ -159,7 +187,13 @@ class CosineKmeans(object):
             'k_clusters': self.k_clusters,
             'max_iter': self.max_iter,
             'final_iter': self.conv_step,
-            'convg_diff': self.cvg
+            'ml_wg': self.ml_wg,
+            'cl_wg': self.cl_wg,
+            'convg_diff': self.cvg,
+            'lrn_rate': self.lrn_rate,
+            'ray_sigma': self.ray_sigma,
+            'dist_msur_params': self.A,
+            'norm_part': self.norm_part
         }
 
     def ICM(self, x_data, mu_lst, clstr_idxs_sets_lst):
@@ -188,7 +222,7 @@ class CosineKmeans(object):
         no_change_cnt = 0
         while no_change_cnt < 2:
 
-            # Calculating the new Clusters.
+            # Calculating the new Clusters. Random.permutation is critical here.
             for x_idx in np.random.permutation(np.arange(x_data.shape[0])):
 
                 # Skipping the indices should not participate in clustering.
@@ -208,17 +242,17 @@ class CosineKmeans(object):
 
                     if j_obj < last_jobj:
                         last_jobj = j_obj
-                        new_clstr_tag = i
+                        mu_neib_idx = i
 
                 # Re-assinging the x_i vector to the new cluster if not already.
-                if x_idx not in clstr_idxs_sets_lst[new_clstr_tag]:
+                if x_idx not in clstr_idxs_sets_lst[mu_neib_idx]:
 
                     # Remove x form all Clusters.
                     for clstr_idxs_set in clstr_idxs_sets_lst:
                         clstr_idxs_set.discard(x_idx)
                         # clstr_idxs_sets_lst[midx].discard(x_idx)
 
-                    clstr_idxs_sets_lst[new_clstr_tag].add(x_idx)
+                    clstr_idxs_sets_lst[mu_neib_idx].add(x_idx)
 
                     no_change = False
 
@@ -273,10 +307,10 @@ class CosineKmeans(object):
         # np.sqrt(np.abs(x2 * self.A[:, :] * x2.T))
         return (
             1 - (
-                 x1 * x2.T /
+                 x1 * self.A[:, :] * x2.T /
                  (
-                  np.sqrt(x1 * x1.T) *
-                  np.sqrt(x2 * x2.T)
+                  np.sqrt(x1 * self.A[:, :] * x1.T) *
+                  np.sqrt(x2 * self.A[:, :] * x2.T)
                   )
                 )
         )
@@ -312,13 +346,79 @@ class CosineKmeans(object):
                 xi_sum = sp.matrix(zero_vect)
 
             # Calculating denominator ||Σ xi||(A)
-            parametrized_norm_xi = np.sqrt(xi_sum * xi_sum.T)
+            parametrized_norm_xi = np.sqrt(xi_sum * self.A[:, :] * xi_sum.T)
             # parametrized_norm_xi = np.sqrt(np.abs(xi_sum * self.A[:, :] * xi_sum.T))
 
             # Calculating the Centroid of the (assumed) hyper-sphear. Then appended to the mu list.
             mu_lst.append(xi_sum / parametrized_norm_xi)
 
         return mu_lst
+
+    def NormPart(self, x_data_subset):
+        """ The von Mises and von Mises - Fisher Logarithmic Normalization partition function:...
+            is calculated in this method. For the 2D data the function is simplified for faster
+            calculation.
+
+            *** This function has been build after great research on the subject. However, some
+            things are not very clear this is always in a revision state until theoretically proven
+            to be correctly used.
+
+            Arguments
+            ---------
+                x_data_subset: The subset of the data point are included in the von Mises-Fisher
+                    distribution.
+
+            Output
+            ------
+                The logarithmic value of the partition normalization function.
+
+        """
+
+        # Calculating the r.
+        # The r it suppose to be the norm of the data points of the current cluster, not the...
+        # ...whole mixture as it is in the global objective function. ## Might this need to be...
+        # ...revised.
+        r = np.linalg.norm(x_data_subset)
+
+        # Calculating the Von Misses Fisher's k concentration is approximated as seen..
+        # ....in Banerjee et al. 2003.
+        dim = x_data_subset.shape[1]
+
+        if dim == 1:
+            raise Exception("Data points cannot have less than two(2) dimension.")
+
+        if dim > 100:
+            # Returning a heuristically found constant value as normalizer because when the...
+            # ...dimentions are very high Bessel function equals Zero.
+            return dim * x_data_subset.shape[0]
+
+        # Calculating the partition function depending on the vector dimensions.
+        k = (r*dim - np.power(r, 3.0)) / (1 - np.power(r, 2.0))
+        # k=0.001 only for the case where the r is too small. Usually at the 1-2 first iterations...
+        # ...of the EM/Kmeans.
+        if k < 0.0:
+            k = 0.001
+
+        if dim > 3 and dim <= 100:
+
+            # This is the proper way for calculating the von Misses Fisher normalization factor.
+            bessel = np.abs(special.jv((dim/2.0)-1.0, k))
+            # bessel = np.abs(self.Jd((dim/2.0)-1.0, k))
+            cdk = np.power(k, (dim/2.0)-1) / (np.power(2*np.pi, dim/2)*bessel)
+
+        elif dim == 2:
+
+            # This is the proper way for calculating the vMF normalization factor for 2D vectors.
+            bessel = np.abs(special.jv(0, k))
+            # bessel = np.abs(self.Jd(0, k))
+            cdk = 1.0 / (2*np.pi*bessel)
+
+        # Returning the log of the normalization function plus the log of the k that is used in...
+        # ...the von Mises Fisher PDF, which is separated from the Cosine Distance due to the log.
+        # The normalizers are multiplied by the number of all the X data subset, because it is...
+        # the global normalizer after the whole summations has been completed.
+        # Still this need to be revised.
+        return (np.log(cdk) + np.log(k)) * x_data_subset.shape[0]
 
     def JObjCosA(self, x_idx, x_data, mu, clstr_idxs_set):
         """ JObjCosA: J-Objective function for parametrized Cosine Distortion Measure. It cannot
@@ -356,9 +456,10 @@ class CosineKmeans(object):
 
             if x_idx in x_cons:
 
-                if (x[0] in clstr_idxs_set or x[1] in clstr_idxs_set) and not (x_cons <= clstr_idxs_set):
+                if (x[0] in clstr_idxs_set or x[1] in clstr_idxs_set) and\
+                        not (x_cons <= clstr_idxs_set):
 
-                    ml_cost += self.CosDistA(x_data[x[0], :], x_data[x[1], :])
+                    ml_cost += self.CosDistA(x_data[x[0], :], x_data[x[1], :])  # self.ml_wg*
 
         # Calculating Cannot-Link violation cost.
         cl_cost = 0.0
@@ -370,10 +471,35 @@ class CosineKmeans(object):
 
                     x = list(x_cons)
 
-                    cl_cost += (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
+                    cl_cost += (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))  # self.cl_wg*
+
+        # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
+        sum1, sum2 = 0.0, 0.0
+        for a in self.A.data:
+            sum1 += np.log(a)
+            sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
+        params_pdf = sum1 - sum2 - (2 * self.A.data.shape[0] * np.log(self.ray_sigma))
+
+        # NOTE!
+        params_pdf = 0.0
+
+        # Calculating the log normalization function of the von Mises-Fisher distribution...
+        # ...NOTE: Only for this cluster i.e. this vMF of the whole PDF mixture.
+        if self.norm_part:
+            norm_part_value = self.NormPart(x_data[list(clstr_idxs_set)])
+        else:
+            norm_part_value = 0.0
+
+        # print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
+        # print "Params are: ", self.A
+
+        # timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
+        # print "Jobj time: %d:%d:%d:%d" % timel
+        # if cl_cost > 0.0 or ml_cost > 0.0:
+        # print "Jobj: ", dist + ml_cost + cl_cost - params_pdf, " | ", dist, ml_cost, cl_cost, params_pdf, norm_part_value
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
-        return dist + ml_cost + cl_cost
+        return dist + ml_cost + cl_cost - params_pdf + norm_part_value
 
     def GlobJObjCosA(self, x_data, mu_lst, clstr_idxs_set_lst):
         """
@@ -391,10 +517,9 @@ class CosineKmeans(object):
 
                     smpls_cnt += 1.0
 
-                    sum_d += self.CosDistA(mu, x_data[x_clstr_idx])
+                    sum_d += self.CosDistA(x_data[x_clstr_idx], mu)
 
         # Averaging dividing be the number of samples.
-        print 'Samples:', smpls_cnt
         sum_d = sum_d / smpls_cnt
 
         # Calculating Must-Link violation cost.
@@ -408,11 +533,12 @@ class CosineKmeans(object):
 
                     x = list(x_cons)
 
-                    if (x[0] in clstr_idxs_set or x[1] in clstr_idxs_set) and not (x_cons <= clstr_idxs_set):
+                    if (x[0] in clstr_idxs_set or x[1] in clstr_idxs_set) and\
+                            not (x_cons <= clstr_idxs_set):
 
                         ml_cnt += 1.0
 
-                        ml_cost += self.CosDistA(x_data[x[0], :], x_data[x[1], :])
+                        ml_cost += self.ml_wg*self.CosDistA(x_data[x[0], :], x_data[x[1], :])
 
         # Averaging dividing be the number of must-link constrains.
         if ml_cnt:
@@ -433,24 +559,248 @@ class CosineKmeans(object):
 
                         x = list(x_cons)
 
-                        cl_cost += (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
+                        cl_cost += self.cl_wg*(1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
 
         # Averaging dividing be the number of cannot-link constrains.
         if cl_cnt:
             cl_cost = cl_cost / cl_cnt
 
+        # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
+        if self.globj:
+            sum1, sum2 = 0.0, 0.0
+            for a in self.A.data:
+                sum1 += np.log(a)
+                sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
+            params_pdf = sum1 - sum2 - (2 * self.A.data.shape[0] * np.log(self.ray_sigma))
+        else:
+            params_pdf = 0.0
+
+        # Calculating the log normalization function of the von Mises-Fisher distribution...
+        # ...of the whole mixture.
+        if self.norm_part and self.globj:
+            norm_part_value = 0.0
+            for clstr_idxs_set in clstr_idxs_set_lst:
+                norm_part_value += self.NormPart(x_data[list(clstr_idxs_set)])
+        else:
+            norm_part_value = 0.0
+
         print 'dims', x_data.shape[1]
         print 'sum_d, ml_cost, cl_cost', sum_d, ml_cost, cl_cost
         print 'sum_d + ml_cost + cl_cost', sum_d + ml_cost + cl_cost
+        print 'np.log(Rayleigh)', params_pdf
+        print 'N*(np.log(cdk) + np.log(k))', norm_part_value
 
         # Calculating and returning the Global J-Objective value for the current Spherical...
         # ...vMF-Mixture set-up.
-        return sum_d + ml_cost + cl_cost
+        return sum_d + ml_cost + cl_cost - params_pdf + norm_part_value
+
+    def UpdateDistorParams(self, A, x_data, mu_lst, clstr_idxs_lst):
+        """ Update Distortion Parameters: This function is updating the whole set of the distortion
+            parameters. In particular the parameters for the Cosine Distance in this implementation
+            of the HMRF Kmeans.
+
+            Arguments
+            ---------
+                A: The diagonal sparse matrix of the cosine distance parameters. This is actually
+                    not necessary to be passed as argument but it is here for coding constancy
+                    reasons.
+                x_data: A numpy.array with X rows of data points and N rows of features/dimensions.
+                    clstr_idxs_lsts: The lists of indices for each cluster.
+                mu_lst: The list of N centroids(mu_i), one for each of the N expected clusters.
+                clstr_idxs_set_lst: The list of sets of x_data array indices for each of the N
+                    clusters.
+
+            Output
+            ------
+                Returning the updated A paramters diagonal (sparse) matrix. Again this is a
+                redundant step just for coding constancy reasons.
+
+        """
+
+        print "In UpdateDistorParams..."
+
+        new_A = np.zeros_like(A.data, dtype=np.float)
+
+        # Updating every parameter's value one-by-one.
+        for a_idx, a in enumerate(np.array([a[0] for a in A.data])):
+
+            # Calculating Partial Derivative of D(xi, mu).
+            xm_pderiv = 0.0
+
+            for mu, clstr_idxs in zip(mu_lst, clstr_idxs_lst):
+
+                for x_clstr_idx in clstr_idxs:
+
+                    if x_clstr_idx not in self.neg_idxs4clstring:  # <---NOTE
+
+                        xm_pderiv += self.PartialDerivative(a_idx, x_data[x_clstr_idx], mu, A)
+
+            # Calculating the Partial Derivative of D(xi, xj) of Must-Link Constraints.
+            mlcost_pderiv = 0.0
+
+            for clstr_idxs_set in clstr_idxs_lst:
+
+                for x_cons in self.must_lnk:
+
+                    if x_cons not in self.neg_idxs4clstring:  # <---NOTE
+
+                        x = list(x_cons)
+
+                        if (x[0] in clstr_idxs_set or x[1] in clstr_idxs_set) and\
+                                not (x_cons <= clstr_idxs_set):
+
+                            mlcost_pderiv += self.ml_wg*self.PartialDerivative(
+                                a_idx, x_data[x[0], :], x_data[x[1], :], A
+                            )
+
+            # Calculating the Partial Derivative of D(xi, xj) of Cannot-Link Constraints.
+            clcost_pderiv = 0.0
+
+            for clstr_idxs_set in clstr_idxs_lst:
+
+                for x_cons in self.cannot_lnk:
+
+                    if x_cons not in self.neg_idxs4clstring:  # <---NOTE
+
+                        if x_cons <= clstr_idxs_set:
+
+                            x = list(x_cons)
+
+                            # NOTE: The (Delta max(CosA) / Delta a) it is a constant according to the...
+                            # ...assuption that max(CosA) == 1 above (see documentation). However...
+                            # ...based on Chapelle et al. in the partial derivative a proper constant...
+                            # ...should be selected in order to keep the cannot-link constraints...
+                            # ...contribution positive. **Here it is just using the outcome of the...
+                            # ...partial derivative it self as to be equally weighted with the...
+                            # ...must-link constraints** OR NOT.
+
+                            cl_pd = self.PartialDerivative(
+                                a_idx, x_data[x[0], :], x_data[x[1], :], A
+                            )
+
+                            # minus_max_clpd = 0.0
+                            # if cl_pd < 0.0:
+                            #     minus_max_clpd = np.floor(cl_pd) - cl_pd
+                            # elif cl_pd > 0.0:
+                            #     minus_max_clpd = np.ceil(cl_pd) - cl_pd
+
+                            # minus_max_clpd = cl_pd
+
+                            clcost_pderiv -= self.cl_wg*cl_pd
+
+            # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
+            # new_a = a + (self.lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv))
+            a_pderiv = (1 / a) - (a / np.square(self.ray_sigma))
+
+            # NOTE!
+            a_pderiv = 0.0
+
+            # print 'Rayleigh Partial', a_pderiv
+
+            if np.abs(a_pderiv) == np.inf:
+                print "Invalid patch for Rayleighs P'(A) triggered: (+/-)INF P'(A)=", a_pderiv
+                a_pderiv = 1e-15
+
+            elif a_pderiv == np.nan:
+                print "Invalid patch for Rayleighs P(A) triggered: NaN P'(A)=", a_pderiv
+                a_pderiv = 1e-15
+
+            # Changing a diagonal value of the A cosine similarity parameters measure.
+            new_A[a_idx] = (a + (self.lrn_rate *
+                                 (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
+                                 )
+                            )
+
+            print self.lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
+            if new_A[a_idx] < 0.0:
+                print self.lrn_rate
+                print xm_pderiv
+                print mlcost_pderiv
+                print clcost_pderiv
+                print a_pderiv
+                0/0
+
+            # ΝΟΤΕ: Invalid patch for let the experiments to be completed.
+            if new_A[a_idx] < 0.0:
+                print "Invalid patch for A triggered: (-) Negative A=", new_A[a_idx], a_pderiv
+                new_A[a_idx] = 1e-15
+
+            elif new_A[a_idx] == 0.0:
+                print "Invalid patch for A triggered: (0) Zero A=", new_A[a_idx], a_pderiv
+                new_A[a_idx] = 1e-15
+
+            elif np.abs(new_A[a_idx]) == np.Inf:
+                print "Invalid patch for A triggered: (+/-)INF A=", new_A[a_idx], a_pderiv
+                new_A[a_idx] = 1e-15
+
+            elif new_A[a_idx] == np.NaN:
+                print "Invalid patch for A triggered: NaN A=", new_A[a_idx], a_pderiv
+                new_A[a_idx] = 1e-15
+
+        A[:, :] = sp.sparse.lil_matrix(np.diag(new_A))
+
+        # Returning the A parameters. This is actually a dump return for coding constance reasons.
+        return A
+
+    def PartialDerivative(self, a_idx, x1, x2, A):
+        """ Partial Derivative: This method is calculating the partial derivative of a specific
+            parameter given the proper vectors. That is, for the cosine distance is a x_i with the
+            centroid vector (mu) of the cluster where x_i is belonging into. As for the constraint
+            violations is the x_1 and x_2 of a specific pair of constraints each time this method
+            is called.
+            **for detail see documentation.
+
+            Arguments
+            ---------
+                a_idx: The index of the parameter on the diagonal of the A diagonal sparse
+                    parameters matrix.
+                x1, x2: The vectors will be used for the partial derivative calculation.
+
+            Output
+            ------
+                res_a: The partial derivative's value.
+
+        """
+
+        # A = sp.diag(distor_params)
+        # x1 = sp.matrix(x1)
+        # x2 = sp.matrix(x2)
+
+        if sp.sparse.issparse(x1):
+            x1 = sp.matrix(x1.todense())
+        else:
+            x1 = sp.matrix(x1)
+
+        if sp.sparse.issparse(x2):
+            x2 = sp.matrix(x2.todense())
+        else:
+            x2 = sp.matrix(x2)
+
+        # Calculating parametrized Norms ||Σ xi||(A)
+        # x1_pnorm = np.sqrt(np.abs(x1 * A * x1.T))
+        # x2_pnorm = np.sqrt(np.abs(x2 * A * x2.T))
+        x1_pnorm = np.sqrt(x1 * A[:, :] * x1.T)
+        x2_pnorm = np.sqrt(x2 * A[:, :] * x2.T)
+
+        res_a = (
+                    (x1[0, a_idx] * x2[0, a_idx] * x1_pnorm * x2_pnorm) -
+                    (
+                        x1 * A[:, :] * x2.T *
+                        (
+                            (
+                                np.square(x1[0, a_idx]) * np.square(x2_pnorm) +
+                                np.square(x2[0, a_idx]) * np.square(x1_pnorm)
+                            ) / (2 * x1_pnorm * x2_pnorm)
+                        )
+                    )
+                ) / (np.square(x1_pnorm) * np.square(x2_pnorm))
+
+        return res_a
 
 
 if __name__ == '__main__':
 
-    test_dims = 1000
+    test_dims = 10
 
     print "Creating Sample"
     x_data_2d_arr1 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
@@ -476,7 +826,6 @@ if __name__ == '__main__':
 
     x_data_2d_arr = np.vstack((x_data_2d_arr1, x_data_2d_arr2, x_data_2d_arr3))
     print x_data_2d_arr
-
     for xy in x_data_2d_arr1:
         plt.text(xy[0], xy[1], str(1),  color="black", fontsize=20)
     for xy in x_data_2d_arr2:
@@ -487,77 +836,34 @@ if __name__ == '__main__':
     # plt.text(x_data_2d_arr3[:, 0], x_data_2d_arr3[:, 1], str(3),  color="red", fontsize=12)
     # plt.show()
     # 0/0
-    #plt.show()
+    # plt.show()
 
     must_lnk_con = [
-        set([1, 5]),
-        set([1, 3]),
-        set([1, 6]),
-        set([1, 8]),
-        set([7, 3]),
-        set([521, 525]),
-        set([521, 528]),
-        set([521, 539]),
-        set([535, 525]),
-        set([537, 539]),
-        set([1037, 1238]),
-        set([1057, 1358]),
-        set([1039, 1438]),
-        set([1045, 1138]),
-        set([1098, 1038]),
+        set([1, 5]), set([1, 3]), set([1, 6]), set([1, 8]), set([7, 3]), set([521, 525]),
+        set([521, 528]), set([521, 539]), set([535, 525]), set([537, 539]), set([1037, 1238]),
+        set([1057, 1358]), set([1039, 1438]), set([1045, 1138]), set([1098, 1038]),
         set([1019, 1138]),
         set([1087, 1338])
     ]
 
     cannot_lnk_con = [
-        set([1, 521]),
-        set([1, 525]),
-        set([1, 528]),
-        set([1, 535]),
-        set([1, 537]),
-        set([1, 539]),
-        set([5, 521]),
-        set([5, 525]),
-        set([5, 528]),
-        set([5, 535]),
-        set([8, 521]),
-        set([8, 525]),
-        set([8, 528]),
-        set([8, 535]),
-        set([8, 537]),
-        set([8, 539]),
-        set([3, 521]),
-        set([3, 535]),
-        set([3, 537]),
-        set([3, 539]),
-        set([6, 521]),
-        set([6, 525]),
-        set([6, 528]),
-        set([6, 535]),
-        set([6, 537]),
-        set([6, 539]),
-        set([7, 521]),
-        set([7, 525]),
-        set([7, 528]),
-        set([7, 535]),
-        set([7, 537]),
-        set([7, 539]),
-        set([538, 1237]),
-        set([548, 1357]),
-        set([558, 1437]),
-        set([738, 1137]),
-        set([938, 1037]),
-        set([838, 1039]),
-        set([555, 1337])
+        set([1, 521]), set([1, 525]), set([1, 528]), set([1, 535]), set([1, 537]), set([1, 539]),
+        set([5, 521]), set([5, 525]), set([5, 528]), set([5, 535]), set([8, 521]), set([8, 525]),
+        set([8, 528]), set([8, 535]), set([8, 537]), set([8, 539]), set([3, 521]), set([3, 535]),
+        set([3, 537]), set([3, 539]), set([6, 521]), set([6, 525]), set([6, 528]), set([6, 535]),
+        set([6, 537]), set([6, 539]), set([7, 521]), set([7, 525]), set([7, 528]), set([7, 535]),
+        set([7, 537]), set([7, 539]), set([538, 1237]), set([548, 1357]), set([558, 1437]),
+        set([738, 1137]), set([938, 1037]), set([838, 1039]), set([555, 1337])
     ]
 
     k_clusters = 3
     init_centrs = [set([0]), set([550]), set([1100])]
     print "Running HMRF Kmeans"
-    ckmeans = CosineKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
-                           max_iter=300, cvg=0.0001)
-
-    res = ckmeans.fit(x_data_2d_arr)  # , set([50]))
+    hkmeans = HMRFKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
+                         ml_wg=0.99, cl_wg=0.99, max_iter=300, cvg=0.0001, lrn_rate=0.0003,
+                         ray_sigma=1.0, d_params=np.random.uniform(1.0, 1.0, size=test_dims),
+                         norm_part=False, globj='non-normed')
+    res = hkmeans.fit(x_data_2d_arr, set([50]))
 
     for mu_idx, clstr_idxs in enumerate(res[1]):
 
