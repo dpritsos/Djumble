@@ -96,7 +96,7 @@ class HMRFKmeans(object):
             self.A = np.random.uniform(0.50, 100.0, size=x_data.shape[1])
         # A should be a diagonal matrix form for the calculations in the functions bellow. The...
         # ...sparse form will save space and the lil_matrix will make the dia_matrix write-able.
-        self.A = sp.sparse.dia_matrix((self.A, [0]), shape=(self.A.shape[0], self.A.shape[0]))
+        self.A = np.diag(self.A)
         self.A = sp.sparse.lil_matrix(self.A)
 
         # Setting up the violation weights matrix if not have been passed as class argument.
@@ -219,6 +219,7 @@ class HMRFKmeans(object):
 
         start_tm = tm.time()
 
+        # #######################
         no_change_cnt = 0
         while no_change_cnt < 2:
 
@@ -257,8 +258,10 @@ class HMRFKmeans(object):
                     no_change = False
 
                 else:
+
                     no_change = True
 
+            # ##########################
             # Counting Non-Changes, i.e. if no change happens for two (2) iteration the...
             # ...re-assingment process stops.
             if no_change:
@@ -633,7 +636,7 @@ class HMRFKmeans(object):
 
                     if x_clstr_idx not in self.neg_idxs4clstring:  # <---NOTE
 
-                        xm_pderiv += self.PartialDerivative(a_idx, x_data[x_clstr_idx], mu, A)
+                        xm_pderiv += self.PartialDerivative(a_idx, x_data[x_clstr_idx, :], mu, A)
 
             # Calculating the Partial Derivative of D(xi, xj) of Must-Link Constraints.
             mlcost_pderiv = 0.0
@@ -712,6 +715,7 @@ class HMRFKmeans(object):
                             )
 
             print self.lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
+            print xm_pderiv, mlcost_pderiv, clcost_pderiv, a_pderiv
             if new_A[a_idx] < 0.0:
                 print self.lrn_rate
                 print xm_pderiv
@@ -796,82 +800,3 @@ class HMRFKmeans(object):
                 ) / (np.square(x1_pnorm) * np.square(x2_pnorm))
 
         return res_a
-
-
-if __name__ == '__main__':
-
-    test_dims = 10
-
-    print "Creating Sample"
-    x_data_2d_arr1 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
-    x_data_2d_arr2 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
-    x_data_2d_arr3 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
-
-    x_data_2d_arr1 = x_data_2d_arr1 / np.max(x_data_2d_arr1, axis=1).reshape(500, 1)
-    x_data_2d_arr2 = x_data_2d_arr2 / np.max(x_data_2d_arr2, axis=1).reshape(500, 1)
-    x_data_2d_arr3 = x_data_2d_arr3 / np.max(x_data_2d_arr3, axis=1).reshape(500, 1)
-
-    # print x_data_2d_arr1
-
-    # 0/0
-
-# (0.7, 0.2, 0.7, 0.2, 0.6, 0.6, 0.1, 0.3, 0.8, 0.5)
-# (0.6, 0.6, 0.7, 0.2, 0.6, 0.6, 0.8, 0.3, 0.9, 0.1)
-# (0.2, 0.3, 0.7, 0.2, 0.6, 0.6, 0.2, 0.3, 0.6, 0.4)
-
-    # tuple(np.random.normal(0.0, 10.0, size=2))
-    # x_data_2d_arr1 = np.random.vonmises(0.5, 100, size=(20, 2))
-    # x_data_2d_arr2 = np.random.vonmises(0.5, 1000, size=(20, 2))
-    # x_data_2d_arr3 = np.random.vonmises(0.5, 10000, size=(20, 2))
-
-    x_data_2d_arr = np.vstack((x_data_2d_arr1, x_data_2d_arr2, x_data_2d_arr3))
-    print x_data_2d_arr
-    for xy in x_data_2d_arr1:
-        plt.text(xy[0], xy[1], str(1),  color="black", fontsize=20)
-    for xy in x_data_2d_arr2:
-        plt.text(xy[0], xy[1], str(2),  color="green", fontsize=20)
-    for xy in x_data_2d_arr3:
-        plt.text(xy[0], xy[1], str(3),  color="blue", fontsize=20)
-    # plt.text(x_data_2d_arr2[:, 0], x_data_2d_arr2[:, 1], str(2),  color="red", fontsize=12)
-    # plt.text(x_data_2d_arr3[:, 0], x_data_2d_arr3[:, 1], str(3),  color="red", fontsize=12)
-    # plt.show()
-    # 0/0
-    # plt.show()
-
-    must_lnk_con = [
-        set([1, 5]), set([1, 3]), set([1, 6]), set([1, 8]), set([7, 3]), set([521, 525]),
-        set([521, 528]), set([521, 539]), set([535, 525]), set([537, 539]), set([1037, 1238]),
-        set([1057, 1358]), set([1039, 1438]), set([1045, 1138]), set([1098, 1038]),
-        set([1019, 1138]),
-        set([1087, 1338])
-    ]
-
-    cannot_lnk_con = [
-        set([1, 521]), set([1, 525]), set([1, 528]), set([1, 535]), set([1, 537]), set([1, 539]),
-        set([5, 521]), set([5, 525]), set([5, 528]), set([5, 535]), set([8, 521]), set([8, 525]),
-        set([8, 528]), set([8, 535]), set([8, 537]), set([8, 539]), set([3, 521]), set([3, 535]),
-        set([3, 537]), set([3, 539]), set([6, 521]), set([6, 525]), set([6, 528]), set([6, 535]),
-        set([6, 537]), set([6, 539]), set([7, 521]), set([7, 525]), set([7, 528]), set([7, 535]),
-        set([7, 537]), set([7, 539]), set([538, 1237]), set([548, 1357]), set([558, 1437]),
-        set([738, 1137]), set([938, 1037]), set([838, 1039]), set([555, 1337])
-    ]
-
-    k_clusters = 3
-    init_centrs = [set([0]), set([550]), set([1100])]
-    print "Running HMRF Kmeans"
-    hkmeans = HMRFKmeans(k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs,
-                         ml_wg=0.99, cl_wg=0.99, max_iter=300, cvg=0.0001, lrn_rate=0.0003,
-                         ray_sigma=1.0, d_params=np.random.uniform(1.0, 1.0, size=test_dims),
-                         norm_part=False, globj='non-normed')
-    res = hkmeans.fit(x_data_2d_arr, set([50]))
-
-    for mu_idx, clstr_idxs in enumerate(res[1]):
-
-        print mu_idx+1, len(clstr_idxs), np.sort(clstr_idxs)
-
-        for xy in x_data_2d_arr[list(clstr_idxs)]:
-            plt.text(xy[0], xy[1], str(mu_idx+1), color='red', fontsize=15)
-        # plt.plot(x_data_2d_arr2, '^')
-        # plt.plot(x_data_2d_arr3, '>')
-
-    plt.show()

@@ -175,12 +175,12 @@ class CosineKmeans(object):
             # Terminating upon the difference of the last two Global JObej values.
             if np.abs(last_gobj - glob_jobj) < self.cvg or glob_jobj < self.cvg:
                 print 'last_gobj - glob_jobj', last_gobj - glob_jobj
-                print "Global Objective", glob_jobj
+                print "Global Objective (Narray)", glob_jobj
                 break
             else:
                 last_gobj = glob_jobj
 
-            print "Global Objective", glob_jobj
+            print "Global Objective (Narray)", glob_jobj
 
         # Storing the amount of iterations until convergence.
         self.conv_step = conv_step
@@ -332,8 +332,8 @@ class CosineKmeans(object):
 
         if idxzof_mli4smpli[0].shape[0]:
 
-            # Getting the must-link, with current, data points indeces which they should be in the...
-            # ...same cluster.
+            # Getting the must-link, with current, data points indeces which they should be in...
+            # the same cluster.
             mliz_with_smpli = self.mst_lnk_idxs[~idxzof_mli4smpli[0], idxzof_mli4smpli[1]]
 
             # Getting the indeces of must-link than are not in the cluster as they should have been.
@@ -342,18 +342,13 @@ class CosineKmeans(object):
             if viol_idxs.shape[0]:
 
                 # Calculating all pairs of violation costs for must-link constraints.
-                # NOTE: The violation cost is equivalent to the parametrized Cosine distance which...
-                # ...here is equivalent to the (1 - dot product) because the data points assumed...
-                # ...to be normalized by the parametrized Norm of the vectors.
+                # NOTE: The violation cost is equivalent to the parametrized Cosine distance...
+                # ...which here is equivalent to the (1 - dot product) because the data points...
+                # ...assumed to be normalized by the parametrized Norm of the vectors.
                 viol_costs = 1.0 - np.dot(x_data[x_idx], x_data[viol_idxs[1]].T)
 
                 # Sum-ing up Weighted violations costs.
                 ml_cost = np.sum(viol_costs)
-                # np.multiply(self.w_violations[x_idx, viol_idxs], viol_costs)
-
-                # Equivalent to: (in a for-loop implementation)
-                # cl_cost += self.w_violations[x[0], x[1]] *\
-                #  self.CosDistA(x_data[x[0], :], x_data[x[1], :])
 
         # Calculating Cannot-Link violation cost.
         # ---------------------------------------
@@ -361,17 +356,16 @@ class CosineKmeans(object):
 
         # Getting the index(s) of the cannot-link-constraints index-table of this data sample.
         idxzof_cli4smpli = np.where(self.cnt_lnk_idxs == x_idx)
-        #print idxzof_cli4smpli
+
         if idxzof_cli4smpli[0].shape[0]:
-            #print 'IN'
-            # Getting the cannot-link, with current, data points indeces which they should not be in...
-            # ...the same cluster.
+
+            # Getting the cannot-link, with current, data points indeces which they should not...
+            # ...be in the same cluster.
             cliz_with_smpli = self.cnt_lnk_idxs[~idxzof_cli4smpli[0], idxzof_cli4smpli[1]]
-            #print cliz_with_smpli
-            #print np.in1d(cliz_with_smpli, clstr_idx_arr)
-            # Getting the indeces of cannot-link than are in the cluster as they shouldn't have been.
+
+            # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
+            # ...have been.
             viol_idxs = self.cnt_lnk_idxs[:, np.in1d(cliz_with_smpli, clstr_idx_arr)]
-            #print viol_idxs
 
             if viol_idxs.shape[0]:
 
@@ -385,11 +379,6 @@ class CosineKmeans(object):
 
                 # Sum-ing up Weighted violations costs.
                 cl_cost = np.sum(viol_costs)
-                # np.multiply(self.w_violations[x_idx, viol_idxs], viol_costs)
-
-                # Equivalent to: (in a for-loop implementation)
-                # cl_cost += self.w_violations[x[0], x[1]] *\
-                # (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost
@@ -455,11 +444,6 @@ class CosineKmeans(object):
                     # ...should be element-by-element.
 
                     ml_cost += np.sum(viol_costs_onetime)
-                    #     np.multiply(
-                    #         self.w_violations[viol_pair_idx, viol_idxs],
-                    #         viol_costs_onetime
-                    #     )
-                    # )
 
             # Calculating Cannot-Link violation cost.
             # ---------------------------------------
@@ -501,14 +485,8 @@ class CosineKmeans(object):
                 # ...triangle because we need the cosine distance of the constraints pairs...
                 # ...only ones.
                 cl_cost += np.sum(viol_costs_onetime)
-                #     np.multiply(
-                #         self.w_violations[viol_pair_idx, viol_idxs],
-                #         viol_costs_onetime
-                #     )
-                # )
 
         # Averaging EVERYTHING.
-
         sum_d = sum_d / smlps_cnt
 
         if ml_cnt:

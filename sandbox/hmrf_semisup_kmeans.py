@@ -15,13 +15,11 @@ import os
 import copy
 import warnings
 
-
 sys.path.append('../')
-from djumble.cos_semisup_km import CosineKmeans
-from djumble.cos_semisup_km_narray import CosineKmeans as CosineKmeans_arr
+from djumble.hmrf_semisup_km import HMRFKmeans as HMRFKmeans
+from djumble.hmrf_semisup_km_narray import HMRFKmeans as HMRFKmeans_arr
 
-
-test_dims = 1000
+test_dims = 10
 
 print "Creating Sample"
 x_data_2d_arr1 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
@@ -47,11 +45,11 @@ x_data_2d_arr = np.vstack((x_data_2d_arr1, x_data_2d_arr2, x_data_2d_arr3))
 print x_data_2d_arr
 
 for xy in x_data_2d_arr1:
-    plt.text(xy[0], xy[1], str(1),  color="black", fontsize=20)
+    plt.text(xy[0], xy[1], str(1),  color="black", fontsize=10)
 for xy in x_data_2d_arr2:
-    plt.text(xy[0], xy[1], str(2),  color="green", fontsize=20)
+    plt.text(xy[0], xy[1], str(2),  color="green", fontsize=10)
 for xy in x_data_2d_arr3:
-    plt.text(xy[0], xy[1], str(3),  color="blue", fontsize=20)
+    plt.text(xy[0], xy[1], str(3),  color="blue", fontsize=10)
 # plt.text(x_data_2d_arr2[:, 0], x_data_2d_arr2[:, 1], str(2),  color="red", fontsize=12)
 # plt.text(x_data_2d_arr3[:, 0], x_data_2d_arr3[:, 1], str(3),  color="red", fontsize=12)
 # plt.show()
@@ -94,46 +92,51 @@ cannot_lnk_con_arr = np.array(
 k_clusters = 3
 
 init_centrs = [set([0]), set([550]), set([1100])]
-init_centrs_arr = [0, 550, 1100]
+init_centrs_lst = [0, 550, 1100]
 
 print "Running HMRF Kmeans"
-ckmeans = CosineKmeans(
-    k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs, max_iter=300, cvg=0.0001
+hkmeans = HMRFKmeans(
+    k_clusters, must_lnk_con, cannot_lnk_con,
+    init_centroids=init_centrs, ml_wg=1.0, cl_wg=1.0, max_iter=300, cvg=0.001, lrn_rate=0.0003,
+    ray_sigma=0.5, d_params=None, norm_part=False, globj='non-normed'
 )
 
-res = ckmeans.fit(copy.deepcopy(x_data_2d_arr))  # , set([50]))
+res = hkmeans.fit(copy.deepcopy(x_data_2d_arr))  # , set([50]))
 
 # print res[1]
 
-ckmeans_arr = CosineKmeans_arr(
-    k_clusters, must_lnk_con_arr, cannot_lnk_con_arr, init_centroids=init_centrs_arr, max_iter=300,
-    cvg=0.0001
+hkmeans_arr = HMRFKmeans_arr(
+    k_clusters, must_lnk_con_arr, cannot_lnk_con_arr,
+    init_centroids=init_centrs_lst, ml_wg=1.0, cl_wg=1.0, max_iter=300, cvg=0.001, lrn_rate=0.0003,
+    ray_sigma=0.5, d_params=None, norm_part=False, globj='non-normed'
 )
 
-res = ckmeans_arr.fit(x_data_2d_arr)
+res = hkmeans_arr.fit(x_data_2d_arr)
 
 # print res[1]
 
 """
-for mu_idx, clstr_idxs in enumerate(res[1]):
+for mu_idx in np.unique(res[1]):
 
-    print mu_idx+1, len(clstr_idxs), np.sort(clstr_idxs)
-
-    for xy in x_data_2d_arr[list(clstr_idxs)]:
-        plt.text(xy[0], xy[1], str(mu_idx+1), color='red', fontsize=15)
-    # plt.plot(x_data_2d_arr2, '^')
-    # plt.plot(x_data_2d_arr3, '>')
-
-plt.show()
-
-for mu_idx, mu in enumerate(res[0]):
+    print mu_idx
 
     clstr_idxs = np.where(res[1] == mu_idx)[0]
 
-    for xy in x_data_2d_arr[clstr_idxs]:
+    print clstr_idxs
+
+    for xy in x_data_2d_arr[list(clstr_idxs)]:
         plt.text(xy[0], xy[1], str(mu_idx+1), color='red', fontsize=15)
-    # plt.plot(x_data_2d_arr2, '^')
-    # plt.plot(x_data_2d_arr3, '>')
 
 plt.show()
+
+# for mu_idx, mu in enumerate(res[0]):
+#
+#     clstr_idxs = np.where(res[1] == mu_idx)[0]
+#
+#     for xy in x_data_2d_arr[clstr_idxs]:
+#         plt.text(xy[0], xy[1], str(mu_idx+1), color='red', fontsize=15)
+#     # plt.plot(x_data_2d_arr2, '^')
+#     # plt.plot(x_data_2d_arr3, '>')
+#
+# plt.show()
 """
