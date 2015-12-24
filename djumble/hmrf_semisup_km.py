@@ -624,12 +624,13 @@ class HMRFKmeans(object):
 
         new_A = np.zeros_like(A.data, dtype=np.float)
 
+        # Initializing...
+        xm_pderiv, mlcost_pderiv, clcost_pderiv = 0.0, 0.0, 0.0
+
         # Updating every parameter's value one-by-one.
         for a_idx, a in enumerate(np.array([a[0] for a in A.data])):
 
             # Calculating Partial Derivative of D(xi, mu).
-            xm_pderiv = 0.0
-
             for mu, clstr_idxs in zip(mu_lst, clstr_idxs_lst):
 
                 for x_clstr_idx in clstr_idxs:
@@ -639,8 +640,6 @@ class HMRFKmeans(object):
                         xm_pderiv += self.PartialDerivative(a_idx, x_data[x_clstr_idx, :], mu, A)
 
             # Calculating the Partial Derivative of D(xi, xj) of Must-Link Constraints.
-            mlcost_pderiv = 0.0
-
             for clstr_idxs_set in clstr_idxs_lst:
 
                 for x_cons in self.must_lnk:
@@ -657,8 +656,6 @@ class HMRFKmeans(object):
                             )
 
             # Calculating the Partial Derivative of D(xi, xj) of Cannot-Link Constraints.
-            clcost_pderiv = 0.0
-
             for clstr_idxs_set in clstr_idxs_lst:
 
                 for x_cons in self.cannot_lnk:
