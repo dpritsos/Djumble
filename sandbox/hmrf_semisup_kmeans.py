@@ -6,20 +6,18 @@ import scipy as sp
 import scipy.stats as sps
 import random as rnd
 import matplotlib.pyplot as plt
-import scipy.special as special
-import multiprocessing as mp
-from multiprocessing import sharedctypes as mp_sct
-import time as tm
 import sys
 import os
 import copy
-import warnings
+import pstats
+import cProfile
+import StringIO
 
 sys.path.append('../')
-from djumble.hmrf_semisup_km import HMRFKmeans as HMRFKmeans
-from djumble.hmrf_semisup_km_narray import HMRFKmeans as HMRFKmeans_arr
+# from djumble.hmrf_semisup_km import HMRFKmeans as HMRFKmeans
+from djumble.hmrf_semisup_km_narray_cy import HMRFKmeans as HMRFKmeans_arr
 
-test_dims = 100
+test_dims = 10
 
 print "Creating Sample"
 x_data_2d_arr1 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
@@ -42,7 +40,7 @@ x_data_2d_arr3 = x_data_2d_arr3 / np.max(x_data_2d_arr3, axis=1).reshape(500, 1)
 # x_data_2d_arr3 = np.random.vonmises(0.5, 10000, size=(20, 2))
 
 x_data_2d_arr = np.vstack((x_data_2d_arr1, x_data_2d_arr2, x_data_2d_arr3))
-print x_data_2d_arr
+# print x_data_2d_arr
 
 for xy in x_data_2d_arr1:
     plt.text(xy[0], xy[1], str(1),  color="black", fontsize=10)
@@ -95,6 +93,7 @@ init_centrs = [set([0]), set([550]), set([1100])]
 init_centrs_lst = [0, 550, 1100]
 
 print "Running HMRF Kmeans"
+"""
 hkmeans = HMRFKmeans(
     k_clusters, must_lnk_con, cannot_lnk_con,
     init_centroids=init_centrs, ml_wg=1.0, cl_wg=1.0, max_iter=300, cvg=0.001, lrn_rate=0.0003,
@@ -104,6 +103,13 @@ hkmeans = HMRFKmeans(
 res = hkmeans.fit(copy.deepcopy(x_data_2d_arr))  # , set([50]))
 
 # print res[1]
+"""
+
+# Prifilling
+pr = cProfile.Profile()
+
+# Prifilling - Starts
+pr.enable()
 
 hkmeans_arr = HMRFKmeans_arr(
     k_clusters, must_lnk_con_arr, cannot_lnk_con_arr,
@@ -114,6 +120,17 @@ hkmeans_arr = HMRFKmeans_arr(
 res = hkmeans_arr.fit(x_data_2d_arr)
 
 # print res[1]
+
+# Prifilling - Ends
+pr.disable()
+
+# Prifilling - Stats
+s = StringIO.StringIO()
+ps = pstats.Stats(pr, stream=s)
+ps.sort_stats("cumtime").print_stats()
+print s.getvalue()
+
+
 
 """
 for mu_idx in np.unique(res[1]):

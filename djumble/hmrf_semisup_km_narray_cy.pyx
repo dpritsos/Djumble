@@ -1,5 +1,7 @@
 # The following comment enables the use of utf-8 within the script.
 # -*- coding: utf-8 -*-
+# cython: profile=True
+# cython: cdivision
 
 import numpy as np
 import scipy as sp
@@ -8,8 +10,10 @@ import random as rnd
 import scipy.special as special
 import time as tm
 
+cimport numpy as cnp
 
-class HMRFKmeans(object):
+
+cdef class HMRFKmeans:
     """ HMRF Kmeans: A Semi-supervised clustering algorithm based on Hidden Markov Random Fields
         Clustering model optimized by Expectation Maximization (EM) algorithm with Hard clustering
         constraints, i.e. a Kmeans Semi-supervised clustering variant.
@@ -40,6 +44,16 @@ class HMRFKmeans(object):
 
     """
 
+    # Attributes (Here used for perfornace accelaration).
+    cdef int k_clusters
+    cdef int [:, ::1] mst_lnk_idxs
+    cdef int [:, ::1] cnt_lnk_idxs
+    cdef double ml_wg
+    cdef double cl_wg
+    cdef int max_iter
+    cdef double cvg
+    cdef double lrn_rate
+
     def __init__(self, k_clusters, must_lnk_con, cannot_lnk_con, init_centroids=None,
                  ml_wg=1.0, cl_wg=1.0, max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5,
                  d_params=None, norm_part=False, globj='non-normed'):
@@ -67,7 +81,7 @@ class HMRFKmeans(object):
         else:
             raise Exception("globj: can be either 'proper' or 'non-normed'.")
 
-    def fit(self, x_data):
+    def fit(self, double [:, ::1] x_data):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
             data in the Mixture of the von Misses Fisher (vMF) distributions. However, the vMF(s)
             are considered to have the same shape at the end of the process. That is, Kmeans and
@@ -219,7 +233,8 @@ class HMRFKmeans(object):
             'norm_part': self.norm_part
         }
 
-    def ICM(self, x_data, mu_arr, clstr_tags_arr):
+    cdef ICM(self, double [:, ::1] x_data,
+             double [::1]mu_arr, int [:, ::1] clstr_tags_arr):
         """ ICM: Iterated Conditional Modes (for the E-Step).
             After all points are assigned, they are randomly re-ordered, and the assignment process
             is repeated. This process proceeds until no point changes its cluster assignment
@@ -241,7 +256,15 @@ class HMRFKmeans(object):
         print "In ICM..."
         # start_tm = tm.time()
 
-        no_change_cnt = 0
+        cdef int no_change_cnt = 0
+        cdef int x_idx
+        cdef double last_jobj
+        cdef int i
+        cdef double mu
+        cdef double j_obj
+        cdef int new_clstr_tag
+        cdef bint no_change
+
         while no_change_cnt < 2:
 
             # Calculating the new Clusters.
