@@ -13,9 +13,9 @@ import pstats
 import cProfile
 import StringIO
 
-sys.path.append('../')
+sys.path.append('../djumble/')
 # from djumble.hmrf_semisup_km import HMRFKmeans as HMRFKmeans
-from djumble.hmrf_semisup_km_narray_cy import HMRFKmeans as HMRFKmeans_arr
+from hmrf_semisup_km_narray_cy import HMRFKmeans as HMRFKmeans_arr
 
 test_dims = 10
 
@@ -90,7 +90,7 @@ cannot_lnk_con_arr = np.array(
 k_clusters = 3
 
 init_centrs = [set([0]), set([550]), set([1100])]
-init_centrs_lst = [0, 550, 1100]
+init_centrs_lst = np.array([0, 550, 1100])
 
 print "Running HMRF Kmeans"
 """
@@ -114,7 +114,7 @@ pr.enable()
 hkmeans_arr = HMRFKmeans_arr(
     k_clusters, must_lnk_con_arr, cannot_lnk_con_arr,
     init_centroids=init_centrs_lst, ml_wg=1.0, cl_wg=1.0, max_iter=300, cvg=0.001, lrn_rate=0.0003,
-    ray_sigma=0.5, d_params=None, norm_part=False, globj='non-normed'
+    ray_sigma=0.5, d_params=None, norm_part=False, globj_norm=False
 )
 
 res = hkmeans_arr.fit(x_data_2d_arr)
@@ -127,7 +127,7 @@ pr.disable()
 # Prifilling - Stats
 s = StringIO.StringIO()
 ps = pstats.Stats(pr, stream=s)
-ps.sort_stats("cumtime").print_stats()
+ps.sort_stats("time").print_stats()  # cumtime
 print s.getvalue()
 
 

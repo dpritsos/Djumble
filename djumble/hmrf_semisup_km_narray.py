@@ -42,7 +42,7 @@ class HMRFKmeans(object):
 
     def __init__(self, k_clusters, must_lnk_con, cannot_lnk_con, init_centroids=None,
                  ml_wg=1.0, cl_wg=1.0, max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5,
-                 d_params=None, norm_part=False, globj='non-normed'):
+                 d_params=None, norm_part=False, globj_norm=False):
 
         self.k_clusters = k_clusters
         self.mst_lnk_idxs = must_lnk_con
@@ -60,12 +60,7 @@ class HMRFKmeans(object):
         # This option enables or disables the normalizations values to be included in the...
         # ...calculation of the total values, other than the total cosine distances, the...
         # ...total must-link and cannot-link violation scores.
-        if globj == 'non-normed':
-            self.globj = False
-        elif globj == 'proper':
-            self.globj = True
-        else:
-            raise Exception("globj: can be either 'proper' or 'non-normed'.")
+        self.globj_norm = globj_norm
 
     def fit(self, x_data):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
@@ -111,7 +106,7 @@ class HMRFKmeans(object):
         clstr_tags_arr[:] = np.Inf
 
         # Selecting a random set of centroids if not any given as class initialization argument.
-        if not self.init_centroids:
+        if self.init_centroids is None:
             # Pick k random vector from the x_data set as initial centroids. Where k is equals...
             # ...the number of self.k_clusters.
             self.init_centroids = np.random.randint(0, self.k_clusters, size=x_data.shape[0])
@@ -257,7 +252,7 @@ class HMRFKmeans(object):
                     clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
 
                     # Calculating the J-Objective.
-                    j_obj = np.round(self.JObjCosA(x_idx, x_data, mu, clstr_idxs_arr), 3)
+                    j_obj = self.JObjCosA(x_idx, x_data, mu, clstr_idxs_arr)
 
                     if j_obj < last_jobj:
                         last_jobj = j_obj
@@ -637,7 +632,7 @@ class HMRFKmeans(object):
             cl_cost = cl_cost / cl_cnt
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
-        if self.globj:
+        if self.globj_norm:
             sum1, sum2 = 0.0, 0.0
             for a in np.diag(self.A[:, :].toarray()):
                 sum1 += np.log(a)
@@ -649,7 +644,7 @@ class HMRFKmeans(object):
 
         # Calculating the log normalization function of the von Mises-Fisher distribution...
         # ...of the whole mixture.
-        if self.norm_part and self.globj:
+        if self.norm_part and self.globj_norm:
             norm_part_value = 0.0
             for i in enumerate(mu_arr.shape[0]):
                 clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
