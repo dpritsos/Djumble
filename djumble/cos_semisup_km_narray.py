@@ -50,18 +50,17 @@ class CosineKmeans(object):
 
     """
 
-    def __init__(self, k_clusters, must_lnk_con, cannot_lnk_con, init_centroids=None, max_iter=300,
-                 cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5, d_params=None,
-                 norm_part=False, globj='non-normed'):
+    def __init__(self, k_clusters, must_lnk, cannot_lnk, init_centroids=None, max_iter=300,
+                 cvg=0.001):
 
         self.k_clusters = k_clusters
-        self.mst_lnk_idxs = must_lnk_con
-        self.cnt_lnk_idxs = cannot_lnk_con
+        self.must_lnk = must_lnk
+        self.cannot_lnk = cannot_lnk
         self.init_centroids = init_centroids
         self.max_iter = max_iter
         self.cvg = cvg
 
-    def fit(self, x_data):
+    def fit(self, x_data, neg_idxs4clstring=np.array([], dtype=np.int)):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
             data in the Mixture of the von Misses Fisher (vMF) distributions. However, the vMF(s)
             are considered to have the same shape at the end of the process. That is, Kmeans and
@@ -102,7 +101,7 @@ class CosineKmeans(object):
         clstr_tags_arr[:] = np.Inf
 
         # Selecting a random set of centroids if not any given as class initialization argument.
-        if not self.init_centroids:
+        if self.init_centroids is None:
             # Pick k random vector from the x_data set as initial centroids. Where k is equals...
             # ...the number of self.k_clusters.
             self.init_centroids = np.random.randint(0, self.k_clusters, size=x_data.shape[0])
@@ -116,13 +115,21 @@ class CosineKmeans(object):
         # # The above might actually change based on the initialization set-up will be used.
         # ########
 
+        # Set of indices not participating in clustering. NOTE: For particular experiments only.
+        self.neg_idxs4clstring = neg_idxs4clstring
+
+        if self.neg_idxs4clstring.shape[0]:
+            for idx in self.neg_idxs4clstring:
+                clstr_tags_arr[idx] = -9
+
+
         # NOTE: Initially normalizing the samples under the distortion parameters values in...
         # ...order to reducing the cosine distance calculation to a simple dot products...
         # ...calculation in the rest of the EM (sub)steps.
         x_data = np.divide(
             x_data,
             np.sqrt(
-                np.diag(np.dot(x_data, x_data.T)),
+                np.diag(np.dot(x_data, np.transpose(x_data))),
                 dtype=np.float
             ).reshape(x_data.shape[0], 1)
         )
@@ -141,7 +148,6 @@ class CosineKmeans(object):
 
             print
             print conv_step
-            start_tm = tm.time()
 
             # The E-Step.
 
@@ -161,16 +167,13 @@ class CosineKmeans(object):
             x_data = np.divide(
                 x_data,
                 np.sqrt(
-                    np.diag(np.dot(x_data, x_data.T)),
+                    np.diag(np.dot(x_data, np.transpose(x_data))),
                     dtype=np.float
                 ).reshape(x_data.shape[0], 1)
             )
 
             # Calculating Global JObjective function.
             glob_jobj = self.GlobJObjCosA(x_data, mu_arr, clstr_tags_arr)
-
-            timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
-            print "Time elapsed : %d:%d:%d:%d" % timel
 
             # Terminating upon the difference of the last two Global JObej values.
             if np.abs(last_gobj - glob_jobj) < self.cvg or glob_jobj < self.cvg:
@@ -216,13 +219,16 @@ class CosineKmeans(object):
         """
 
         print "In ICM..."
-        start_tm = tm.time()
 
         no_change_cnt = 0
         while no_change_cnt < 2:
 
             # Calculating the new Clusters.
             for x_idx in np.random.permutation(np.arange(x_data.shape[0])):
+
+                # Skipping the indices should not participate in clustering.
+                if np.in1d(x_idx, self.neg_idxs4clstring):
+                    continue
 
                 # Setting the initial value for the previews J-Objective value.
                 last_jobj = np.Inf
@@ -256,9 +262,6 @@ class CosineKmeans(object):
             if no_change:
                 no_change_cnt += 1
 
-        timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
-        print "ICM time: %d:%d:%d:%d" % timel
-
         # Returning clstr_tags_arr.
         return clstr_tags_arr
 
@@ -288,7 +291,7 @@ class CosineKmeans(object):
             xi_sum = x_data[clstr_idxs_arr, :].sum(axis=0)
 
             # Calculating denominator ||Σ xi||
-            parametrized_norm_xi = np.sqrt(np.dot(xi_sum, xi_sum.T))
+            parametrized_norm_xi = np.sqrt(np.dot(xi_sum, np.transpose(xi_sum)))
 
             # Calculating the Centroid of the (assumed) hyper-sphear. Then appended to the mu list.
             mu_lst.append(xi_sum / parametrized_norm_xi)
@@ -317,27 +320,26 @@ class CosineKmeans(object):
                 Returning the J-Objective values for the specific x_i in the specific cluster.
 
         """
-        start_tm = tm.time()
 
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
         # --------------------------------------------------------------------------------
-        dist = 1.0 - np.dot(mu, x_data[x_idx, :].T)
+        dist = 1.0 - np.dot(mu, np.transpose(x_data[x_idx, :]))
 
         # Calculating Must-Link violation cost.
         # -------------------------------------
         ml_cost = 0.0
 
         # Getting the index(s) of the must-link-constraints index-table of this data sample.
-        idxzof_mli4smpli = np.where(self.mst_lnk_idxs == x_idx)
+        idxzof_mli4smpli = np.where(self.must_lnk == x_idx)
 
         if idxzof_mli4smpli[0].shape[0]:
 
             # Getting the must-link, with current, data points indeces which they should be in...
             # the same cluster.
-            mliz_with_smpli = self.mst_lnk_idxs[~idxzof_mli4smpli[0], idxzof_mli4smpli[1]]
+            mliz_with_smpli = self.must_lnk[~idxzof_mli4smpli[0], idxzof_mli4smpli[1]]
 
             # Getting the indeces of must-link than are not in the cluster as they should have been.
-            viol_idxs = self.mst_lnk_idxs[:, ~np.in1d(mliz_with_smpli, clstr_idx_arr)]
+            viol_idxs = self.must_lnk[:, ~np.in1d(mliz_with_smpli, clstr_idx_arr)]
 
             if viol_idxs.shape[0]:
 
@@ -345,7 +347,7 @@ class CosineKmeans(object):
                 # NOTE: The violation cost is equivalent to the parametrized Cosine distance...
                 # ...which here is equivalent to the (1 - dot product) because the data points...
                 # ...assumed to be normalized by the parametrized Norm of the vectors.
-                viol_costs = 1.0 - np.dot(x_data[x_idx], x_data[viol_idxs[1]].T)
+                viol_costs = 1.0 - np.dot(x_data[x_idx], np.transpose(x_data[viol_idxs[1]]))
 
                 # Sum-ing up Weighted violations costs.
                 ml_cost = np.sum(viol_costs)
@@ -355,17 +357,17 @@ class CosineKmeans(object):
         cl_cost = 0.0
 
         # Getting the index(s) of the cannot-link-constraints index-table of this data sample.
-        idxzof_cli4smpli = np.where(self.cnt_lnk_idxs == x_idx)
+        idxzof_cli4smpli = np.where(self.cannot_lnk == x_idx)
 
         if idxzof_cli4smpli[0].shape[0]:
 
             # Getting the cannot-link, with current, data points indeces which they should not...
             # ...be in the same cluster.
-            cliz_with_smpli = self.cnt_lnk_idxs[~idxzof_cli4smpli[0], idxzof_cli4smpli[1]]
+            cliz_with_smpli = self.cannot_lnk[~idxzof_cli4smpli[0], idxzof_cli4smpli[1]]
 
             # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
             # ...have been.
-            viol_idxs = self.cnt_lnk_idxs[:, np.in1d(cliz_with_smpli, clstr_idx_arr)]
+            viol_idxs = self.cannot_lnk[:, np.in1d(cliz_with_smpli, clstr_idx_arr)]
 
             if viol_idxs.shape[0]:
 
@@ -374,7 +376,7 @@ class CosineKmeans(object):
                 # ...parametrized Cosine distance of the vectors. Since MaxCosine is 1 then...
                 # ...maxCosineDistance - CosineDistance == CosineSimilarty of the vectors....
                 # ...Again the data points assumed to be normalized.
-                viol_costs = np.dot(x_data[x_idx], x_data[viol_idxs[1]].T)
+                viol_costs = np.dot(x_data[x_idx], np.transpose(x_data[viol_idxs[1]]))
                 # viol_costs = np.ones_like(viol_costs) - viol_costs
 
                 # Sum-ing up Weighted violations costs.
@@ -403,28 +405,28 @@ class CosineKmeans(object):
 
             # Calculating the cosine distances and add the to the total sum of distances.
             # ---------------------------------------------------------------------------
-            sum_d += np.sum(1.0 - np.dot(mu, x_data[clstr_idxs_arr].T))
+            sum_d += np.sum(1.0 - np.dot(mu, np.transpose(x_data[clstr_idxs_arr])))
 
             # Calculating Must-Link violation cost.
             # -------------------------------------
 
             # Getting the must-link left side of the pair constraints, i.e. the row indeces...
             # ...of the constraints matrix that are in the cluster's set of indeces.
-            in_clstr_ml_rows = np.in1d(self.mst_lnk_idxs[0], clstr_idxs_arr)
+            in_clstr_ml_rows = np.in1d(self.must_lnk[0], clstr_idxs_arr)
 
             # Getting the indeces of must-link than are not in the cluster as they should...
             # ...have been.
 
             ml_clstr_comn_idxs = np.in1d(
-                self.mst_lnk_idxs, clstr_idxs_arr
-            ).reshape(2, self.mst_lnk_idxs.shape[1])
+                self.must_lnk, clstr_idxs_arr
+            ).reshape(2, self.must_lnk.shape[1])
 
             ml_viol_columns = np.intersect1d(
                 np.where(ml_clstr_comn_idxs[0] != ml_clstr_comn_idxs[1])[0],
                 np.hstack((ml_clstr_comn_idxs[0].nonzero()[0], ml_clstr_comn_idxs[1].nonzero()[0]))
             )
 
-            viol_ipairs = self.mst_lnk_idxs[:, ml_viol_columns]
+            viol_ipairs = self.must_lnk[:, ml_viol_columns]
 
             #
             ml_cnt += float(viol_ipairs.shape[0])
@@ -433,7 +435,7 @@ class CosineKmeans(object):
 
                     # Calculating all pairs of violation costs for must-link constraints.
                     # NOTE: The violation cost is equivalent to the maxCosine distance.
-                    viol_costs = 1.0 - np.dot(x_data[viol_ipairs[0]], x_data[viol_ipairs[1]].T)
+                    viol_costs = 1.0 - np.dot(x_data[viol_ipairs[0]], np.transpose(x_data[viol_ipairs[1]]))
 
                     if viol_costs.shape[0] > 1:
                         viol_costs_onetime = np.tril(viol_costs, -1)
@@ -450,21 +452,21 @@ class CosineKmeans(object):
 
             # Getting the cannot-link left side of the pair constraints, i.e. the row indeces...
             # ...of the constraints matrix that are in the cluster's set of indeces.
-            in_clstr_cl_rows = np.in1d(self.cnt_lnk_idxs[0], clstr_idxs_arr)
+            in_clstr_cl_rows = np.in1d(self.cannot_lnk[0], clstr_idxs_arr)
 
             # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
             # ...have been.
 
             cl_clstr_comn_idxs = np.in1d(
-                self.cnt_lnk_idxs, clstr_idxs_arr
-            ).reshape(2, self.cnt_lnk_idxs.shape[1])
+                self.cannot_lnk, clstr_idxs_arr
+            ).reshape(2, self.cannot_lnk.shape[1])
 
             cl_viol_columns = np.intersect1d(
                 np.where(cl_clstr_comn_idxs[0] == cl_clstr_comn_idxs[1])[0],
                 cl_clstr_comn_idxs[0].nonzero()[0]
             )
 
-            viol_ipairs = self.cnt_lnk_idxs[:, cl_viol_columns]
+            viol_ipairs = self.cannot_lnk[:, cl_viol_columns]
 
             #
             cl_cnt += float(viol_ipairs.shape[0])
@@ -473,7 +475,7 @@ class CosineKmeans(object):
 
                 # Calculating all pairs of violation costs for cannot-link constraints.
                 # NOTE: The violation cost is equivalent to the maxCosine distance
-                viol_costs = np.dot(x_data[viol_ipairs[0]], x_data[viol_ipairs[1]].T)
+                viol_costs = np.dot(x_data[viol_ipairs[0]], np.transpose(x_data[viol_ipairs[1]]))
 
                 if viol_costs.shape[0] > 1:
                     viol_costs_onetime = np.tril(viol_costs, -1)

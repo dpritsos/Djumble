@@ -1,4 +1,3 @@
-# The following comment enables the use of utf-8 within the script.
 # -*- coding: utf-8 -*-
 # cython: profile=True
 # cython: cdivision

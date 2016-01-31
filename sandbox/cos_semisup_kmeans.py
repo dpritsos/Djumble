@@ -16,9 +16,9 @@ import copy
 import warnings
 
 
-sys.path.append('../')
-from djumble.cos_semisup_km import CosineKmeans
-from djumble.cos_semisup_km_narray import CosineKmeans as CosineKmeans_arr
+sys.path.append('../djumble/')
+from cos_semisup_km import CosineKmeans
+from cos_semisup_km_narray import CosineKmeans as CosineKmeans_arr
 
 
 test_dims = 1000
@@ -101,7 +101,7 @@ ckmeans = CosineKmeans(
     k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs, max_iter=300, cvg=0.0001
 )
 
-res = ckmeans.fit(copy.deepcopy(x_data_2d_arr))  # , set([50]))
+res = ckmeans.fit(copy.deepcopy(x_data_2d_arr), set([50]))
 
 # print res[1]
 
@@ -110,9 +110,9 @@ ckmeans_arr = CosineKmeans_arr(
     cvg=0.0001
 )
 
-res = ckmeans_arr.fit(x_data_2d_arr)
+res = ckmeans_arr.fit(x_data_2d_arr, np.array([50]))
 
-# print res[1]
+print len(res[1]), np.in1d(-9, res[1]), np.in1d(30, res[1])
 
 """
 for mu_idx, clstr_idxs in enumerate(res[1]):

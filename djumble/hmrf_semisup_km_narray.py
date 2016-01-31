@@ -6,7 +6,6 @@ import scipy as sp
 import scipy.stats as sps
 import random as rnd
 import scipy.special as special
-import time as tm
 
 
 class HMRFKmeans(object):
@@ -95,8 +94,8 @@ class HMRFKmeans(object):
 
         # Setting up the violation weights matrix if not have been passed as class argument.
         # if self.w_violations is None:
-        #     self.w_violations = np.random.uniform(0.9, 0.9, size=(x_data.shape[0], x_data.shape[0]))
-        #     # ### I am not sure what kind of values this weights should actually have.
+        #   self.w_violations = np.random.uniform(0.9, 0.9, size=(x_data.shape[0], x_data.shape[0]))
+        #   # ### I am not sure what kind of values this weights should actually have.
 
         # Deriving initial centroids lists from the must-link an cannot-link constraints.
         # Not ready yet...
@@ -145,7 +144,6 @@ class HMRFKmeans(object):
 
             print
             print conv_step
-            # start_tm = tm.time()
 
             # The E-Step.
 
@@ -175,9 +173,6 @@ class HMRFKmeans(object):
 
             # Calculating Global JObjective function.
             glob_jobj = self.GlobJObjCosA(x_data, mu_arr, clstr_tags_arr)
-
-            # timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
-            # print "Time elapsed : %d:%d:%d:%d" % timel
 
             # Terminating upon the difference of the last two Global JObej values.
             if np.abs(last_gobj - glob_jobj) < self.cvg or glob_jobj < self.cvg:
@@ -234,7 +229,6 @@ class HMRFKmeans(object):
         """
 
         print "In ICM..."
-        # start_tm = tm.time()
 
         no_change_cnt = 0
         while no_change_cnt < 2:
@@ -273,9 +267,6 @@ class HMRFKmeans(object):
             # ...re-assingment process stops.
             if no_change:
                 no_change_cnt += 1
-
-        # timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
-        # print "ICM time: %d:%d:%d:%d" % timel
 
         # Returning clstr_tags_arr.
         return clstr_tags_arr
@@ -407,7 +398,6 @@ class HMRFKmeans(object):
                 Returning the J-Objective values for the specific x_i in the specific cluster.
 
         """
-        # start_tm = tm.time()
 
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
         # --------------------------------------------------------------------------------
@@ -442,10 +432,6 @@ class HMRFKmeans(object):
                 # Sum-ing up Weighted violations costs.
                 ml_cost = np.sum(viol_costs)
                 # ml_cost = np.sum(np.multiply(self.ml_wg, viol_costs)) <--- PORPER
-
-                # Equivalent to: (in a for-loop implementation)
-                # cl_cost += self.w_violations[x[0], x[1]] *\
-                #  self.CosDistA(x_data[x[0], :], x_data[x[1], :])
 
         # Calculating Cannot-Link violation cost.
         # ---------------------------------------
@@ -504,11 +490,6 @@ class HMRFKmeans(object):
 
         # print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
         # print "Params are: ", self.A
-
-        # timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
-        # print "Jobj time: %d:%d:%d:%d" % timel
-        # if cl_cost > 0.0 or ml_cost > 0.0:
-        # print "Jobj: ", dist + ml_cost + cl_cost - params_pdf, " | ", dist, ml_cost, cl_cost, params_pdf, norm_part_value
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
@@ -688,8 +669,6 @@ class HMRFKmeans(object):
         print "In UpdateDistorParams..."
 
         new_A = np.zeros_like(A.data, dtype=np.float)
-
-        start_tm = tm.time()
 
         # Initializing...
         xm_pderiv, mlcost_pderiv, clcost_pderiv = 0.0, 0.0, 0.0
