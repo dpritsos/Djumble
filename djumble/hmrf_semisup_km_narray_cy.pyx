@@ -45,8 +45,8 @@ cdef class HMRFKmeans:
 
     # Attributes (Here used for perfornace accelaration).
     cdef cnp.intp_t k_clusters
-    cdef cnp.intp_t [:, ::1] mst_lnk_idxs
-    cdef cnp.intp_t [:, ::1] cnt_lnk_idxs
+    cdef cnp.intp_t [:, ::1] must_lnk
+    cdef cnp.intp_t [:, ::1] cannot_lnk
     cdef cnp.intp_t [::1] init_centroids
     cdef double ml_wg
     cdef double cl_wg
@@ -59,15 +59,15 @@ cdef class HMRFKmeans:
     cdef bint globj_norm
     cdef double [:, ::1] A
 
-    def __init__(self, cnp.intp_t k_clusters, cnp.intp_t [:, ::1] must_lnk_con,
-                 cnp.intp_t [:, ::1] cannot_lnk_con, cnp.intp_t [::1] init_centroids=None,
+    def __init__(self, cnp.intp_t k_clusters, cnp.intp_t [:, ::1] must_lnk,
+                 cnp.intp_t [:, ::1] cannot_lnk, cnp.intp_t [::1] init_centroids=None,
                  double ml_wg=1.0, double cl_wg=1.0, int max_iter=300,
                  double cvg=0.001, double lrn_rate=0.0003, double ray_sigma=0.5,
                  double [::1] d_params=None, bint norm_part=False, bint globj_norm=False):
 
         self.k_clusters = k_clusters
-        self.mst_lnk_idxs = must_lnk_con
-        self.cnt_lnk_idxs = cannot_lnk_con
+        self.must_lnk = must_lnk
+        self.cannot_lnk = cannot_lnk
         self.init_centroids = init_centroids
         self.ml_wg = ml_wg
         self.cl_wg = cl_wg
@@ -454,16 +454,16 @@ cdef class HMRFKmeans:
         ml_cost = 0.0
 
         # Getting the index(s) of the must-link-constraints index-table of this data sample.
-        idxzof_mli4smpli = np.where(self.mst_lnk_idxs == x_idx)
+        idxzof_mli4smpli = np.where(self.must_lnk == x_idx)
 
         if idxzof_mli4smpli[0].shape[0]:
 
             # Getting the must-link, with current, data points indeces which they should be in...
             # the same cluster.
-            mliz_with_smpli = self.mst_lnk_idxs[~idxzof_mli4smpli[0], idxzof_mli4smpli[1]]
+            mliz_with_smpli = self.must_lnk[~idxzof_mli4smpli[0], idxzof_mli4smpli[1]]
 
             # Getting the indeces of must-link than are not in the cluster as they should have been.
-            viol_idxs = self.mst_lnk_idxs[:, ~np.in1d(mliz_with_smpli, clstr_idx_arr)]
+            viol_idxs = self.must_lnk[:, ~np.in1d(mliz_with_smpli, clstr_idx_arr)]
 
             if viol_idxs.shape[0]:
 
@@ -488,17 +488,17 @@ cdef class HMRFKmeans:
         cl_cost = 0.0
 
         # Getting the index(s) of the cannot-link-constraints index-table of this data sample.
-        idxzof_cli4smpli = np.where(self.cnt_lnk_idxs == x_idx)
+        idxzof_cli4smpli = np.where(self.cannot_lnk == x_idx)
 
         if idxzof_cli4smpli[0].shape[0]:
 
             # Getting the cannot-link, with current, data points indeces which they should not...
             # ...be in the same cluster.
-            cliz_with_smpli = self.cnt_lnk_idxs[~idxzof_cli4smpli[0], idxzof_cli4smpli[1]]
+            cliz_with_smpli = self.cannot_lnk[~idxzof_cli4smpli[0], idxzof_cli4smpli[1]]
 
             # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
             # ...have been.
-            viol_idxs = self.cnt_lnk_idxs[:, np.in1d(cliz_with_smpli, clstr_idx_arr)]
+            viol_idxs = self.cannot_lnk[:, np.in1d(cliz_with_smpli, clstr_idx_arr)]
 
             if viol_idxs.shape[0]:
 
@@ -578,14 +578,14 @@ cdef class HMRFKmeans:
 
             # Getting the must-link left side of the pair constraints, i.e. the row indeces...
             # ...of the constraints matrix that are in the cluster's set of indeces.
-            in_clstr_ml_rows = np.in1d(self.mst_lnk_idxs[0], clstr_idxs_arr)
+            in_clstr_ml_rows = np.in1d(self.must_lnk[0], clstr_idxs_arr)
 
             # Getting the indeces of must-link than are not in the cluster as they should...
             # ...have been.
 
             ml_clstr_comn_idxs = np.in1d(
-                self.mst_lnk_idxs, clstr_idxs_arr
-            ).reshape(2, self.mst_lnk_idxs.shape[1])
+                self.must_lnk, clstr_idxs_arr
+            ).reshape(2, self.must_lnk.shape[1])
 
             ml_viol_columns = np.intersect1d(
                 np.where(ml_clstr_comn_idxs[0] != ml_clstr_comn_idxs[1])[0],
@@ -594,7 +594,7 @@ cdef class HMRFKmeans:
 
             if ml_viol_columns.shape[0]:
 
-                viol_ipairs = self.mst_lnk_idxs[:, ml_viol_columns]
+                viol_ipairs = self.must_lnk[:, ml_viol_columns]
 
                 #
                 ml_cnt += float(viol_ipairs.shape[0])
@@ -620,21 +620,21 @@ cdef class HMRFKmeans:
 
             # Getting the cannot-link left side of the pair constraints, i.e. the row indeces...
             # ...of the constraints matrix that are in the cluster's set of indeces.
-            in_clstr_cl_rows = np.in1d(self.cnt_lnk_idxs[0], clstr_idxs_arr)
+            in_clstr_cl_rows = np.in1d(self.cannot_lnk[0], clstr_idxs_arr)
 
             # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
             # ...have been.
 
             cl_clstr_comn_idxs = np.in1d(
-                self.cnt_lnk_idxs, clstr_idxs_arr
-            ).reshape(2, self.cnt_lnk_idxs.shape[1])
+                self.cannot_lnk, clstr_idxs_arr
+            ).reshape(2, self.cannot_lnk.shape[1])
 
             cl_viol_columns = np.intersect1d(
                 np.where(cl_clstr_comn_idxs[0] == cl_clstr_comn_idxs[1])[0],
                 cl_clstr_comn_idxs[0].nonzero()[0]
             )
 
-            viol_ipairs = self.cnt_lnk_idxs[:, cl_viol_columns]
+            viol_ipairs = self.cannot_lnk[:, cl_viol_columns]
 
             #
             cl_cnt += float(viol_ipairs.shape[0])
@@ -752,14 +752,14 @@ cdef class HMRFKmeans:
 
                 # Getting the must-link left side of the pair constraints, i.e. the row indeces...
                 # ...of the constraints matrix that are in the cluster's set of indeces.
-                in_clstr_ml_rows = np.in1d(self.mst_lnk_idxs[0], clstr_idxs_arr)
+                in_clstr_ml_rows = np.in1d(self.must_lnk[0], clstr_idxs_arr)
 
                 # Getting the indeces of must-link than are not in the cluster as they should...
                 # ...have been.
 
                 ml_clstr_comn_idxs = np.in1d(
-                    self.mst_lnk_idxs, clstr_idxs_arr
-                ).reshape(2, self.mst_lnk_idxs.shape[1])
+                    self.must_lnk, clstr_idxs_arr
+                ).reshape(2, self.must_lnk.shape[1])
 
                 ml_viol_columns = np.intersect1d(
                     np.where(ml_clstr_comn_idxs[0] != ml_clstr_comn_idxs[1])[0],
@@ -770,7 +770,7 @@ cdef class HMRFKmeans:
 
                 if ml_viol_columns.shape[0]:
 
-                    viol_ipairs = self.mst_lnk_idxs[:, ml_viol_columns]
+                    viol_ipairs = self.must_lnk[:, ml_viol_columns]
 
                     #
                     ml_cnt += float(viol_ipairs.shape[0])
@@ -787,14 +787,14 @@ cdef class HMRFKmeans:
 
                 # Getting the cannot-link left side of the pair constraints, i.e. the row indeces...
                 # ...of the constraints matrix that are in the cluster's set of indeces.
-                in_clstr_cl_rows = np.in1d(self.cnt_lnk_idxs[0], clstr_idxs_arr)
+                in_clstr_cl_rows = np.in1d(self.cannot_lnk[0], clstr_idxs_arr)
 
                 # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
                 # ...have been.
 
                 cl_clstr_comn_idxs = np.in1d(
-                    self.cnt_lnk_idxs, clstr_idxs_arr
-                ).reshape(2, self.cnt_lnk_idxs.shape[1])
+                    self.cannot_lnk, clstr_idxs_arr
+                ).reshape(2, self.cannot_lnk.shape[1])
 
                 cl_viol_columns = np.intersect1d(
                     np.where(cl_clstr_comn_idxs[0] == cl_clstr_comn_idxs[1])[0],
@@ -803,7 +803,7 @@ cdef class HMRFKmeans:
 
                 if cl_viol_columns.shape[0]:
 
-                    viol_ipairs = self.cnt_lnk_idxs[:, cl_viol_columns]
+                    viol_ipairs = self.cannot_lnk[:, cl_viol_columns]
 
                     #
                     cl_cnt += float(viol_ipairs.shape[0])
@@ -920,3 +920,85 @@ cdef class HMRFKmeans:
                 ) / (np.square(x1_pnorm) * np.square(x2_pnorm))
 
         return res_a
+
+    cdef inline double [:, ::1] dot2d(double [:, ::1] m1, double [:, ::1] m2):
+
+        if m1.shape[1] != m2.shape[0]:
+            raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
+
+        # Matrix index variables.
+        cdef unsigned int i, j, k
+        cdef unsigned int I = m1.shape[0]
+        cdef unsigned int J = m2.shape[1]
+        cdef unsigned int K = m1.shape[1]
+
+        # Creating the numpy.array for results and its memory view
+        cdef double [:, ::1] res = np.zeros((I, J), dtype=np.float)
+
+        # Calculating the dot product.
+        with nogil:
+            for i in range(I):
+                for j in range(J):
+                    for k in range(K):
+                        res[i, j] += m1[i, k] * m2[k, j]
+
+        return res
+
+    cdef double vdot(double [::1] v1, double [::1] v2):
+
+        if v1.shape[0] != v2.shape[0]:
+            raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
+
+        # Matrix index variables.
+        cdef unsigned int i
+        cdef unsigned int I = v1.shape[0]
+
+        # Initializing the result variable.
+        cdef double res = <double>0.0
+
+        # Calculating the dot product.
+        with nogil:
+            for i in range(I):
+                res += v1[i] * v2[i]
+
+        return res
+
+    cdef inline double [:, ::1] dot2d_ds(double [:, ::1] m1, double [::1] m2):
+
+        if m1.shape[1] != m2.shape[0]:
+            raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
+
+        # Matrix index variables.
+        cdef unsigned int i, j
+        cdef unsigned int I = m1.shape[0]
+        cdef unsigned int J = m2.shape[0]
+
+        # Creating the numpy.array for results and its memory view
+        cdef double [:, ::1] res = np.zeros((I, J), dtype=np.float)
+
+        # Calculating the dot product.
+        with nogil:
+            for i in range(I):
+                for j in range(J):
+                    res[i, j] = m1[i, j] * m2[j]
+
+        return res
+
+    cdef inline double [::1] dot1d_ds(double [::1] v, double [::1] m):
+
+        if v.shape[0] != m.shape[0]:
+            raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
+
+        # Matrix index variables.
+        cdef unsigned int i
+        cdef unsigned int I = v.shape[0]
+
+        # Creating the numpy.array for results and its memory view
+        cdef double [::1] res = np.zeros((I), dtype=np.float)
+
+        # Calculating the dot product.
+        with nogil:
+            for i in range(I):
+                res[i] = v[i] * m[i]
+
+        return res
