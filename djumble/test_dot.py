@@ -17,8 +17,8 @@ res = np.zeros((2, 2), dtype=np.float)
 pr.enable()
 
 for i in xrange(1000):
-    # np.dot(a, b)
-    dp.dot(a, b, res)
+    np.dot(a, b)
+    dp.dot(a, b)
 
 
 # Prifilling - Ends
