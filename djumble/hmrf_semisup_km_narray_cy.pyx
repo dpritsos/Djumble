@@ -426,7 +426,7 @@ cdef class HMRFKmeans:
         return (np.log(cdk) + np.log(k)) * x_data_subset.shape[0]
 
     cdef JObjCosA(self, cnp.intp_t x_idx, double [:, ::1] x_data,
-                  double [::1] mu, cnp.intp_t [::1] clstr_idx_arr):
+                  double [::1] mu, cnp.intp_t [::1] clstr_tags_arr):
         """ JObjCosA: J-Objective function for parametrized Cosine Distortion Measure. It cannot
             be very generic because the gradient decent (partial derivative) calculations should be
             applied, they are totally dependent on the distortion measure (here is Cosine Distance).
@@ -472,11 +472,13 @@ cdef class HMRFKmeans:
                 break
 
             if x_idx == self.ml_sorted[0, i] and
-                clstr_idx_arr[x_idx] != clstr_idx_arr[self.ml_sorted[1, i]]:
+                clstr_tags_arr[x_idx] != clstr_tags_arr[self.ml_sorted[1, i]]:
 
-                ml_cost += 1.0 - self.vdot(
-                    self.dot1d_ds(x_data[x_idx, :], self.A),
-                    x_data[self.ml_sorted[1, i], :]
+                ml_cost += self.ml_wg * (
+                    1.0 - self.vdot(
+                        self.dot1d_ds(x_data[x_idx, :], self.A),
+                        x_data[self.ml_sorted[1, i], :]
+                    )
                 )
 
         # Calculating Cannot-Link violation cost.
@@ -487,11 +489,13 @@ cdef class HMRFKmeans:
                 break
 
             if x_idx == self.cl_sorted[0, i] and
-                clstr_idx_arr[x_idx] == clstr_idx_arr[self.cl_sorted[1, i]]:
+                clstr_tags_arr[x_idx] == clstr_tags_arr[self.cl_sorted[1, i]]:
 
-                cl_cost += self.vdot(
-                    self.dot1d_ds(x_data[x_idx, :], self.A),
-                    x_data[self.cl_sorted[1, i], :]
+                cl_cost += self.cl_wg * (
+                    self.vdot(
+                        self.dot1d_ds(x_data[x_idx, :], self.A),
+                        x_data[self.cl_sorted[1, i], :]
+                    )
                 )
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
@@ -515,17 +519,26 @@ cdef class HMRFKmeans:
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
 
-    cdef GlobJObjCosA(self, x_data, mu_arr, clstr_tags_arr):
+    cdef GlobJObjCosA(self, double [:, ::1] x_data, double [:, ::1] mu_arr,
+                      cnp.intp_t [::1] clstr_tags_arr):
         """
         """
 
         print "In GlobalJObjCosA..."
 
         # Calculating the distance of all vectors, the must-link and cannot-link violations scores.
-        sum_d, ml_cost, cl_cost, norm_part_value, params_pdf = 0.0, 0.0, 0.0, 0.0, 0.0
-        smlps_cnt, ml_cnt, cl_cnt = 0.0, 0.0, 0.0
+        cdef double sum_d = 0.0
+        cdef double ml_cost = 0.0
+        cdef double cl_cost = 0.0
+        cdef double norm_part_value = 0.0
+        cdef double params_pdf = 0.0
+        cdef double smlps_cnt = 0.0
+        cdef double ml_cnt = 0.0
+        cdef double cl_cnt = 0.0
+        cdef cp.intp_t i
+        cdef cp.intp_t
 
-        for i, mu in enumerate(mu_arr):
+        for i in range(self.k_clusters):
 
             # Getting the indeces for the i cluster.
             clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
