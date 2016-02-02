@@ -47,6 +47,8 @@ cdef class HMRFKmeans:
     cdef cnp.intp_t k_clusters
     cdef cnp.intp_t [:, ::1] must_lnk
     cdef cnp.intp_t [:, ::1] cannot_lnk
+    cdef cnp.intp_t ml_size
+    cdef cnp.intp_t cl_size
     cdef cnp.intp_t [::1] init_centroids
     cdef double ml_wg
     cdef double cl_wg
@@ -57,7 +59,8 @@ cdef class HMRFKmeans:
     cdef double [::1] d_params
     cdef bint norm_part
     cdef bint globj_norm
-    cdef double [:, ::1] A
+    cdef double [::1] A
+    cdef cnp.intp_t A_size
 
     def __init__(self, cnp.intp_t k_clusters, cnp.intp_t [:, ::1] must_lnk,
                  cnp.intp_t [:, ::1] cannot_lnk, cnp.intp_t [::1] init_centroids=None,
@@ -66,8 +69,21 @@ cdef class HMRFKmeans:
                  double [::1] d_params=None, bint norm_part=False, bint globj_norm=False):
 
         self.k_clusters = k_clusters
+
         self.must_lnk = must_lnk
+        tmp_arr = np.hstack(must_lnk, must_lnk[::-1, :])
+        self.ml_sorted = tmp_arr[:, np.argsort(tmp_arr)[0]]
+
         self.cannot_lnk = cannot_lnk
+        tmp_arr = np.hstack(cannot_lnk, cannot_lnk[::-1, :])
+        self.cl_sorted = tmp_arr[:, np.argsort(tmp_arr)[0]]
+
+        self.ml_size = self.must_lnk.shape[1]
+        self.cl_size = self.cannot_lnk.shape[1]
+
+        self.cl_sorted_size = self.cl_sorted.shape[1]
+        self.ml_sorted_size = self.ml_sorted.shape[1]
+
         self.init_centroids = init_centroids
         self.ml_wg = ml_wg
         self.cl_wg = cl_wg
@@ -75,7 +91,9 @@ cdef class HMRFKmeans:
         self.cvg = cvg
         self.lrn_rate = lrn_rate
         self.ray_sigma = ray_sigma
-        self.d_params = d_params
+        self.A = d_params
+        if d_params != None:
+            self.A_size = d_params.shape[0]
         self.norm_part = norm_part
 
         # This option enables or disables the normalizations values to be included in the...
@@ -109,22 +127,12 @@ cdef class HMRFKmeans:
         cdef int i, idx
 
         # Setting up distortion parameters if not have been passed as class argument.
-        if self.d_params == None:
-
-            self.A = np.diag(np.random.uniform(0.5, 1.0, size=x_data.shape[1]))
-
-        else:
-
-            # A should be a diagonal matrix form for the calculations in the functions bellow. The...
-            # ...sparse form will save space and the csr_matrix will make the dia_matrix write-able.
-            self.A = np.diag(self.d_params)
-
-        # self.A = sp.sparse.lil_matrix(self.A)
-
-        # Setting up the violation weights matrix if not have been passed as class argument.
-        # if self.w_violations is None:
-        #     self.w_violations = np.random.uniform(0.9, 0.9, size=(x_data.shape[0], x_data.shape[0]))
-        #     # ### I am not sure what kind of values this weights should actually have.
+        if self.A == None:
+            self.A = np.ones((x_data.shape[1]), dtype=np.float)
+        elif self.A.shape[0] != x_data.shape[1]:
+            raise Exception(
+                "Dimension mismutch amogst distortion params A[] vector and x_data features size."
+            )
 
         # Deriving initial centroids lists from the must-link an cannot-link constraints.
         # Not ready yet...
@@ -219,10 +227,6 @@ cdef class HMRFKmeans:
 
         # Storing the amount of iterations until convergence.
         self.conv_step = conv_step
-
-        # Closing the internal process pool.
-        # self.da_pool.close()
-        # self.da_pool.join()
 
         # Returning the Centroids and the Clusters,i.e. the set of indeces for each cluster.
         return mu_arr, clstr_tags_arr
@@ -421,7 +425,8 @@ cdef class HMRFKmeans:
         # Still this need to be revised.
         return (np.log(cdk) + np.log(k)) * x_data_subset.shape[0]
 
-    cdef JObjCosA(self, x_idx, x_data, mu, clstr_idx_arr):
+    cdef JObjCosA(self, cnp.intp_t x_idx, double [:, ::1] x_data,
+                  double [::1] mu, cnp.intp_t [::1] clstr_idx_arr):
         """ JObjCosA: J-Objective function for parametrized Cosine Distortion Measure. It cannot
             be very generic because the gradient decent (partial derivative) calculations should be
             applied, they are totally dependent on the distortion measure (here is Cosine Distance).
@@ -443,108 +448,69 @@ cdef class HMRFKmeans:
                 Returning the J-Objective values for the specific x_i in the specific cluster.
 
         """
-        # start_tm = tm.time()
+
+        # Setting and initalizing local variables.
+        cdef double dist = 0.0
+        cdef double ml_cost = 0.0
+        cdef double cl_cost = 0.0
+        cdef cnp.intp_t i
+        cdef cnp.intp_t ml_lnk_size = self
+        cdef double sum1 = 0.0
+        cdef double sum2 = 0.0
+        cdef double params_pdf = 0.0
+        cdef double norm_part_value = 0.0
 
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
         # --------------------------------------------------------------------------------
-        dist = 1.0 - np.dot(np.dot(mu, self.A[:, :]), x_data[x_idx, :].T)
+        dist = 1.0 - self.vdot(self.dot1d_ds(mu, self.A), x_data[x_idx, :])
 
         # Calculating Must-Link violation cost.
         # -------------------------------------
-        ml_cost = 0.0
+        for i in range(self.ml_sorted_size):
 
-        # Getting the index(s) of the must-link-constraints index-table of this data sample.
-        idxzof_mli4smpli = np.where(self.must_lnk == x_idx)
+            if x_idx < self.ml_sorted[0, i]:
+                break
 
-        if idxzof_mli4smpli[0].shape[0]:
+            if x_idx == self.ml_sorted[0, i] and
+                clstr_idx_arr[x_idx] != clstr_idx_arr[self.ml_sorted[1, i]]:
 
-            # Getting the must-link, with current, data points indeces which they should be in...
-            # the same cluster.
-            mliz_with_smpli = self.must_lnk[~idxzof_mli4smpli[0], idxzof_mli4smpli[1]]
-
-            # Getting the indeces of must-link than are not in the cluster as they should have been.
-            viol_idxs = self.must_lnk[:, ~np.in1d(mliz_with_smpli, clstr_idx_arr)]
-
-            if viol_idxs.shape[0]:
-
-                # Calculating all pairs of violation costs for must-link constraints.
-                # NOTE: The violation cost is equivalent to the parametrized Cosine distance...
-                # ...which here is equivalent to the (1 - dot product) because the data points...
-                # ...assumed to be normalized by the parametrized Norm of the vectors.
-                viol_costs = 1.0 - np.dot(
-                    np.dot(x_data[x_idx], self.A[:, :]), x_data[viol_idxs[1]].T
+                ml_cost += 1.0 - self.vdot(
+                    self.dot1d_ds(x_data[x_idx, :], self.A),
+                    x_data[self.ml_sorted[1, i], :]
                 )
-
-                # Sum-ing up Weighted violations costs.
-                ml_cost = np.sum(viol_costs)
-                # ml_cost = np.sum(np.multiply(self.ml_wg, viol_costs)) <--- PORPER
-
-                # Equivalent to: (in a for-loop implementation)
-                # cl_cost += self.w_violations[x[0], x[1]] *\
-                #  self.CosDistA(x_data[x[0], :], x_data[x[1], :])
 
         # Calculating Cannot-Link violation cost.
         # ---------------------------------------
-        cl_cost = 0.0
+        for i in range(self.cl_sorted_size):
 
-        # Getting the index(s) of the cannot-link-constraints index-table of this data sample.
-        idxzof_cli4smpli = np.where(self.cannot_lnk == x_idx)
+            if x_idx < self.cl_sorted[0, i]:
+                break
 
-        if idxzof_cli4smpli[0].shape[0]:
+            if x_idx == self.cl_sorted[0, i] and
+                clstr_idx_arr[x_idx] == clstr_idx_arr[self.cl_sorted[1, i]]:
 
-            # Getting the cannot-link, with current, data points indeces which they should not...
-            # ...be in the same cluster.
-            cliz_with_smpli = self.cannot_lnk[~idxzof_cli4smpli[0], idxzof_cli4smpli[1]]
-
-            # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
-            # ...have been.
-            viol_idxs = self.cannot_lnk[:, np.in1d(cliz_with_smpli, clstr_idx_arr)]
-
-            if viol_idxs.shape[0]:
-
-                # Calculating all pairs of violation costs for cannot-link constraints.
-                # NOTE: The violation cost is equivalent to the maxCosine distance minus the...
-                # ...parametrized Cosine distance of the vectors. Since MaxCosine is 1 then...
-                # ...maxCosineDistance - CosineDistance == CosineSimilarty of the vectors....
-                # ...Again the data points assumed to be normalized.
-                viol_costs = np.dot(
-                    np.dot(x_data[x_idx], self.A[:, :]), x_data[viol_idxs[1]].T
+                cl_cost += self.vdot(
+                    self.dot1d_ds(x_data[x_idx, :], self.A),
+                    x_data[self.cl_sorted[1, i], :]
                 )
-                # viol_costs = np.ones_like(viol_costs) - viol_costs
-
-                # Sum-ing up Weighted violations costs.
-                cl_cost = np.sum(viol_costs)
-                # cl_cost = np.sum(np.multiply(self.cl_wg, viol_costs)) <--- PORPER
-
-                # Equivalent to: (in a for-loop implementation)
-                # cl_cost += self.w_violations[x[0], x[1]] *\
-                # (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
-        sum1, sum2 = 0.0, 0.0
-        for a in np.diag(self.A[:, :]):
-            sum1 += np.log(a)
-            sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
-        params_pdf = sum1 - sum2 -\
-            (2 * np.diag(self.A[:, :]).shape[0] * np.log(self.ray_sigma))
+
+        for i in range(self.A_size):
+            sum1 += np.log(self.A[i])
+            sum2 += np.square(self.A[i]) / (2 * np.square(self.ray_sigma))
+        params_pdf = sum1 - sum2 - (2 * self.A_size * np.log(self.ray_sigma))
 
         # NOTE!
         params_pdf = 0.0
 
+        # ######## NEEDS to be changed in Cython
         # Calculating the log normalization function of the von Mises-Fisher distribution...
         # ...NOTE: Only for this cluster i.e. this vMF of the whole PDF mixture.
-        if self.norm_part:
-            norm_part_value = self.NormPart(x_data[clstr_idx_arr])
-        else:
-            norm_part_value = 0.0
-
-        # print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
-        # print "Params are: ", self.A
-
-        # timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
-        # print "Jobj time: %d:%d:%d:%d" % timel
-        # if cl_cost > 0.0 or ml_cost > 0.0:
-        # print "Jobj: ", dist + ml_cost + cl_cost - params_pdf, " | ", dist, ml_cost, cl_cost, params_pdf, norm_part_value
+        # if self.norm_part:
+        #     norm_part_value = self.NormPart(x_data[clstr_idx_arr])
+        # else:
+        norm_part_value = 0.0
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
@@ -944,7 +910,7 @@ cdef class HMRFKmeans:
 
         return res
 
-    cdef double vdot(double [::1] v1, double [::1] v2):
+    cdef inline double vdot(double [::1] v1, double [::1] v2):
 
         if v1.shape[0] != v2.shape[0]:
             raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")

@@ -446,8 +446,6 @@ class HMRFKmeans(object):
 
         """
 
-        start_tm = tm.time()
-
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
         dist = self.CosDistA(x_data[x_idx, :], mu)
 
@@ -492,14 +490,6 @@ class HMRFKmeans(object):
             norm_part_value = self.NormPart(x_data[list(clstr_idxs_set)])
         else:
             norm_part_value = 0.0
-
-        # print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
-        # print "Params are: ", self.A
-
-        # timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
-        # print "Jobj time: %d:%d:%d:%d" % timel
-        # if cl_cost > 0.0 or ml_cost > 0.0:
-        # print "Jobj: ", dist + ml_cost + cl_cost - params_pdf, " | ", dist, ml_cost, cl_cost, params_pdf, norm_part_value
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
