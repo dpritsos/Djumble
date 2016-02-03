@@ -61,6 +61,7 @@ cdef class HMRFKmeans:
     cdef bint globj_norm
     cdef double [::1] A
     cdef cnp.intp_t A_size
+    cdef cp.intp_t xdata_size
 
     def __init__(self, cnp.intp_t k_clusters, cnp.intp_t [:, ::1] must_lnk,
                  cnp.intp_t [:, ::1] cannot_lnk, cnp.intp_t [::1] init_centroids=None,
@@ -100,6 +101,8 @@ cdef class HMRFKmeans:
         # ...calculation of the total values, other than the total cosine distances, the...
         # ...total must-link and cannot-link violation scores.
         self.globj_norm = globj_norm
+
+        self.xdata_size = 0
 
     def fit(self, double [:, ::1] x_data):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
@@ -535,107 +538,53 @@ cdef class HMRFKmeans:
         cdef double smlps_cnt = 0.0
         cdef double ml_cnt = 0.0
         cdef double cl_cnt = 0.0
-        cdef cp.intp_t i
+        cdef cp.intp_t k, i
         cdef cp.intp_t
 
-        for i in range(self.k_clusters):
-
-            # Getting the indeces for the i cluster.
-            clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
-
-            #
-            smlps_cnt += clstr_idxs_arr.shape[0]
+        for k in range(self.k_clusters):
 
             # Calculating the cosine distances and add the to the total sum of distances.
             # ---------------------------------------------------------------------------
-            sum_d += np.sum(
-                1.0 - np.dot(np.dot(mu, self.A[:, :]), x_data[clstr_idxs_arr, :].T)
-            )
+            for i in range(self.xdata_size):
+
+                if clstr_tags_arr[i] == k:
+
+                    sum_d += 1.0 - self.vdot(self.dot1d_ds(mu_arr[k, :], self.A), x_data[i, :])
+
+                    smlps_cnt += 1.0
 
             # Calculating Must-Link violation cost.
             # -------------------------------------
+            for i in range(self.ml_size):
 
-            # Getting the must-link left side of the pair constraints, i.e. the row indeces...
-            # ...of the constraints matrix that are in the cluster's set of indeces.
-            in_clstr_ml_rows = np.in1d(self.must_lnk[0], clstr_idxs_arr)
+                if clstr_tags_arr[self.must_lnk[0, i]] != clstr_tags_arr[self.must_lnk[1, i]] and
+                    (clstr_tags_arr[self.must_lnk[0, i]] == k or
+                                clstr_tags_arr[self.must_lnk[1, i]] == k):
 
-            # Getting the indeces of must-link than are not in the cluster as they should...
-            # ...have been.
+                    ml_cost += self.ml_wg * (
+                        1.0 - self.vdot(
+                            self.dot1d_ds(x_data[self.must_lnk[0, i]], :], self.A),
+                            x_data[self.must_lnk[1, i]], :]
+                        )
+                    )
 
-            ml_clstr_comn_idxs = np.in1d(
-                self.must_lnk, clstr_idxs_arr
-            ).reshape(2, self.must_lnk.shape[1])
-
-            ml_viol_columns = np.intersect1d(
-                np.where(ml_clstr_comn_idxs[0] != ml_clstr_comn_idxs[1])[0],
-                np.hstack((ml_clstr_comn_idxs[0].nonzero()[0], ml_clstr_comn_idxs[1].nonzero()[0]))
-            )
-
-            if ml_viol_columns.shape[0]:
-
-                viol_ipairs = self.must_lnk[:, ml_viol_columns]
-
-                #
-                ml_cnt += float(viol_ipairs.shape[0])
-
-                # Calculating all pairs of violation costs for must-link constraints.
-                # NOTE: The violation cost is equivalent to the maxCosine distance.
-                viol_costs = 1.0 - np.dot(
-                    np.dot(x_data[viol_ipairs[0]], self.A[:, :]), x_data[viol_ipairs[1]].T
-                )
-
-                if viol_costs.shape[0] > 1:
-                    viol_costs_onetime = np.tril(viol_costs, -1)
-                else:
-                    viol_costs_onetime = viol_costs
-
-                # Sum-ing up Weighted violations costs. NOTE: Here the matrix multiply...
-                # ...should be element-by-element.
-
-                ml_cost += np.sum(np.multiply(self.ml_wg, viol_costs_onetime))
+                    ml_cnt += 1.0
 
             # Calculating Cannot-Link violation cost.
             # ---------------------------------------
+            for i in range(self.cl_size):
 
-            # Getting the cannot-link left side of the pair constraints, i.e. the row indeces...
-            # ...of the constraints matrix that are in the cluster's set of indeces.
-            in_clstr_cl_rows = np.in1d(self.cannot_lnk[0], clstr_idxs_arr)
+                if clstr_tags_arr[self.cannot_lnk[0, i]] == k and
+                    clstr_tags_arr[self.cannot_lnk[0, i]] == clstr_tags_arr[self.cannot_lnk[1, i]]:
 
-            # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
-            # ...have been.
+                    cl_cost += self.cl_wg * (
+                        self.vdot(
+                            self.dot1d_ds(x_data[self.cannot_lnk[0, i]], :], self.A),
+                            x_data[self.cannot_lnk[1, i]], :]
+                        )
+                    )
 
-            cl_clstr_comn_idxs = np.in1d(
-                self.cannot_lnk, clstr_idxs_arr
-            ).reshape(2, self.cannot_lnk.shape[1])
-
-            cl_viol_columns = np.intersect1d(
-                np.where(cl_clstr_comn_idxs[0] == cl_clstr_comn_idxs[1])[0],
-                cl_clstr_comn_idxs[0].nonzero()[0]
-            )
-
-            viol_ipairs = self.cannot_lnk[:, cl_viol_columns]
-
-            #
-            cl_cnt += float(viol_ipairs.shape[0])
-
-            if viol_ipairs.shape[0]:
-
-                # Calculating all pairs of violation costs for cannot-link constraints.
-                # NOTE: The violation cost is equivalent to the maxCosine distance
-                viol_costs = np.dot(
-                    np.dot(x_data[viol_ipairs[0]], self.A[:, :]), x_data[viol_ipairs[1]].T
-                )
-
-                if viol_costs.shape[0] > 1:
-                    viol_costs_onetime = np.tril(viol_costs, -1)
-                else:
-                    viol_costs_onetime = viol_costs
-
-                # Sum-ing up Weighted violations costs. NOTE: Here the matrix multiply...
-                # ...should be element-by-element. NOTE#2: We are getting only the lower...
-                # ...triangle because we need the cosine distance of the constraints pairs...
-                # ...only ones.
-                cl_cost += np.sum(np.multiply(self.cl_wg, viol_costs_onetime))
+                    cl_cnt += 1.0
 
         # Averaging EVERYTHING.
         sum_d = sum_d / smlps_cnt
@@ -647,25 +596,25 @@ cdef class HMRFKmeans:
             cl_cost = cl_cost / cl_cnt
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
-        if self.globj_norm:
-            sum1, sum2 = 0.0, 0.0
-            for a in np.diag(self.A[:, :]):
-                sum1 += np.log(a)
-                sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
-            params_pdf = sum1 - sum2 -\
-                (2 * np.diag(self.A[:, :]).shape[0] * np.log(self.ray_sigma))
-        else:
-            params_pdf = 0.0
+        # if self.globj_norm:
+        #     sum1, sum2 = 0.0, 0.0
+        #     for a in np.diag(self.A[:, :]):
+        #         sum1 += np.log(a)
+        #         sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
+        #     params_pdf = sum1 - sum2 -\
+        #         (2 * np.diag(self.A[:, :]).shape[0] * np.log(self.ray_sigma))
+        # else:
+        #     params_pdf = 0.0
 
         # Calculating the log normalization function of the von Mises-Fisher distribution...
         # ...of the whole mixture.
-        if self.norm_part and self.globj_norm:
-            norm_part_value = 0.0
-            for i in enumerate(mu_arr.shape[0]):
-                clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
-                norm_part_value += self.NormPart(x_data[clstr_idxs_arr])
-        else:
-            norm_part_value = 0.0
+        # if self.norm_part and self.globj_norm:
+        #     norm_part_value = 0.0
+        #     for i in enumerate(mu_arr.shape[0]):
+        #         clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
+        #         norm_part_value += self.NormPart(x_data[clstr_idxs_arr])
+        # else:
+        #     norm_part_value = 0.0
 
         print 'dims', x_data.shape[1]
         print 'sum_d, ml_cost, cl_cost', sum_d, ml_cost, cl_cost
@@ -677,7 +626,8 @@ cdef class HMRFKmeans:
         # ...vMF-Mixture set-up.
         return sum_d + ml_cost + cl_cost - params_pdf + norm_part_value
 
-    cdef UpdateDistorParams(self, A, x_data, mu_arr, clstr_tags_arr):
+    cdef UpdateDistorParams(self, double [::1] A,
+                            double [:, ::1] x_data, mu_arr, cnp.intp_t [::1] clstr_tags_arr):
         """ Update Distortion Parameters: This function is updating the whole set of the distortion
             parameters. In particular the parameters for the Cosine Distance in this implementation
             of the HMRF Kmeans.
@@ -702,140 +652,89 @@ cdef class HMRFKmeans:
 
         print "In UpdateDistorParams..."
 
-        new_A = np.zeros_like(np.diag(A), dtype=np.float)
-
-        start_tm = tm.time()
-
         # Initializing...
-        xm_pderiv, mlcost_pderiv, clcost_pderiv = 0.0, 0.0, 0.0
-        smpls_cnt, ml_cnt, cl_cnt = 0.0, 0.0, 0.0
+        cdef double xm_pdv = 0.0
+        cdef double ml_pdv = 0.0
+        cdef double cl_pdv = 0.0
+        cdef double smpls_cnt = 0.0
+        cdef double ml_cnt = 0.0
+        cdef double cl_cnt = 0.0
+        cdef cpn.intp_t a_idx, k
+        cdef double a_pdv = 0.0
+        cdef double [::1] new_A = np.zeros((self.A_size), dtype=np.float)
 
-        for a_idx, a in enumerate(np.diag(A)):
+        for a_idx in range(self.A_size):
 
-            for i, mu in enumerate(mu_arr):
-
-                # Getting the indeces for the i cluster.
-                clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
-
-                #
-                smpls_cnt += float(clstr_idxs_arr.shape[0])
+            for k in range(self.k_clusters):
 
                 # Calculating the partial derivatives of each parameter for all cluster's member...
                 # ...for each cluster.
                 # ---------------------------------------------------------------------------------
-                for x_clstr_idx in clstr_idxs_arr:
-                    xm_pderiv += self.PartialDerivative(a_idx, x_data[x_clstr_idx, :], mu, A)
+                for i in range(self.xdata_size):
+
+                    if clstr_tags_arr[i] == k:
+
+                        xm_pdv += self.PartialDerivative(a_idx, x_data[i, :], mu_arr[k, :], A)
 
                 # Calculating Must-Link violation cost.
                 # -------------------------------------
+                for i in range(self.ml_size):
 
-                # Getting the must-link left side of the pair constraints, i.e. the row indeces...
-                # ...of the constraints matrix that are in the cluster's set of indeces.
-                in_clstr_ml_rows = np.in1d(self.must_lnk[0], clstr_idxs_arr)
+                    if clstr_tags_arr[self.must_lnk[0, i]] != clstr_tags_arr[self.must_lnk[1, i]] and
+                        (clstr_tags_arr[self.must_lnk[0, i]] == k or
+                                    clstr_tags_arr[self.must_lnk[1, i]] == k):
 
-                # Getting the indeces of must-link than are not in the cluster as they should...
-                # ...have been.
-
-                ml_clstr_comn_idxs = np.in1d(
-                    self.must_lnk, clstr_idxs_arr
-                ).reshape(2, self.must_lnk.shape[1])
-
-                ml_viol_columns = np.intersect1d(
-                    np.where(ml_clstr_comn_idxs[0] != ml_clstr_comn_idxs[1])[0],
-                    np.hstack(
-                        (ml_clstr_comn_idxs[0].nonzero()[0], ml_clstr_comn_idxs[1].nonzero()[0])
-                    )
-                )
-
-                if ml_viol_columns.shape[0]:
-
-                    viol_ipairs = self.must_lnk[:, ml_viol_columns]
-
-                    #
-                    ml_cnt += float(viol_ipairs.shape[0])
-
-                    # Calculating the partial derivatives of all pairs of violations for...
-                    # ...must-link constraints.
-                    for x in zip(viol_ipairs[0], viol_ipairs[1]):
-                        mlcost_pderiv += self.ml_wg*self.PartialDerivative(
-                            a_idx, x_data[x[0], :], x_data[x[1], :], A
+                        ml_pdv += self.ml_wg*self.PartialDerivative(
+                            a_idx,
+                            x_data[self.must_lnk[0, i], :],
+                            x_data[self.must_lnk[1, i], :],
+                            A
                         )
 
                 # Calculating Cannot-Link violation cost.
                 # ---------------------------------------
+                for i in range(self.cl_size):
 
-                # Getting the cannot-link left side of the pair constraints, i.e. the row indeces...
-                # ...of the constraints matrix that are in the cluster's set of indeces.
-                in_clstr_cl_rows = np.in1d(self.cannot_lnk[0], clstr_idxs_arr)
+                    if clstr_tags_arr[self.cannot_lnk[0, i]] == k and
+                     clstr_tags_arr[self.cannot_lnk[0, i]] == clstr_tags_arr[self.cannot_lnk[1, i]]:
 
-                # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
-                # ...have been.
-
-                cl_clstr_comn_idxs = np.in1d(
-                    self.cannot_lnk, clstr_idxs_arr
-                ).reshape(2, self.cannot_lnk.shape[1])
-
-                cl_viol_columns = np.intersect1d(
-                    np.where(cl_clstr_comn_idxs[0] == cl_clstr_comn_idxs[1])[0],
-                    cl_clstr_comn_idxs[0].nonzero()[0]
-                )
-
-                if cl_viol_columns.shape[0]:
-
-                    viol_ipairs = self.cannot_lnk[:, cl_viol_columns]
-
-                    #
-                    cl_cnt += float(viol_ipairs.shape[0])
-
-                    # Calculating all pairs of violation costs for cannot-link constraints.
-                    # NOTE: The violation cost is equivalent to the maxCosine distance
-                    for x in zip(viol_ipairs[0], viol_ipairs[1]):
-                        mlcost_pderiv -= self.cl_wg*self.PartialDerivative(
-                            a_idx, x_data[x[0], :], x_data[x[1], :], A
+                        cl_pdv -= self.cl_wg*self.PartialDerivative(
+                            a_idx,
+                            x_data[self.cannot_lnk[0, i], :],
+                            x_data[self.cannot_lnk[1, i], :],
+                            A
                         )
 
-            # Averaging EVERYTHING
-            # xm_pderiv = xm_pderiv / smpls_cnt
-            # if ml_cnt:
-            #     mlcost_pderiv = mlcost_pderiv / ml_cnt
-            # if cl_cnt:
-            #     clcost_pderiv = clcost_pderiv / cl_cnt
-
             # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
-            # new_a = a + (self.lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv))
+            # new_a = a + (self.lrn_rate * (xm_pdv + ml_pdv + cl_pdv))
             # a_pderiv = (1 / a) - (a / np.square(self.ray_sigma))
 
             # NOTE!
-            a_pderiv = 0.0
+            a_pdv = 0.0
 
             # print 'Rayleigh Partial', a_pderiv
 
-            if np.abs(a_pderiv) == np.inf:
-                print "Invalid patch for Rayleighs P'(A) triggered: (+/-)INF P'(A)=", a_pderiv
-                a_pderiv = 1e-15
+            # if np.abs(a_pderiv) == np.inf:
+            #     print "Invalid patch for Rayleighs P'(A) triggered: (+/-)INF P'(A)=", a_pderiv
+            #     a_pderiv = 1e-15
 
-            elif a_pderiv == np.nan:
-                print "Invalid patch for Rayleighs P(A) triggered: NaN P'(A)=", a_pderiv
-                a_pderiv = 1e-15
+            # elif a_pderiv == np.nan:
+            #     print "Invalid patch for Rayleighs P(A) triggered: NaN P'(A)=", a_pderiv
+            #     a_pderiv = 1e-15
 
             # Changing a diagonal value of the A cosine similarity parameters measure.
-            print a
-            print (a + (self.lrn_rate *
-                                 (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
-                                 )
-                            )
-            new_A[a_idx] = (a + (self.lrn_rate *
-                                 (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
-                                 )
-                            )
+            print A[a_idx]
+            print A[a_idx] + (self.lrn_rate * (xm_pdv + ml_pdv + cl_pdv - a_pdv))
 
-            # print self.lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
-            # print xm_pderiv, mlcost_pderiv, clcost_pderiv, a_pderiv
+            new_A[a_idx] = A[a_idx] + (self.lrn_rate * (xm_pdv + ml_pdv + cl_pdv - a_pdv))
+
+            # print self.lrn_rate * (xm_pdv + ml_pdv + cl_pdv - a_pderiv)
+            # print xm_pdv, ml_pdv, cl_pdv, a_pderiv
             if new_A[a_idx] < 0.0:
                 print self.lrn_rate
-                print xm_pderiv
-                print mlcost_pderiv
-                print clcost_pderiv
+                print xm_pdv
+                print ml_pdv
+                print cl_pdv
                 print a_pderiv
                 0/0
 
@@ -856,7 +755,7 @@ cdef class HMRFKmeans:
                 print "Invalid patch for A triggered: NaN A=", new_A[a_idx], a_pderiv
                 new_A[a_idx] = 1e-15
 
-        A[:, :] = new_A
+        A[:] = new_A
 
         # Returning the A parameters. This is actually a dump return for coding constance reasons.
         return A

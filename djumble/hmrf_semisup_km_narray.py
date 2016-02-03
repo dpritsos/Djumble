@@ -754,7 +754,7 @@ class HMRFKmeans(object):
                     # Calculating all pairs of violation costs for cannot-link constraints.
                     # NOTE: The violation cost is equivalent to the maxCosine distance
                     for x in zip(viol_ipairs[0], viol_ipairs[1]):
-                        mlcost_pderiv -= self.cl_wg*self.PartialDerivative(
+                        clcost_pderiv -= self.cl_wg*self.PartialDerivative(
                             a_idx, x_data[x[0], :], x_data[x[1], :], A
                         )
 
