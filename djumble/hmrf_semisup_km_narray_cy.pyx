@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # cython: profile=True
-# cython: cdivision
+# cython: cdivision=True
+# cython: boundscheck=False
 
 import numpy as np
 import scipy as sp
@@ -474,9 +475,8 @@ cdef class HMRFKmeans:
             if x_idx < self.ml_sorted[0, i]:
                 break
 
-            if x_idx == self.ml_sorted[0, i] and
+            if x_idx == self.ml_sorted[0, i] and\
                 clstr_tags_arr[x_idx] != clstr_tags_arr[self.ml_sorted[1, i]]:
-
                 ml_cost += self.ml_wg * (
                     1.0 - self.vdot(
                         self.dot1d_ds(x_data[x_idx, :], self.A),
@@ -491,7 +491,7 @@ cdef class HMRFKmeans:
             if x_idx < self.cl_sorted[0, i]:
                 break
 
-            if x_idx == self.cl_sorted[0, i] and
+            if x_idx == self.cl_sorted[0, i] and\
                 clstr_tags_arr[x_idx] == clstr_tags_arr[self.cl_sorted[1, i]]:
 
                 cl_cost += self.cl_wg * (
@@ -539,7 +539,6 @@ cdef class HMRFKmeans:
         cdef double ml_cnt = 0.0
         cdef double cl_cnt = 0.0
         cdef cp.intp_t k, i
-        cdef cp.intp_t
 
         for k in range(self.k_clusters):
 
@@ -557,14 +556,14 @@ cdef class HMRFKmeans:
             # -------------------------------------
             for i in range(self.ml_size):
 
-                if clstr_tags_arr[self.must_lnk[0, i]] != clstr_tags_arr[self.must_lnk[1, i]] and
-                    (clstr_tags_arr[self.must_lnk[0, i]] == k or
+                if clstr_tags_arr[self.must_lnk[0, i]] != clstr_tags_arr[self.must_lnk[1, i]] and\
+                    (clstr_tags_arr[self.must_lnk[0, i]] == k or\
                                 clstr_tags_arr[self.must_lnk[1, i]] == k):
 
                     ml_cost += self.ml_wg * (
                         1.0 - self.vdot(
-                            self.dot1d_ds(x_data[self.must_lnk[0, i]], :], self.A),
-                            x_data[self.must_lnk[1, i]], :]
+                            self.dot1d_ds(x_data[self.must_lnk[0, i], :], self.A),
+                            x_data[self.must_lnk[1, i], :]
                         )
                     )
 
@@ -574,13 +573,13 @@ cdef class HMRFKmeans:
             # ---------------------------------------
             for i in range(self.cl_size):
 
-                if clstr_tags_arr[self.cannot_lnk[0, i]] == k and
+                if clstr_tags_arr[self.cannot_lnk[0, i]] == k and\
                     clstr_tags_arr[self.cannot_lnk[0, i]] == clstr_tags_arr[self.cannot_lnk[1, i]]:
 
                     cl_cost += self.cl_wg * (
                         self.vdot(
-                            self.dot1d_ds(x_data[self.cannot_lnk[0, i]], :], self.A),
-                            x_data[self.cannot_lnk[1, i]], :]
+                            self.dot1d_ds(x_data[self.cannot_lnk[0, i], :], self.A),
+                            x_data[self.cannot_lnk[1, i], :]
                         )
                     )
 
@@ -659,7 +658,7 @@ cdef class HMRFKmeans:
         cdef double smpls_cnt = 0.0
         cdef double ml_cnt = 0.0
         cdef double cl_cnt = 0.0
-        cdef cpn.intp_t a_idx, k
+        cdef cnp.intp_t a_idx, k
         cdef double a_pdv = 0.0
         cdef double [::1] new_A = np.zeros((self.A_size), dtype=np.float)
 
@@ -680,8 +679,8 @@ cdef class HMRFKmeans:
                 # -------------------------------------
                 for i in range(self.ml_size):
 
-                    if clstr_tags_arr[self.must_lnk[0, i]] != clstr_tags_arr[self.must_lnk[1, i]] and
-                        (clstr_tags_arr[self.must_lnk[0, i]] == k or
+                    if clstr_tags_arr[self.must_lnk[0, i]] != clstr_tags_arr[self.must_lnk[1, i]] and\
+                        (clstr_tags_arr[self.must_lnk[0, i]] == k or\
                                     clstr_tags_arr[self.must_lnk[1, i]] == k):
 
                         ml_pdv += self.ml_wg*self.PartialDerivative(
@@ -695,7 +694,7 @@ cdef class HMRFKmeans:
                 # ---------------------------------------
                 for i in range(self.cl_size):
 
-                    if clstr_tags_arr[self.cannot_lnk[0, i]] == k and
+                    if clstr_tags_arr[self.cannot_lnk[0, i]] == k and\
                      clstr_tags_arr[self.cannot_lnk[0, i]] == clstr_tags_arr[self.cannot_lnk[1, i]]:
 
                         cl_pdv -= self.cl_wg*self.PartialDerivative(
@@ -735,10 +734,11 @@ cdef class HMRFKmeans:
                 print xm_pdv
                 print ml_pdv
                 print cl_pdv
-                print a_pderiv
+                # print a_pderiv
                 0/0
 
             # ΝΟΤΕ: Invalid patch for let the experiments to be completed.
+            """
             if new_A[a_idx] < 0.0:
                 print "Invalid patch for A triggered: (-) Negative A=", new_A[a_idx], a_pderiv
                 new_A[a_idx] = 1e-15
@@ -754,6 +754,7 @@ cdef class HMRFKmeans:
             elif new_A[a_idx] == np.NaN:
                 print "Invalid patch for A triggered: NaN A=", new_A[a_idx], a_pderiv
                 new_A[a_idx] = 1e-15
+            """
 
         A[:] = new_A
 
@@ -799,7 +800,7 @@ cdef class HMRFKmeans:
 
         return res_a
 
-    cdef inline double [:, ::1] dot2d(double [:, ::1] m1, double [:, ::1] m2):
+    cdef inline double [:, ::1] dot2d(self, double [:, ::1] m1, double [:, ::1] m2):
 
         if m1.shape[1] != m2.shape[0]:
             raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
@@ -822,7 +823,7 @@ cdef class HMRFKmeans:
 
         return res
 
-    cdef inline double vdot(double [::1] v1, double [::1] v2):
+    cdef inline double vdot(self, double [::1] v1, double [::1] v2):
 
         if v1.shape[0] != v2.shape[0]:
             raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
@@ -841,7 +842,7 @@ cdef class HMRFKmeans:
 
         return res
 
-    cdef inline double [:, ::1] dot2d_ds(double [:, ::1] m1, double [::1] m2):
+    cdef inline double [:, ::1] dot2d_ds(self, double [:, ::1] m1, double [::1] m2):
 
         if m1.shape[1] != m2.shape[0]:
             raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
@@ -862,7 +863,7 @@ cdef class HMRFKmeans:
 
         return res
 
-    cdef inline double [::1] dot1d_ds(double [::1] v, double [::1] m):
+    cdef inline double [::1] dot1d_ds(self, double [::1] v, double [::1] m):
 
         if v.shape[0] != m.shape[0]:
             raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
