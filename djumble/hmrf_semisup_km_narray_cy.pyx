@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# cython: profile=True
+# cython: profile=False
 # cython: cdivision=True
 # cython: boundscheck=False
 
@@ -12,6 +12,10 @@ import time as tm
 
 cimport numpy as cnp
 
+cdef extern from "math.h":
+    cdef double sqrt(double x)
+    cdef double pow(double x, double y)
+    cdef double log (double x)
 
 cdef class HMRFKmeans:
     """ HMRF Kmeans: A Semi-supervised clustering algorithm based on Hidden Markov Random Fields
@@ -48,8 +52,12 @@ cdef class HMRFKmeans:
     cdef cnp.intp_t k_clusters
     cdef cnp.intp_t [:, ::1] must_lnk
     cdef cnp.intp_t [:, ::1] cannot_lnk
+    cdef cnp.intp_t [:, :] ml_sorted
+    cdef cnp.intp_t [:, :] cl_sorted
     cdef cnp.intp_t ml_size
     cdef cnp.intp_t cl_size
+    cdef cnp.intp_t cl_sorted_size
+    cdef cnp.intp_t ml_sorted_size
     cdef cnp.intp_t [::1] init_centroids
     cdef double ml_wg
     cdef double cl_wg
@@ -62,22 +70,23 @@ cdef class HMRFKmeans:
     cdef bint globj_norm
     cdef double [::1] A
     cdef cnp.intp_t A_size
-    cdef cp.intp_t xdata_size
+    cdef cnp.intp_t xdata_size
+    cdef cnp.intp_t conv_step
 
     def __init__(self, cnp.intp_t k_clusters, cnp.intp_t [:, ::1] must_lnk,
                  cnp.intp_t [:, ::1] cannot_lnk, cnp.intp_t [::1] init_centroids=None,
                  double ml_wg=1.0, double cl_wg=1.0, int max_iter=300,
-                 double cvg=0.001, double lrn_rate=0.0003, double ray_sigma=0.5,
+                 double cvg=0.001, double lrn_rate=0.003, double ray_sigma=0.5,
                  double [::1] d_params=None, bint norm_part=False, bint globj_norm=False):
 
         self.k_clusters = k_clusters
 
         self.must_lnk = must_lnk
-        tmp_arr = np.hstack(must_lnk, must_lnk[::-1, :])
+        tmp_arr = np.hstack((must_lnk, must_lnk[::-1, :]))
         self.ml_sorted = tmp_arr[:, np.argsort(tmp_arr)[0]]
 
         self.cannot_lnk = cannot_lnk
-        tmp_arr = np.hstack(cannot_lnk, cannot_lnk[::-1, :])
+        tmp_arr = np.hstack((cannot_lnk, cannot_lnk[::-1, :]))
         self.cl_sorted = tmp_arr[:, np.argsort(tmp_arr)[0]]
 
         self.ml_size = self.must_lnk.shape[1]
@@ -103,7 +112,6 @@ cdef class HMRFKmeans:
         # ...total must-link and cannot-link violation scores.
         self.globj_norm = globj_norm
 
-        self.xdata_size = 0
 
     def fit(self, double [:, ::1] x_data):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
@@ -127,12 +135,14 @@ cdef class HMRFKmeans:
         """
 
         # Initializing clustering
+        cdef cnp.intp_t i, idx, conv_step
 
-        cdef int i, idx
+        self.xdata_size = x_data.shape[0]
 
         # Setting up distortion parameters if not have been passed as class argument.
         if self.A == None:
             self.A = np.ones((x_data.shape[1]), dtype=np.float)
+            self.A_size = self.A.shape[0]
         elif self.A.shape[0] != x_data.shape[1]:
             raise Exception(
                 "Dimension mismutch amogst distortion params A[] vector and x_data features size."
@@ -166,7 +176,7 @@ cdef class HMRFKmeans:
         x_data = np.divide(
             x_data,
             np.sqrt(
-                np.diag(np.dot(np.dot(x_data, self.A[:, :]), x_data.T)),
+                np.diag(np.dot(self.dot2d_ds(x_data, self.A), x_data.T)),
                 dtype=np.float
             ).reshape(x_data.shape[0], 1)
         )
@@ -207,7 +217,7 @@ cdef class HMRFKmeans:
             x_data = np.divide(
                 x_data,
                 np.sqrt(
-                    np.diag(np.dot(np.dot(x_data, self.A[:, :]), x_data.T)),
+                    np.diag(np.dot(self.dot2d_ds(x_data, self.A), x_data.T)),
                     dtype=np.float
                 ).reshape(x_data.shape[0], 1)
             )
@@ -269,7 +279,6 @@ cdef class HMRFKmeans:
         """
 
         print "In ICM..."
-        # start_tm = tm.time()
 
         cdef cnp.intp_t no_change_cnt = 0
         cdef cnp.intp_t x_idx
@@ -318,9 +327,6 @@ cdef class HMRFKmeans:
             if no_change:
                 no_change_cnt += 1
 
-        # timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
-        # print "ICM time: %d:%d:%d:%d" % timel
-
         # Returning clstr_tags_arr.
         return clstr_tags_arr
 
@@ -341,29 +347,33 @@ cdef class HMRFKmeans:
 
         print "In MeanCosA..."
 
+        cdef cnp.intp_t i
         mu_arr = np.zeros((self.k_clusters, x_data.shape[1]))
-        for i in np.arange(self.k_clusters):
+
+        for i in range(self.k_clusters):
 
             clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
 
             # Summing up all the X data points for the current cluster.
             if len(clstr_idxs_arr):
-                xi_sum = np.sum(np.asarray(x_data)[clstr_idxs_arr, :], axis=0)
+                    # This line should be chaged with a pure c-like code for increading perfornace.
+                    xi_sum = np.sum(np.asarray(x_data)[clstr_idxs_arr, :], axis=0)
+                    # ####
             else:
                 print "Zero Mean for a clucter triggered!!!"
                 zero_vect = np.zeros_like(x_data[0, :])
                 zero_vect[:] = 1e-15
-                xi_sum = sp.matrix(zero_vect)
+                xi_sum[:] = zero_vect[:]
 
             # Calculating denominator ||Σ xi||(A)
-            parametrized_norm_xi = np.sqrt(np.dot(np.dot(xi_sum, self.A), xi_sum.T))
+            parametrized_norm_xi = sqrt(self.vdot(self.dot1d_ds(xi_sum, self.A), xi_sum))
 
             # Calculating the Centroid of the (assumed) hyper-sphear. Then appended to the mu list.
             mu_arr[i, :] = xi_sum / parametrized_norm_xi
 
         return mu_arr
 
-    cdef NormPart(self, x_data_subset):
+    cdef NormPart(self, double [:, ::1] x_data_subset):
         """ The von Mises and von Mises - Fisher Logarithmic Normalization partition function:...
             is calculated in this method. For the 2D data the function is simplified for faster
             calculation.
@@ -458,7 +468,6 @@ cdef class HMRFKmeans:
         cdef double ml_cost = 0.0
         cdef double cl_cost = 0.0
         cdef cnp.intp_t i
-        cdef cnp.intp_t ml_lnk_size = self
         cdef double sum1 = 0.0
         cdef double sum2 = 0.0
         cdef double params_pdf = 0.0
@@ -502,12 +511,10 @@ cdef class HMRFKmeans:
                 )
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
-
-        for i in range(self.A_size):
-            sum1 += np.log(self.A[i])
-            sum2 += np.square(self.A[i]) / (2 * np.square(self.ray_sigma))
-        params_pdf = sum1 - sum2 - (2 * self.A_size * np.log(self.ray_sigma))
-
+        #for i in range(self.A_size):
+        #    sum1 += log(self.A[i])
+        #    sum2 += pow(self.A[i], 2.0) / (2 * pow(self.ray_sigma, 2.0))
+        #params_pdf = sum1 - sum2 - (2 * self.A_size * log(self.ray_sigma))
         # NOTE!
         params_pdf = 0.0
 
@@ -517,7 +524,7 @@ cdef class HMRFKmeans:
         # if self.norm_part:
         #     norm_part_value = self.NormPart(x_data[clstr_idx_arr])
         # else:
-        norm_part_value = 0.0
+        # norm_part_value = 0.0
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
@@ -526,7 +533,6 @@ cdef class HMRFKmeans:
                       cnp.intp_t [::1] clstr_tags_arr):
         """
         """
-
         print "In GlobalJObjCosA..."
 
         # Calculating the distance of all vectors, the must-link and cannot-link violations scores.
@@ -538,7 +544,9 @@ cdef class HMRFKmeans:
         cdef double smlps_cnt = 0.0
         cdef double ml_cnt = 0.0
         cdef double cl_cnt = 0.0
-        cdef cp.intp_t k, i
+        cdef cnp.intp_t k, i, a_idx
+        cdef double sum1 = 0.0
+        cdef double sum2 = 0.0
 
         for k in range(self.k_clusters):
 
@@ -573,13 +581,13 @@ cdef class HMRFKmeans:
             # ---------------------------------------
             for i in range(self.cl_size):
 
-                if clstr_tags_arr[self.cannot_lnk[0, i]] == k and\
+                if clstr_tags_arr[<int>self.cannot_lnk[0, i]] == k and\
                     clstr_tags_arr[self.cannot_lnk[0, i]] == clstr_tags_arr[self.cannot_lnk[1, i]]:
 
                     cl_cost += self.cl_wg * (
                         self.vdot(
                             self.dot1d_ds(x_data[self.cannot_lnk[0, i], :], self.A),
-                            x_data[self.cannot_lnk[1, i], :]
+                            x_data[<int>self.cannot_lnk[1, i], :]
                         )
                     )
 
@@ -595,15 +603,13 @@ cdef class HMRFKmeans:
             cl_cost = cl_cost / cl_cnt
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
-        # if self.globj_norm:
-        #     sum1, sum2 = 0.0, 0.0
-        #     for a in np.diag(self.A[:, :]):
-        #         sum1 += np.log(a)
-        #         sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
-        #     params_pdf = sum1 - sum2 -\
-        #         (2 * np.diag(self.A[:, :]).shape[0] * np.log(self.ray_sigma))
-        # else:
-        #     params_pdf = 0.0
+        if self.globj_norm:
+            for a_idx in self.A_size:
+                sum1 += log(self.A[a_idx])
+                sum2 += pow(self.A[a_idx], 2.0) / (2 * pow(self.ray_sigma, 2.0))
+            params_pdf = sum1 - sum2 - (2 * self.A_size * log(self.ray_sigma))
+        else:
+            params_pdf = 0.0
 
         # Calculating the log normalization function of the von Mises-Fisher distribution...
         # ...of the whole mixture.
@@ -613,7 +619,7 @@ cdef class HMRFKmeans:
         #         clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
         #         norm_part_value += self.NormPart(x_data[clstr_idxs_arr])
         # else:
-        #     norm_part_value = 0.0
+        norm_part_value = 0.0
 
         print 'dims', x_data.shape[1]
         print 'sum_d, ml_cost, cl_cost', sum_d, ml_cost, cl_cost
@@ -705,9 +711,10 @@ cdef class HMRFKmeans:
                         )
 
             # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
-            # new_a = a + (self.lrn_rate * (xm_pdv + ml_pdv + cl_pdv))
-            # a_pderiv = (1 / a) - (a / np.square(self.ray_sigma))
-
+            # Should be on the new_a or on the last iteration A[a_idx] ???
+            # new_a = self.A[a_idx] + (self.lrn_rate * (xm_pdv + ml_pdv + cl_pdv))
+            # Now it is applied on the previews Α[a_idx]!
+            a_pdv = (1 / self.A[a_idx]) - (self.A[a_idx] / pow(self.ray_sigma, 2.0))
             # NOTE!
             a_pdv = 0.0
 
@@ -722,19 +729,17 @@ cdef class HMRFKmeans:
             #     a_pderiv = 1e-15
 
             # Changing a diagonal value of the A cosine similarity parameters measure.
-            print A[a_idx]
-            print A[a_idx] + (self.lrn_rate * (xm_pdv + ml_pdv + cl_pdv - a_pdv))
+            #print A[a_idx]
+            #print A[a_idx] + (self.lrn_rate * (xm_pdv + ml_pdv + cl_pdv - a_pdv))
 
             new_A[a_idx] = A[a_idx] + (self.lrn_rate * (xm_pdv + ml_pdv + cl_pdv - a_pdv))
 
-            # print self.lrn_rate * (xm_pdv + ml_pdv + cl_pdv - a_pderiv)
-            # print xm_pdv, ml_pdv, cl_pdv, a_pderiv
             if new_A[a_idx] < 0.0:
                 print self.lrn_rate
                 print xm_pdv
                 print ml_pdv
                 print cl_pdv
-                # print a_pderiv
+                print a_pdv
                 0/0
 
             # ΝΟΤΕ: Invalid patch for let the experiments to be completed.
@@ -756,12 +761,13 @@ cdef class HMRFKmeans:
                 new_A[a_idx] = 1e-15
             """
 
-        A[:] = new_A
+        A[:] = new_A[:]
 
         # Returning the A parameters. This is actually a dump return for coding constance reasons.
         return A
 
-    cdef inline PartialDerivative(self, a_idx, x1, x2, A):
+    cdef inline double PartialDerivative(self, cnp.intp_t a_idx,
+                                         double [::1] x1, double [::1] x2, double [::1] A):
         """ Partial Derivative: This method is calculating the partial derivative of a specific
             parameter given the proper vectors. That is, for the cosine distance is a x_i with the
             centroid vector (mu) of the cluster where x_i is belonging into. As for the constraint
@@ -780,23 +786,24 @@ cdef class HMRFKmeans:
                 res_a: The partial derivative's value.
 
         """
+        cdef double res_a = 0.0
 
         # Calculating parametrized Norms ||Σ xi||(A)
-        x1_pnorm = np.sqrt(np.dot(np.dot(x1, A[:, :]), np.asarray(x1).reshape(x1.shape[0], 1)))
-        x2_pnorm = np.sqrt(np.dot(np.dot(x2, A[:, :]), np.asarray(x2).reshape(x2.shape[0], 1)))
+        x1_pnorm = sqrt(self.vdot(self.dot1d_ds(x1, A), x1))
+        x2_pnorm = sqrt(self.vdot(self.dot1d_ds(x2, A), x2))
 
         res_a = (
                     (x1[a_idx] * x2[a_idx] * x1_pnorm * x2_pnorm) -
                     (
-                        np.dot(np.dot(x1, A[:, :]), np.asarray(x2).reshape(x2.shape[0], 1)) *
+                        self.vdot(self.dot1d_ds(x1, A), x2) *
                         (
                             (
-                                np.square(x1[a_idx]) * np.square(x2_pnorm) +
-                                np.square(x2[a_idx]) * np.square(x1_pnorm)
+                                pow(x1[a_idx], 2.0) * pow(x2_pnorm, 2.0) +
+                                pow(x2[a_idx], 2.0) * pow(x1_pnorm, 2.0)
                             ) / (2 * x1_pnorm * x2_pnorm)
                         )
                     )
-                ) / (np.square(x1_pnorm) * np.square(x2_pnorm))
+                ) / (pow(x1_pnorm, 2.0) * pow(x2_pnorm, 2.0))
 
         return res_a
 

@@ -15,9 +15,9 @@ import StringIO
 
 sys.path.append('../djumble/')
 # from djumble.hmrf_semisup_km import HMRFKmeans as HMRFKmeans
-from hmrf_semisup_km_narray_cy import HMRFKmeans as HMRFKmeans_arr
+from hmrf_semisup_km_narray import HMRFKmeans as HMRFKmeans_arr
 
-test_dims = 10
+test_dims = 1000
 
 print "Creating Sample"
 x_data_2d_arr1 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))

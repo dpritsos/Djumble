@@ -86,7 +86,7 @@ class HMRFKmeans(object):
 
         # Setting up distortion parameters if not have been passed as class argument.
         if self.A is None:
-            self.A = np.random.uniform(0.5, 1.0, size=x_data.shape[1])
+            self.A = np.ones((x_data.shape[1]), dtype=np.float)
         # A should be a diagonal matrix form for the calculations in the functions bellow. The...
         # ...sparse form will save space and the csr_matrix will make the dia_matrix write-able.
         self.A = np.diag(self.A)
