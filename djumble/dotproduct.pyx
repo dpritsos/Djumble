@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# cython: profile=True
+# cython: profile=False
 # cython: cdivision=True
 # cython: boundscheck=False
 # cyhton: wraparound=False
@@ -32,7 +32,7 @@ def dot2d(double [:, ::1] m1, double [:, ::1] m2):
 
     return res
 
-@cython.profile(False)
+
 cpdef double vdot(double [::1] v1, double [::1] v2):
 
     if v1.shape[0] != v2.shape[0]:

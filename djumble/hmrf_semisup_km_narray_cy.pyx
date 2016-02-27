@@ -2,6 +2,7 @@
 # cython: profile=False
 # cython: cdivision=True
 # cython: boundscheck=False
+# cyhton: wraparound=False
 
 import numpy as np
 import scipy as sp
@@ -72,6 +73,8 @@ cdef class HMRFKmeans:
     cdef cnp.intp_t A_size
     cdef cnp.intp_t xdata_size
     cdef cnp.intp_t conv_step
+    cdef cnp.intp_t [::1] neg_idxs4clstring
+    cdef cnp.intp_t neg_i4c_size
 
     def __init__(self, cnp.intp_t k_clusters, cnp.intp_t [:, ::1] must_lnk,
                  cnp.intp_t [:, ::1] cannot_lnk, cnp.intp_t [::1] init_centroids=None,
@@ -113,7 +116,7 @@ cdef class HMRFKmeans:
         self.globj_norm = globj_norm
 
 
-    def fit(self, double [:, ::1] x_data):
+    def fit(self, double [:, ::1] x_data, cnp.intp_t [::1] neg_idxs4clstring):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
             data in the Mixture of the von Misses Fisher (vMF) distributions. However, the vMF(s)
             are considered to have the same shape at the end of the process. That is, Kmeans and
@@ -170,9 +173,18 @@ cdef class HMRFKmeans:
         # # The above might actually change based on the initialization set-up will be used.
         # ########
 
+        # Set of indices not participating in clustering. NOTE: For particular experiments only.
+        self.neg_idxs4clstring = neg_idxs4clstring
+        self.neg_i4c_size = self.neg_idxs4clstring.shape[0]
+
+        if self.neg_i4c_size > 0:
+            for i_idx in range(self.neg_i4c_size):
+                clstr_tags_arr[self.neg_idxs4clstring[i_idx]] = -9
+
         # NOTE: Initially normalizing the samples under the distortion parameters values in...
         # ...order to reducing the cosine distance calculation to a simple dot products...
         # ...calculation in the rest of the EM (sub)steps.
+        # print np.array(x_data[0, 0:100])
         x_data = np.divide(
             x_data,
             np.sqrt(
@@ -180,6 +192,7 @@ cdef class HMRFKmeans:
                 dtype=np.float
             ).reshape(x_data.shape[0], 1)
         )
+        # print np.array(x_data[0, 0:100])
 
         # Calculating the initial Centroids of the assumed hyper-shperical clusters.
         mu_arr = self.MeanCosA(x_data, clstr_tags_arr)
@@ -221,6 +234,9 @@ cdef class HMRFKmeans:
                     dtype=np.float
                 ).reshape(x_data.shape[0], 1)
             )
+
+            # ##################### KOLPAKI - Recalculating centroids upon the new clusters set-up.
+            mu_arr = self.MeanCosA(x_data, clstr_tags_arr)
 
             # Calculating Global JObjective function.
             glob_jobj = self.GlobJObjCosA(x_data, mu_arr, clstr_tags_arr)
@@ -289,38 +305,51 @@ cdef class HMRFKmeans:
         cdef bint no_change
         cdef cnp.intp_t [::1] clstr_idxs_arr
         cdef cnp.intp_t new_clstr_tag
+        cdef bint skip_smpl = False
 
         while no_change_cnt < 2:
 
             # Calculating the new Clusters.
             for x_idx in np.random.permutation(np.arange(x_data.shape[0])):
 
-                # Setting the initial value for the previews J-Objective value.
-                last_jobj = np.Inf
+                # Looking for skipping indices that should not participate in clustering.
+                for i in range(self.neg_i4c_size):
+                    if self.neg_idxs4clstring[i] == x_idx:
+                        skip_smpl = True
 
-                # Calculating the J-Objective for every x_i vector of the x_data set.
-                for i, mu in enumerate(mu_arr):
+                # Skipping the indices should not participate in clustering.
+                if not skip_smpl:
 
-                    # Getting the indeces for this cluster.
-                    clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
+                    # Setting the initial value for the previews J-Objective value.
+                    last_jobj = np.Inf
 
-                    # Calculating the J-Objective.
-                    j_obj = <double>self.JObjCosA(x_idx, x_data, mu, clstr_idxs_arr)
+                    # Calculating the J-Objective for every x_i vector of the x_data set.
+                    for i, mu in enumerate(mu_arr):
 
-                    if j_obj < last_jobj:
-                        last_jobj = j_obj
-                        new_clstr_tag = i
+                        # Getting the indeces for this cluster.
+                        clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
 
-                # Checking if the cluster where the data-point belongs into has been changed.
-                if clstr_tags_arr[x_idx] != new_clstr_tag:
+                        # Calculating the J-Objective.
+                        j_obj = <double>self.JObjCosA(x_idx, x_data, mu, clstr_idxs_arr)
 
-                    no_change = False
+                        if j_obj < last_jobj:
+                            last_jobj = j_obj
+                            new_clstr_tag = i
 
-                    # Re-assinging the x_i vector to the new cluster if not already.
-                    clstr_tags_arr[x_idx] = new_clstr_tag
+                    # Checking if the cluster where the data-point belongs into has been changed.
+                    if clstr_tags_arr[x_idx] != new_clstr_tag:
+
+                        no_change = False
+
+                        # Re-assinging the x_i vector to the new cluster if not already.
+                        clstr_tags_arr[x_idx] = new_clstr_tag
+
+                    else:
+                        no_change = True
 
                 else:
-                    no_change = True
+                    # Reseting skipping samples flag.
+                    skip_smpl = False
 
             # Counting Non-Changes, i.e. if no change happens for two (2) iteration the...
             # ...re-assingment process stops.
@@ -356,9 +385,9 @@ cdef class HMRFKmeans:
 
             # Summing up all the X data points for the current cluster.
             if len(clstr_idxs_arr):
-                    # This line should be chaged with a pure c-like code for increading perfornace.
-                    xi_sum = np.sum(np.asarray(x_data)[clstr_idxs_arr, :], axis=0)
-                    # ####
+                # This line should be chaged with a pure c-like code for increading perfornace.
+                xi_sum = np.sum(np.asarray(x_data)[clstr_idxs_arr, :], axis=0)
+                # ####
             else:
                 print "Zero Mean for a clucter triggered!!!"
                 zero_vect = np.zeros_like(x_data[0, :])
@@ -473,9 +502,18 @@ cdef class HMRFKmeans:
         cdef double params_pdf = 0.0
         cdef double norm_part_value = 0.0
 
+        cdef double tmp = 0.0
+
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
         # --------------------------------------------------------------------------------
-        dist = 1.0 - self.vdot(self.dot1d_ds(mu, self.A), x_data[x_idx, :])
+        tmp = self.vdot(self.dot1d_ds(mu, self.A), x_data[x_idx, :])
+
+        if tmp > 1:
+            print "OVER ONE", tmp
+        if tmp == 1:
+            print "ONE", tmp
+
+        dist = 1.0 - tmp
 
         # Calculating Must-Link violation cost.
         # -------------------------------------
@@ -511,12 +549,12 @@ cdef class HMRFKmeans:
                 )
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
-        #for i in range(self.A_size):
-        #    sum1 += log(self.A[i])
-        #    sum2 += pow(self.A[i], 2.0) / (2 * pow(self.ray_sigma, 2.0))
-        #params_pdf = sum1 - sum2 - (2 * self.A_size * log(self.ray_sigma))
+        for i in range(self.A_size):
+            sum1 += log(self.A[i])
+            sum2 += pow(self.A[i], 2.0) / (2 * pow(self.ray_sigma, 2.0))
+        params_pdf = sum1 - sum2 - (2 * self.A_size * log(self.ray_sigma))
         # NOTE!
-        params_pdf = 0.0
+        # params_pdf = 0.0
 
         # ######## NEEDS to be changed in Cython
         # Calculating the log normalization function of the von Mises-Fisher distribution...
@@ -716,7 +754,7 @@ cdef class HMRFKmeans:
             # Now it is applied on the previews Α[a_idx]!
             a_pdv = (1 / self.A[a_idx]) - (self.A[a_idx] / pow(self.ray_sigma, 2.0))
             # NOTE!
-            a_pdv = 0.0
+            # a_pdv = 0.0
 
             # print 'Rayleigh Partial', a_pderiv
 
