@@ -236,7 +236,15 @@ cdef class HMRFKmeans:
             )
 
             # ##################### KOLPAKI - Recalculating centroids upon the new clusters set-up.
-            mu_arr = self.MeanCosA(x_data, clstr_tags_arr)
+            # mu_arr = self.MeanCosA(x_data, clstr_tags_arr)
+
+            mu_arr = np.divide(
+                mu_arr,
+                np.sqrt(
+                    np.diag(np.dot(self.dot2d_ds(mu_arr, self.A), mu_arr.T)),
+                    dtype=np.float
+                ).reshape(mu_arr.shape[0], 1)
+            )
 
             # Calculating Global JObjective function.
             glob_jobj = self.GlobJObjCosA(x_data, mu_arr, clstr_tags_arr)
