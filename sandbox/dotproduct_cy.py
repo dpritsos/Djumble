@@ -9,6 +9,10 @@ import dotproduct as dop
 
 x1 = np.array([1.0, 0.4, 0.6, 0.5, 0.6, 0.7, 0.6], dtype=np.float)
 x2 = np.array([0.0, 1.0, 0.0, 0.9, 0.1, 0.2, 0.3], dtype=np.float)
+a = np.array([[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+              [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+              [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]], dtype=np.float)
+
 
 A = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float)
 
@@ -30,3 +34,8 @@ print xmean
 print dop.vdot(dop.dot1d_ds(xmean, A), x2_cosnorm)
 print dop.vdot(dop.dot1d_ds(xmean, A), x2_cosnorm) / (np.sqrt(dop.vdot(dop.dot1d_ds(xmean, A), xmean)) * np.sqrt(dop.vdot(dop.dot1d_ds(x2_cosnorm, A), x2_cosnorm)))
 #print np.dot(x1_cosnorm, np.matrix(x2_cosnorm).T)
+
+print np.asarray(dop.sum_axs0(a, np.array([0,1,2]))) / np.array([2.0, 4.0, 2.0, 2.0, 2.0, 2.0, 2.0])
+res_a_x_aT = dop.dot2d_ds(a, a.T)
+print np.asarray(res_a_x_aT)
+print np.asarray(dop.get_diag(res_a_x_aT))

@@ -394,7 +394,7 @@ cdef class HMRFKmeans:
             # Summing up all the X data points for the current cluster.
             if len(clstr_idxs_arr):
                 # This line should be chaged with a pure c-like code for increading perfornace.
-                xi_sum = np.sum(np.asarray(x_data)[clstr_idxs_arr, :], axis=0)
+                xi_sum = self.sum_axs0(x_data, clstr_idxs_arr)
                 # ####
             else:
                 print "Zero Mean for a clucter triggered!!!"
@@ -932,5 +932,25 @@ cdef class HMRFKmeans:
         with nogil:
             for i in range(I):
                 res[i] = v[i] * m[i]
+
+        return res
+
+    cdef inline sum_axs0(self, double [:, ::1] m, cnp.intp_t [::1] idxs):
+
+        # Matrix index variables.
+        cdef unsigned int i
+        cdef unsigned int I = idxs.shape[0]
+        cdef unsigned int J = m.shape[1]
+
+        # Creating the numpy.array for results and its memory view
+        cdef double [::1] res = np.zeros((J), dtype=np.float)
+
+        # Calculating the dot product.
+        with nogil:
+            for j in range(J):
+                for i in range(I):
+                    # The idxs array is giving the actual row index of the data matrix...
+                    # ...to be summed up.
+                    res[j] += m[idxs[i], j]
 
         return res

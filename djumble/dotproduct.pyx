@@ -9,7 +9,7 @@ cimport numpy as cnp
 cimport cython
 
 
-def dot2d(double [:, ::1] m1, double [:, ::1] m2):
+cpdef double [:, ::1] dot2d(double [:, ::1] m1, double [:, ::1] m2):
 
     if m1.shape[1] != m2.shape[0]:
         raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
@@ -33,7 +33,7 @@ def dot2d(double [:, ::1] m1, double [:, ::1] m2):
     return res
 
 
-cpdef double vdot(double [::1] v1, double [::1] v2):
+cpdef double [::1] vdot(double [::1] v1, double [::1] v2):
 
     if v1.shape[0] != v2.shape[0]:
         raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
@@ -53,7 +53,7 @@ cpdef double vdot(double [::1] v1, double [::1] v2):
     return res
 
 
-def dot2d_ds(double [:, ::1] m1, double [::1] m2):
+cpdef double [:, ::1] dot2d_ds(double [:, ::1] m1, double [::1] m2):
 
     if m1.shape[1] != m2.shape[0]:
         raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
@@ -75,7 +75,7 @@ def dot2d_ds(double [:, ::1] m1, double [::1] m2):
     return res
 
 
-def dot1d_ds(double [::1] v, double [::1] m):
+cpdef double [::1] dot1d_ds(double [::1] v, double [::1] m):
 
     if v.shape[0] != m.shape[0]:
         raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
@@ -91,5 +91,44 @@ def dot1d_ds(double [::1] v, double [::1] m):
     with nogil:
         for i in range(I):
             res[i] = v[i] * m[i]
+
+    return res
+
+
+cpdef double [::1] sum_axs0(double [:, ::1] m, cnp.intp_t [::1] idxs):
+
+    # Matrix index variables.
+    cdef unsigned int i, j
+    cdef unsigned int I = idxs.shape[0]
+    cdef unsigned int J = m.shape[1]
+
+    # Creating the numpy.array for results and its memory view
+    cdef double [::1] res = np.zeros((J), dtype=np.float)
+
+    # Calculating the dot product.
+    with nogil:
+        for j in range(J):
+            for i in range(I):
+                # The idxs array is giving the actual row index of the data matrix...
+                # ...to be summed up.
+                res[j] += m[idxs[i], j]
+
+    return res
+
+cpdef double [::1] get_diag(double [:, ::1] m):
+
+    # Matrix index variables.
+    cdef unsigned int i
+    cdef unsigned int I = m.shape[0]
+
+    # Creating the numpy.array for results and its memory view
+    cdef double [::1] res = np.zeros((I), dtype=np.float)
+
+    # Calculating the dot product.
+    with nogil:
+        for i in range(I):
+            # The idxs array is giving the actual row index of the data matrix...
+            # ...to be summed up.
+            res[i] += m[i, i]
 
     return res
