@@ -36,6 +36,10 @@ print dop.vdot(dop.dot1d_ds(xmean, A), x2_cosnorm) / (np.sqrt(dop.vdot(dop.dot1d
 #print np.dot(x1_cosnorm, np.matrix(x2_cosnorm).T)
 
 print np.asarray(dop.sum_axs0(a, np.array([0,1,2]))) / np.array([2.0, 4.0, 2.0, 2.0, 2.0, 2.0, 2.0])
-res_a_x_aT = dop.dot2d_ds(a, a.T)
+res_a_x_aT = dop.dot2d_2d(a, a.T)
 print np.asarray(res_a_x_aT)
 print np.asarray(dop.get_diag(res_a_x_aT))
+print np.asarray(dop.div2d_vv(a, dop.get_diag(res_a_x_aT)))
+print np.asarray(dop.div2d_vv(a, np.array([1.,2.,3.])))
+print np.asarray(dop.vdiv_num(np.array([2.,2.,2.]), 4.0))
+print np.asarray(dop.vsqrt(np.array([4.,4.,4.])))

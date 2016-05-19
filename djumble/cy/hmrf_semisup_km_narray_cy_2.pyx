@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# cython: profile=False
+# cython: profile=True
 # cython: cdivision=True
 # cython: boundscheck=False
 # cyhton: wraparound=False
@@ -14,9 +14,9 @@ import time as tm
 cimport numpy as cnp
 
 cdef extern from "math.h":
-    cdef double sqrt(double x)
-    cdef double pow(double x, double y)
-    cdef double log (double x)
+    cdef double sqrt(double x) nogil
+    cdef double pow(double x, double y) nogil
+    cdef double log (double x) nogil
 
 cdef class HMRFKmeans:
     """ HMRF Kmeans: A Semi-supervised clustering algorithm based on Hidden Markov Random Fields
@@ -185,12 +185,13 @@ cdef class HMRFKmeans:
         # ...order to reducing the cosine distance calculation to a simple dot products...
         # ...calculation in the rest of the EM (sub)steps.
         # print np.array(x_data[0, 0:100])
-        x_data = np.divide(
+        x_data = self.div2d_vv(
             x_data,
-            np.sqrt(
-                np.diag(np.dot(self.dot2d_ds(x_data, self.A), x_data.T)),
-                dtype=np.float
-            ).reshape(x_data.shape[0], 1)
+            self.vsqrt(
+                self.get_diag(
+                    self.dot2d_2d(self.dot2d_ds(x_data, self.A), x_data.T)
+                )
+            )
         )
         # print np.array(x_data[0, 0:100])
 
@@ -227,23 +228,22 @@ cdef class HMRFKmeans:
             # NOTE: Normalizing the samples under the new parameters values in order to reducing...
             # ...the cosine distance calculation to a simple dot products calculation in the...
             # ...rest of the EM (sub)steps.
-            x_data = np.divide(
+            x_data = self.div2d_vv(
                 x_data,
-                np.sqrt(
-                    np.diag(np.dot(self.dot2d_ds(x_data, self.A), x_data.T)),
-                    dtype=np.float
-                ).reshape(x_data.shape[0], 1)
+                self.vsqrt(
+                    self.get_diag(
+                        self.dot2d_2d(self.dot2d_ds(x_data, self.A), x_data.T)
+                    )
+                )
             )
 
-            # ##################### KOLPAKI - Recalculating centroids upon the new clusters set-up.
-            # mu_arr = self.MeanCosA(x_data, clstr_tags_arr)
-
-            mu_arr = np.divide(
+            # KOLPAKI - Re-normalizing the  centroids upon the new clusters set-up.
+            mu_arr = self.div2d_vv(
                 mu_arr,
-                np.sqrt(
-                    np.diag(np.dot(self.dot2d_ds(mu_arr, self.A), mu_arr.T)),
-                    dtype=np.float
-                ).reshape(mu_arr.shape[0], 1)
+                self.vsqrt(
+                    self.get_diag(
+                        self.dot2d_2d(self.dot2d_ds(mu_arr, self.A), mu_arr.T))
+                    )
             )
 
             # Calculating Global JObjective function.
@@ -406,7 +406,7 @@ cdef class HMRFKmeans:
             parametrized_norm_xi = sqrt(self.vdot(self.dot1d_ds(xi_sum, self.A), xi_sum))
 
             # Calculating the Centroid of the (assumed) hyper-sphear. Then appended to the mu list.
-            mu_arr[i, :] = xi_sum / parametrized_norm_xi
+            mu_arr[i, :] = self.vdiv_num(xi_sum, parametrized_norm_xi)
 
         return mu_arr
 
@@ -855,8 +855,8 @@ cdef class HMRFKmeans:
 
     cdef inline double [:, ::1] dot2d(self, double [:, ::1] m1, double [:, ::1] m2):
 
-        if m1.shape[1] != m2.shape[0]:
-            raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
+        # if m1.shape[1] != m2.shape[0]:
+        #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
 
         # Matrix index variables.
         cdef unsigned int i, j, k
@@ -878,15 +878,15 @@ cdef class HMRFKmeans:
 
     cdef inline double vdot(self, double [::1] v1, double [::1] v2):
 
-        if v1.shape[0] != v2.shape[0]:
-            raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
+        # if v1.shape[0] != v2.shape[0]:
+        #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
 
         # Matrix index variables.
         cdef unsigned int i
         cdef unsigned int I = v1.shape[0]
 
         # Initializing the result variable.
-        cdef double res = <double>0.0
+        cdef double res = 0.0
 
         # Calculating the dot product.
         with nogil:
@@ -897,8 +897,8 @@ cdef class HMRFKmeans:
 
     cdef inline double [:, ::1] dot2d_ds(self, double [:, ::1] m1, double [::1] m2):
 
-        if m1.shape[1] != m2.shape[0]:
-            raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
+        # if m1.shape[1] != m2.shape[0]:
+        #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
 
         # Matrix index variables.
         cdef unsigned int i, j
@@ -918,8 +918,8 @@ cdef class HMRFKmeans:
 
     cdef inline double [::1] dot1d_ds(self, double [::1] v, double [::1] m):
 
-        if v.shape[0] != m.shape[0]:
-            raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
+        # if v.shape[0] != m.shape[0]:
+        #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
 
         # Matrix index variables.
         cdef unsigned int i
@@ -935,7 +935,7 @@ cdef class HMRFKmeans:
 
         return res
 
-    cdef inline sum_axs0(self, double [:, ::1] m, cnp.intp_t [::1] idxs):
+    cdef inline double [::1] sum_axs0(self, double [:, ::1] m, cnp.intp_t [::1] idxs):
 
         # Matrix index variables.
         cdef unsigned int i
@@ -952,5 +952,108 @@ cdef class HMRFKmeans:
                     # The idxs array is giving the actual row index of the data matrix...
                     # ...to be summed up.
                     res[j] += m[idxs[i], j]
+
+        return res
+
+
+    cdef inline double [::1] get_diag(self, double [:, ::1] m):
+
+        # Matrix index variables.
+        cdef unsigned int i
+        cdef unsigned int I = m.shape[0]
+
+        # Creating the numpy.array for results and its memory view
+        cdef double [::1] res = np.zeros((I), dtype=np.float)
+
+        # Calculating the dot product.
+        with nogil:
+            for i in range(I):
+                # The idxs array is giving the actual row index of the data matrix...
+                # ...to be summed up.
+                res[i] += m[i, i]
+
+        return res
+
+
+    cdef inline double [:, ::1] dot2d_2d(self, double [:, :] m1, double [:, :] m2):
+
+        # if m1.shape[1] != m2.shape[0]:
+        #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
+
+        # Matrix index variables.
+        cdef unsigned int i0, j0, i1, j1
+        cdef unsigned int I0 = m1.shape[0]
+        cdef unsigned int I1 = m1.shape[1]
+        # cdef unsigned int J0 = m2.shape[0]
+        cdef unsigned int J1 = m2.shape[1]
+
+        # Creating the numpy.array for results and its memory view
+        cdef double [:, ::1] res = np.zeros((I0, J1), dtype=np.float)
+
+        # Calculating the dot product.
+        with nogil:
+            for i0 in range(I0):
+                for j1 in range(J1):
+                    for i1 in range(I1):
+                        res[i0, j1] += m1[i0, i1] * m2[i1, j1]
+
+        return res
+
+
+    cdef inline double [:, ::1] div2d_vv(self, double [:, ::1] m, double [::1] v):
+
+        # _vv stands for Vertical Vector.
+
+        # if m.shape[0] != v.shape[0]:
+        #     raise Exception("Matrix dimensions mismatch. 2D matrix cannot be dived by the vertical vector")
+
+        # Matrix index variables.
+        cdef unsigned int i0, i1, j
+        cdef unsigned int I0 = m.shape[0]
+        cdef unsigned int I1 = m.shape[1]
+        cdef unsigned int J = v.shape[0]
+
+        # Creating the numpy.array for results and its memory view
+        cdef double [:, ::1] res = np.zeros((I0, I1), dtype=np.float)
+
+        # Calculating the dot product.
+        with nogil:
+            for i0 in range(I0):
+                for i1 in range(I1):
+                    res[i0, i1] = m[i0, i1] / v[i0]
+
+        return res
+
+
+    cdef inline double [::1] vdiv_num(self, double [::1] v, double num):
+
+        # Matrix index variables.
+        cdef unsigned int i
+        cdef unsigned int I = v.shape[0]
+
+        # Creating the numpy.array for results and its memory view
+        cdef double [::1] res = np.zeros((I), dtype=np.float)
+
+        # Calculating the dot product.
+        with nogil:
+            for i in range(I):
+                res[i] = v[i] / num
+
+        return res
+
+
+    cdef inline double [::1] vsqrt(self, double [::1] v):
+
+        # Matrix index variables.
+        cdef unsigned int i
+        cdef unsigned int I = v.shape[0]
+
+        # Creating the numpy.array for results and its memory view
+        cdef double [::1] res = np.zeros((I), dtype=np.float)
+
+        # Calculating the dot product.
+        with nogil:
+            for i in range(I):
+                res[i] = sqrt(v[i])
 
         return res

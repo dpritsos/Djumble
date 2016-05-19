@@ -15,7 +15,7 @@ import StringIO
 
 sys.path.append('../djumble/')
 # from djumble.hmrf_semisup_km import HMRFKmeans as HMRFKmeans
-from hmrf_semisup_km_narray import HMRFKmeans as HMRFKmeans_arr
+from hmrf_semisup_km_narray_cy import HMRFKmeans as HMRFKmeans_arr
 
 test_dims = 1000
 
@@ -117,7 +117,7 @@ hkmeans_arr = HMRFKmeans_arr(
     ray_sigma=0.5, d_params=None, norm_part=False, globj_norm=False
 )
 
-res = hkmeans_arr.fit(x_data_2d_arr)
+res = hkmeans_arr.fit(x_data_2d_arr, np.array([], dtype=np.int))
 
 # print res[1]
 
