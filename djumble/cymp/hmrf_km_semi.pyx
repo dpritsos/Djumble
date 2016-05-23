@@ -836,7 +836,7 @@ cdef class HMRFKmeans:
         return A
 
     cdef inline double PartialDerivative(self, cnp.intp_t a_idx,
-                                         double [::1] x1, double [::1] x2, double [::1] A) nogil:
+                                         double [::1] x1, double [::1] x2, double [::1] A):
         """ Partial Derivative: This method is calculating the partial derivative of a specific
             parameter given the proper vectors. That is, for the cosine distance is a x_i with the
             centroid vector (mu) of the cluster where x_i is belonging into. As for the constraint
@@ -883,23 +883,24 @@ cdef class HMRFKmeans:
         # if m1.shape[1] != m2.shape[0]:
         #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
 
+        # if m1.shape[1] != m2.shape[0]:
+        #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
+
         # Matrix index variables.
         cdef unsigned int i, j, k
         cdef unsigned int I = m1.shape[0]
         cdef unsigned int J = m2.shape[1]
         cdef unsigned int K = m1.shape[1]
-        cdef double[:, ::1] res
 
         # Creating the numpy.array for results and its memory view
-        # self.res2d = <double**>realloc(self.res2d, I*J*sizeof(double))
-
+        cdef double [:, ::1] res = np.zeros((I, J), dtype=np.float)
 
         # Calculating the dot product.
-        for i in range(I):
-            for j in range(J):
-                for k in range(K):
-                    pass
-                    # self.res2d[i, j] += m1[i, k] * m2[k, j]
+        with nogil:
+            for i in range(I):
+                for j in range(J):
+                    for k in range(K):
+                        res[i, j] += m1[i, k] * m2[k, j]
 
         return res
 
@@ -952,7 +953,7 @@ cdef class HMRFKmeans:
         cdef unsigned int I = v.shape[0]
 
         # Creating the numpy.array for results and its memory view
-        cdef double [::1] res = cy.vew.array(
+        cdef double [::1] res = cy.view.array(
             shape=I, itemsize=sizeof(double), format='d', mode='c'
         )
 
