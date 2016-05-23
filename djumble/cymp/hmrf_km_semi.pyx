@@ -5,13 +5,10 @@
 # cyhton: wraparound=False
 
 import numpy as np
-import scipy as sp
-import scipy.stats as sps
-import random as rnd
 import scipy.special as special
-import time as tm
-import cython.parallel as comp
-
+# from cpython.mem cimport PyMem_Malloc, PyMem_Realloc, PyMem_Free
+from libc.stdlib cimport malloc, realloc, free
+cimport cython as cy
 cimport numpy as cnp
 
 cdef extern from "math.h":
@@ -73,9 +70,19 @@ cdef class HMRFKmeans:
     cdef double [::1] A
     cdef cnp.intp_t A_size
     cdef cnp.intp_t xdata_size
+    cdef cnp.intp_t feat_size
     cdef cnp.intp_t conv_step
     cdef cnp.intp_t [::1] neg_idxs4clstring
     cdef cnp.intp_t neg_i4c_size
+    cdef double* res1d
+    cdef double** res2d
+
+    def __cinit__(self):
+
+        # The __cinit__() might be the proper place for allocating memory BUT information about...
+        # ...the data size is required thus the memory allocation has moved to fit().
+        pass
+
 
     def __init__(self, cnp.intp_t k_clusters, cnp.intp_t [:, ::1] must_lnk,
                  cnp.intp_t [:, ::1] cannot_lnk, cnp.intp_t [::1] init_centroids=None,
@@ -116,6 +123,13 @@ cdef class HMRFKmeans:
         # ...total must-link and cannot-link violation scores.
         self.globj_norm = globj_norm
 
+    def __dealloc__(self):
+
+        # Dealocating the memory at the Heap preCaptured in order returing the resaults of...
+        # ...methods required and let them work on a free-GIL state.
+        # PyMem_Free(self.res)
+        free(self.res1d)
+        free(self.res2d)
 
     def fit(self, double [:, ::1] x_data, cnp.intp_t [::1] neg_idxs4clstring):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
@@ -142,6 +156,12 @@ cdef class HMRFKmeans:
         cdef cnp.intp_t i, idx, conv_step
 
         self.xdata_size = x_data.shape[0]
+        self.feat_size = x_data.shape[1]
+
+        # Allocating some memmory for the funciton requiring returing resaults in order to...
+        # ...free the GIL.
+        self.res1d = <double*> malloc(self.feat_size*sizeof(double))
+        self.res2d = <double**> malloc(self.xdata_size*self.feat_size*sizeof(double))
 
         # Setting up distortion parameters if not have been passed as class argument.
         if self.A == None:
@@ -715,50 +735,48 @@ cdef class HMRFKmeans:
         cdef double a_pdv = 0.0
         cdef double [::1] new_A = np.zeros((self.A_size), dtype=np.float)
 
-        with nogil:
-            for a_idx in range(self.A_size):
-            #for a_idx in comp.prange(self.A_size, schedule='static', num_threads=8):
+        for a_idx in range(self.A_size):
 
-                for k in range(self.k_clusters):
+            for k in range(self.k_clusters):
 
-                    # Calculating the partial derivatives of each parameter for all cluster's member...
-                    # ...for each cluster.
-                    # ---------------------------------------------------------------------------------
-                    for i in range(self.xdata_size):
+                # Calculating the partial derivatives of each parameter for all cluster's member...
+                # ...for each cluster.
+                # ---------------------------------------------------------------------------------
+                for i in range(self.xdata_size):
 
-                        if clstr_tags_arr[i] == k:
+                    if clstr_tags_arr[i] == k:
 
-                            xm_pdv += self.PartialDerivative(a_idx, x_data[i, :], mu_arr[k, :], A)
+                        xm_pdv += self.PartialDerivative(a_idx, x_data[i, :], mu_arr[k, :], A)
 
-                    # Calculating Must-Link violation cost.
-                    # -------------------------------------
-                    for i in range(self.ml_size):
+                # Calculating Must-Link violation cost.
+                # -------------------------------------
+                for i in range(self.ml_size):
 
-                        if clstr_tags_arr[self.must_lnk[0, i]] != clstr_tags_arr[self.must_lnk[1, i]] and\
-                            (clstr_tags_arr[self.must_lnk[0, i]] == k or\
-                                        clstr_tags_arr[self.must_lnk[1, i]] == k):
+                    if clstr_tags_arr[self.must_lnk[0, i]] != clstr_tags_arr[self.must_lnk[1, i]] and\
+                        (clstr_tags_arr[self.must_lnk[0, i]] == k or\
+                                    clstr_tags_arr[self.must_lnk[1, i]] == k):
 
-                            ml_pdv += self.ml_wg*self.PartialDerivative(
-                                a_idx,
-                                x_data[self.must_lnk[0, i], :],
-                                x_data[self.must_lnk[1, i], :],
-                                A
-                            )
+                        ml_pdv += self.ml_wg*self.PartialDerivative(
+                            a_idx,
+                            x_data[self.must_lnk[0, i], :],
+                            x_data[self.must_lnk[1, i], :],
+                            A
+                        )
 
-                    # Calculating Cannot-Link violation cost.
-                    # ---------------------------------------
-                    for i in range(self.cl_size):
+                # Calculating Cannot-Link violation cost.
+                # ---------------------------------------
+                for i in range(self.cl_size):
 
-                        if clstr_tags_arr[self.cannot_lnk[0, i]] == k and\
-                         clstr_tags_arr[self.cannot_lnk[0, i]] == clstr_tags_arr[self.cannot_lnk[1, i]]:
+                    if clstr_tags_arr[self.cannot_lnk[0, i]] == k and\
+                     clstr_tags_arr[self.cannot_lnk[0, i]] == clstr_tags_arr[self.cannot_lnk[1, i]]:
 
-                            # #### It should me -= or remain always over Zero. ####
-                            cl_pdv -= self.cl_wg*self.PartialDerivative(
-                                a_idx,
-                                x_data[self.cannot_lnk[0, i], :],
-                                x_data[self.cannot_lnk[1, i], :],
-                                A
-                            )
+                        # #### It should me -= or remain always over Zero. ####
+                        cl_pdv -= self.cl_wg*self.PartialDerivative(
+                            a_idx,
+                            x_data[self.cannot_lnk[0, i], :],
+                            x_data[self.cannot_lnk[1, i], :],
+                            A
+                        )
 
             # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
             # Should be on the new_a or on the last iteration A[a_idx] ???
@@ -838,6 +856,8 @@ cdef class HMRFKmeans:
 
         """
         cdef double res_a = 0.0
+        cdef double x1_pnorm
+        cdef double x2_pnorm
 
         # Calculating parametrized Norms ||Σ xi||(A)
         x1_pnorm = sqrt(self.vdot(self.dot1d_ds(x1, A), x1))
@@ -868,20 +888,22 @@ cdef class HMRFKmeans:
         cdef unsigned int I = m1.shape[0]
         cdef unsigned int J = m2.shape[1]
         cdef unsigned int K = m1.shape[1]
+        cdef double[:, ::1] res
 
         # Creating the numpy.array for results and its memory view
-        cdef double [:, ::1] res = np.zeros((I, J), dtype=np.float)
+        # self.res2d = <double**>realloc(self.res2d, I*J*sizeof(double))
+
 
         # Calculating the dot product.
-        with nogil:
-            for i in range(I):
-                for j in range(J):
-                    for k in range(K):
-                        res[i, j] += m1[i, k] * m2[k, j]
+        for i in range(I):
+            for j in range(J):
+                for k in range(K):
+                    pass
+                    # self.res2d[i, j] += m1[i, k] * m2[k, j]
 
         return res
 
-    cdef inline double vdot(self, double [::1] v1, double [::1] v2):
+    cdef inline double vdot(self, double [::1] v1, double [::1] v2) nogil:
 
         # if v1.shape[0] != v2.shape[0]:
         #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
@@ -894,13 +916,12 @@ cdef class HMRFKmeans:
         cdef double res = <double>0.0
 
         # Calculating the dot product.
-        with nogil:
-            for i in range(I):
-                res += v1[i] * v2[i]
+        for i in range(I):
+            res += v1[i] * v2[i]
 
         return res
 
-    cdef inline double [:, ::1] dot2d_ds(self, double [:, ::1] m1, double [::1] m2) nogil:
+    cdef inline double [:, ::1] dot2d_ds(self, double [:, ::1] m1, double [::1] m2):
 
         # if m1.shape[1] != m2.shape[0]:
         #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
@@ -931,16 +952,17 @@ cdef class HMRFKmeans:
         cdef unsigned int I = v.shape[0]
 
         # Creating the numpy.array for results and its memory view
-        cdef double [::1] res = np.zeros((I), dtype=np.float)
+        cdef double [::1] res = cy.vew.array(
+            shape=I, itemsize=sizeof(double), format='d', mode='c'
+        )
 
         # Calculating the dot product.
-        with nogil:
-            for i in range(I):
-                res[i] = v[i] * m[i]
+        for i in range(I):
+            res[i] = v[i] * m[i]
 
         return res
 
-    cdef inline sum_axs0(self, double [:, ::1] m, cnp.intp_t [::1] idxs) nogil:
+    cdef inline sum_axs0(self, double [:, ::1] m, cnp.intp_t [::1] idxs):
 
         # Matrix index variables.
         cdef unsigned int i

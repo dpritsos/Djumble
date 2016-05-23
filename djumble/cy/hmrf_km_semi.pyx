@@ -6,7 +6,6 @@
 
 import numpy as np
 import scipy.special as special
-from cpython.mem cimport PyMem_Malloc, PyMem_Realloc, PyMem_Free
 cimport numpy as cnp
 
 cdef extern from "math.h":
@@ -813,7 +812,7 @@ cdef class HMRFKmeans:
         return A
 
     cdef inline double PartialDerivative(self, cnp.intp_t a_idx,
-                                         double [::1] x1, double [::1] x2, double [::1] A) nogil:
+                                         double [::1] x1, double [::1] x2, double [::1] A):
         """ Partial Derivative: This method is calculating the partial derivative of a specific
             parameter given the proper vectors. That is, for the cosine distance is a x_i with the
             centroid vector (mu) of the cluster where x_i is belonging into. As for the constraint
