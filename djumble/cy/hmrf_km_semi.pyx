@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# cython: profile=True
+# cython: profile=False
 # cython: cdivision=True
 # cython: boundscheck=False
 # cyhton: wraparound=False
