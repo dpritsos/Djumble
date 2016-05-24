@@ -6,8 +6,9 @@
 
 import numpy as np
 import scipy.special as special
+import cython.parallel as cyp
 # from cpython.mem cimport PyMem_Malloc, PyMem_Realloc, PyMem_Free
-from libc.stdlib cimport malloc, realloc, free
+# from libc.stdlib cimport malloc, realloc, free
 cimport cython as cy
 cimport numpy as cnp
 
@@ -74,8 +75,6 @@ cdef class HMRFKmeans:
     cdef cnp.intp_t conv_step
     cdef cnp.intp_t [::1] neg_idxs4clstring
     cdef cnp.intp_t neg_i4c_size
-    cdef double* res1d
-    cdef double** res2d
 
     def __cinit__(self):
 
@@ -128,8 +127,9 @@ cdef class HMRFKmeans:
         # Dealocating the memory at the Heap preCaptured in order returing the resaults of...
         # ...methods required and let them work on a free-GIL state.
         # PyMem_Free(self.res)
-        free(self.res1d)
-        free(self.res2d)
+        #free(self.res1d)
+        #free(self.res2d)
+        pass
 
     def fit(self, double [:, ::1] x_data, cnp.intp_t [::1] neg_idxs4clstring):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
@@ -157,11 +157,6 @@ cdef class HMRFKmeans:
 
         self.xdata_size = x_data.shape[0]
         self.feat_size = x_data.shape[1]
-
-        # Allocating some memmory for the funciton requiring returing resaults in order to...
-        # ...free the GIL.
-        self.res1d = <double*> malloc(self.feat_size*sizeof(double))
-        self.res2d = <double**> malloc(self.xdata_size*self.feat_size*sizeof(double))
 
         # Setting up distortion parameters if not have been passed as class argument.
         if self.A == None:
@@ -878,10 +873,7 @@ cdef class HMRFKmeans:
 
         return res_a
 
-    cdef inline double [:, ::1] dot2d(self, double [:, ::1] m1, double [:, ::1] m2) nogil:
-
-        # if m1.shape[1] != m2.shape[0]:
-        #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
+    cdef inline double [:, ::1] dot2d(self, double [:, ::1] m1, double [:, ::1] m2):
 
         # if m1.shape[1] != m2.shape[0]:
         #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
@@ -896,15 +888,14 @@ cdef class HMRFKmeans:
         cdef double [:, ::1] res = np.zeros((I, J), dtype=np.float)
 
         # Calculating the dot product.
-        with nogil:
-            for i in range(I):
-                for j in range(J):
-                    for k in range(K):
-                        res[i, j] += m1[i, k] * m2[k, j]
+        for i in cyp.prange(I, nogil=True):
+            for j in range(J):
+                for k in range(K):
+                    res[i, j] += m1[i, k] * m2[k, j]
 
         return res
 
-    cdef inline double vdot(self, double [::1] v1, double [::1] v2) nogil:
+    cdef inline double vdot(self, double [::1] v1, double [::1] v2):
 
         # if v1.shape[0] != v2.shape[0]:
         #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
@@ -917,7 +908,7 @@ cdef class HMRFKmeans:
         cdef double res = <double>0.0
 
         # Calculating the dot product.
-        for i in range(I):
+        for i in cyp.prange(I, nogil=True):
             res += v1[i] * v2[i]
 
         return res
@@ -936,14 +927,13 @@ cdef class HMRFKmeans:
         cdef double [:, ::1] res = np.zeros((I, J), dtype=np.float)
 
         # Calculating the dot product.
-        with nogil:
-            for i in range(I):
-                for j in range(J):
-                    res[i, j] = m1[i, j] * m2[j]
+        for i in cyp.prange(I, nogil=True):
+            for j in range(J):
+                res[i, j] = m1[i, j] * m2[j]
 
         return res
 
-    cdef inline double [::1] dot1d_ds(self, double [::1] v, double [::1] m) nogil:
+    cdef inline double [::1] dot1d_ds(self, double [::1] v, double [::1] m):
 
         # if v.shape[0] != m.shape[0]:
         #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
@@ -953,12 +943,10 @@ cdef class HMRFKmeans:
         cdef unsigned int I = v.shape[0]
 
         # Creating the numpy.array for results and its memory view
-        cdef double [::1] res = cy.view.array(
-            shape=I, itemsize=sizeof(double), format='d', mode='c'
-        )
+        cdef double [::1] res = np.zeros((I), dtype=np.float)
 
         # Calculating the dot product.
-        for i in range(I):
+        for i in cyp.prange(I, nogil=True):
             res[i] = v[i] * m[i]
 
         return res
@@ -966,7 +954,7 @@ cdef class HMRFKmeans:
     cdef inline sum_axs0(self, double [:, ::1] m, cnp.intp_t [::1] idxs):
 
         # Matrix index variables.
-        cdef unsigned int i
+        cdef unsigned int i, j
         cdef unsigned int I = idxs.shape[0]
         cdef unsigned int J = m.shape[1]
 
@@ -974,11 +962,10 @@ cdef class HMRFKmeans:
         cdef double [::1] res = np.zeros((J), dtype=np.float)
 
         # Calculating the dot product.
-        with nogil:
-            for j in range(J):
-                for i in range(I):
-                    # The idxs array is giving the actual row index of the data matrix...
-                    # ...to be summed up.
-                    res[j] += m[idxs[i], j]
+        for j in cyp.prange(J, nogil=True):
+            for i in range(I):
+                # The idxs array is giving the actual row index of the data matrix...
+                # ...to be summed up.
+                res[j] += m[idxs[i], j]
 
         return res

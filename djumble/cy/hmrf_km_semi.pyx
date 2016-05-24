@@ -939,7 +939,7 @@ cdef class HMRFKmeans:
     cdef inline sum_axs0(self, double [:, ::1] m, cnp.intp_t [::1] idxs):
 
         # Matrix index variables.
-        cdef unsigned int i
+        cdef unsigned int i, j
         cdef unsigned int I = idxs.shape[0]
         cdef unsigned int J = m.shape[1]
 

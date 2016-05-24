@@ -1,15 +1,16 @@
 from distutils.core import setup
+from Cython.Build import cythonize
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
-from Cython.Build import cythonize
 
 
 
 ext_module = Extension(
     "hmrf_km_semi",
     ["hmrf_km_semi.pyx"],
-    extra_compile_args=['-fopenmp'],
-    extra_link_args=['-fopenmp'],
+    libraries=["m"],
+    extra_compile_args=["-O3", "-ffast-math", "-march=native", "-fopenmp"],
+    extra_link_args=['-fopenmp']
 )
 
 setup(

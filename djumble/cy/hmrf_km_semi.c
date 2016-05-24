@@ -9954,10 +9954,10 @@ static CYTHON_INLINE __Pyx_memviewslice __pyx_f_12hmrf_km_semi_10HMRFKmeans_dot1
 
 static CYTHON_INLINE PyObject *__pyx_f_12hmrf_km_semi_10HMRFKmeans_sum_axs0(CYTHON_UNUSED struct __pyx_obj_12hmrf_km_semi_HMRFKmeans *__pyx_v_self, __Pyx_memviewslice __pyx_v_m, __Pyx_memviewslice __pyx_v_idxs) {
   unsigned int __pyx_v_i;
+  unsigned int __pyx_v_j;
   unsigned int __pyx_v_I;
   unsigned int __pyx_v_J;
   __Pyx_memviewslice __pyx_v_res = { 0, 0, { 0 }, { 0 }, { 0 } };
-  unsigned int __pyx_v_j;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -9983,7 +9983,7 @@ static CYTHON_INLINE PyObject *__pyx_f_12hmrf_km_semi_10HMRFKmeans_sum_axs0(CYTH
 
   /* "hmrf_km_semi.pyx":943
  *         # Matrix index variables.
- *         cdef unsigned int i
+ *         cdef unsigned int i, j
  *         cdef unsigned int I = idxs.shape[0]             # <<<<<<<<<<<<<<
  *         cdef unsigned int J = m.shape[1]
  * 
@@ -9991,7 +9991,7 @@ static CYTHON_INLINE PyObject *__pyx_f_12hmrf_km_semi_10HMRFKmeans_sum_axs0(CYTH
   __pyx_v_I = (__pyx_v_idxs.shape[0]);
 
   /* "hmrf_km_semi.pyx":944
- *         cdef unsigned int i
+ *         cdef unsigned int i, j
  *         cdef unsigned int I = idxs.shape[0]
  *         cdef unsigned int J = m.shape[1]             # <<<<<<<<<<<<<<
  * 
