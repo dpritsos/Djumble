@@ -19,46 +19,40 @@ cdef class VBuffer:
     cdef Py_ssize_t vbz_size
     cdef Py_ssize_t shape[2]
     cdef Py_ssize_t strides[2]
-    cdef vector[float] buffer
+    cdef vector[float] vbuffer
+    cdef int view_count
 
     def __cinit__(self, Py_ssize_t vbz_size, Py_ssize_t buff_size):
         self.buff_size = buff_size
         self.vbz_size = vbz_size
-        cdef int rows
-        #for rows in range(self.vbz_size):
-
-        print 'OK'
+        self.view_count = 0
 
     def add(self):
-        self.buffer.extend(self.buff_size)
+        if self.view_count > 0:
+            raise ValueError("can't add row while being viewed")
+        self.vbuffer.resize(self.vbuffer.size() + self.buff_size)
 
     def __getbuffer__(self, Py_buffer *buffer, int flags):
-        print 'OK'
-        cdef Py_ssize_t itemsize = sizeof(self.buffer[0])
-        print 'OK'
-        self.shape[0] = self.buffer.size() / self.buff_size
-        self.shape[1] = self.buff_size
-        print 'OK'
-        # Adding vbz_size rows, initially zero-filled.
 
-        print 'OK'
+        cdef Py_ssize_t itemsize = sizeof(self.vbuffer[0])
+
+        self.shape[0] = self.vbuffer.size() / self.buff_size
+        self.shape[1] = self.buff_size
+
+        # Adding vbz_size rows, initially zero-filled.
 
         # Stride 1 is the distance, in bytes, between two items in a row;
         # this is the distance between two adjacent items in the vector.
         # Stride 0 is the distance between the first elements of adjacent rows.
-        self.strides[1] = <Py_ssize_t>(  <char*>&(self.buffer[1])
-                                       - <char*>&(self.buffer[0]))
+        self.strides[1] = <Py_ssize_t>(  <char*>&(self.vbuffer[1])
+                                       - <char*>&(self.vbuffer[0]))
         self.strides[0] = self.buff_size * self.strides[1]
 
-        print 'OK'
-        print self.shape
-        print self.strides
-
-        buffer.buf = <char*>&(self.buffer[0])
+        buffer.buf = <char*>&(self.vbuffer[0])
         buffer.format = 'f'                     # float
         buffer.internal = NULL                  # see References
         buffer.itemsize = itemsize
-        buffer.len = self.buffer.size() * itemsize   # product(shape) * itemsize
+        buffer.len = self.vbuffer.size() * itemsize   # product(shape) * itemsize
         buffer.ndim = 2
         buffer.obj = self
         buffer.readonly = 0
@@ -66,5 +60,7 @@ cdef class VBuffer:
         buffer.strides = self.strides
         buffer.suboffsets = NULL                # for pointer arrays only
 
+        self.view_count += 1
+
     def __releasebuffer__(self, Py_buffer *buffer):
-        pass
+        self.view_count -= 1

@@ -6,10 +6,15 @@ import numpy as np
 
 m = VBuffer(1, 10)
 
-a = np.asarray(m)
-
+m.add()
 m.add()
 
-a[:, :] = 1.0
+a = np.asarray(m)
 
-print a, a.shape
+a[:] = 1.0
+
+
+
+a = np.asarray(m)
+
+print m, a, a.shape
