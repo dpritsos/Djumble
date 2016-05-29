@@ -5,12 +5,12 @@
 # cyhton: wraparound=False
 
 import numpy as np
-cimport cython as cy
 cimport numpy as cnp
 import cython.parallel as cyp
 import scipy.special as special
 # from libc.stdlib cimport malloc, realloc, free
 # from cpython.mem cimport PyMem_Malloc, PyMem_Realloc, PyMem_Free
+import time as tm
 
 
 cdef extern from "math.h":
@@ -225,7 +225,7 @@ cdef class HMRFKmeans:
 
             print
             print conv_step
-            # start_tm = tm.time()
+            start_tm = tm.time()
 
             # The E-Step.
 
@@ -266,8 +266,8 @@ cdef class HMRFKmeans:
             # Calculating Global JObjective function.
             glob_jobj = self.GlobJObjCosA(x_data, mu_arr, clstr_tags_arr)
 
-            # timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
-            # print "Time elapsed : %d:%d:%d:%d" % timel
+            timel = tm.gmtime(tm.time() - start_tm)[3:6] + ((tm.time() - int(start_tm))*1000,)
+            print "Time elapsed : %d:%d:%d:%d" % timel
 
             # Terminating upon the difference of the last two Global JObej values.
             if np.abs(last_gobj - glob_jobj) < self.cvg or glob_jobj < self.cvg:
@@ -532,12 +532,6 @@ cdef class HMRFKmeans:
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
         # --------------------------------------------------------------------------------
         tmp = self.vdot(self.dot1d_ds(mu, self.A), x_data[x_idx, :])
-
-        if tmp > 1:
-            print "OVER ONE", tmp
-        if tmp == 1:
-            print "ONE", tmp
-
         dist = 1.0 - tmp
 
         # Calculating Must-Link violation cost.
@@ -889,14 +883,14 @@ cdef class HMRFKmeans:
         cdef double [:, ::1] res = np.zeros((I, J), dtype=np.float)
 
         # Calculating the dot product.
-        for i in cyp.prange(I, nogil=True):
+        for k in cyp.prange(K, nogil=True):
             for j in range(J):
-                for k in range(K):
+                for i in range(I):
                     res[i, j] += m1[i, k] * m2[k, j]
 
         return res
 
-    cdef inline double vdot(self, double [::1] v1, double [::1] v2):
+    cdef inline double vdot(self, double [::1] v1, double [::1] v2) nogil:
 
         # if v1.shape[0] != v2.shape[0]:
         #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
@@ -909,7 +903,7 @@ cdef class HMRFKmeans:
         cdef double res = <double>0.0
 
         # Calculating the dot product.
-        for i in cyp.prange(I, nogil=True):
+        for i in range(I):
             res += v1[i] * v2[i]
 
         return res
@@ -947,7 +941,7 @@ cdef class HMRFKmeans:
         # cdef double* res = <double*> malloc(I*sizeof(double))
         # for i in range(I):
         #    res[i] = 0.0
-        cdef double [::1] res = p.zeros((I), dtype=np.float)
+        cdef double [::1] res = np.zeros((I), dtype=np.float)
 
         # Calculating the dot product.
         for i in cyp.prange(I, nogil=True):
