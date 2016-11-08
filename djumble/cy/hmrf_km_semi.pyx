@@ -72,12 +72,13 @@ cdef class HMRFKmeans:
     cdef cnp.intp_t conv_step
     cdef cnp.intp_t [::1] neg_idxs4clstring
     cdef cnp.intp_t neg_i4c_size
+    cdef double norm_part_val
 
     def __init__(self, cnp.intp_t k_clusters, cnp.intp_t [:, ::1] must_lnk,
                  cnp.intp_t [:, ::1] cannot_lnk, cnp.intp_t [::1] init_centroids=None,
                  double ml_wg=1.0, double cl_wg=1.0, int max_iter=300,
                  double cvg=0.001, double lrn_rate=0.003, double ray_sigma=0.5,
-                 double [::1] d_params=None, bint norm_part=False, bint globj_norm=False):
+                 double [::1] d_params=None, bint norm_part=False, double norm_part_val=1000.0, bint globj_norm=False):
 
         self.k_clusters = k_clusters
 
@@ -106,6 +107,7 @@ cdef class HMRFKmeans:
         if d_params != None:
             self.A_size = d_params.shape[0]
         self.norm_part = norm_part
+        self.norm_part_val = norm_part_val
 
         # This option enables or disables the normalizations values to be included in the...
         # ...calculation of the total values, other than the total cosine distances, the...
@@ -278,7 +280,8 @@ cdef class HMRFKmeans:
             'lrn_rate': self.lrn_rate,
             'ray_sigma': self.ray_sigma,
             'dist_msur_params': self.A,
-            'norm_part': self.norm_part
+            'norm_part': self.norm_part,
+            'norm_part_val': self.norm_part_val
         }
 
     cdef ICM(self, double [:, ::1] x_data, double [:, ::1] mu_arr, object clstr_tags_arr):
@@ -563,9 +566,11 @@ cdef class HMRFKmeans:
         #     norm_part_value = self.NormPart(x_data[clstr_idx_arr])
         # else:
         # norm_part_value = 0.0
+        if self.norm_part and self.globj_norm:
+            norm_part_value = 0.0 # self.norm_part_val
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
-        return dist + ml_cost + cl_cost - params_pdf + norm_part_value
+        return dist + ml_cost + cl_cost + params_pdf + norm_part_value
 
     cdef GlobJObjCosA(self, double [:, ::1] x_data, double [:, ::1] mu_arr,
                       cnp.intp_t [::1] clstr_tags_arr):
@@ -642,7 +647,7 @@ cdef class HMRFKmeans:
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
         if self.globj_norm:
-            for a_idx in self.A_size:
+            for a_idx in range(self.A_size):
                 sum1 += log(self.A[a_idx])
                 sum2 += pow(self.A[a_idx], 2.0) / (2 * pow(self.ray_sigma, 2.0))
             params_pdf = sum1 - sum2 - (2 * self.A_size * log(self.ray_sigma))
@@ -657,17 +662,19 @@ cdef class HMRFKmeans:
         #         clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
         #         norm_part_value += self.NormPart(x_data[clstr_idxs_arr])
         # else:
-        norm_part_value = 0.0
+        if self.norm_part and self.globj_norm:
+            norm_part_value = self.norm_part_val
 
         print 'dims', x_data.shape[1]
-        print 'sum_d, ml_cost, cl_cost', sum_d, ml_cost, cl_cost
-        print 'sum_d + ml_cost + cl_cost', sum_d + ml_cost + cl_cost
-        print 'np.log(Rayleigh)', params_pdf
-        print 'N*(np.log(cdk) + np.log(k))', norm_part_value
+        print 'sum_d, ml_cost, cl_cost:', sum_d, ml_cost, cl_cost
+        print 'sum_d + ml_cost + cl_cost:', sum_d + ml_cost + cl_cost
+        print 'np.log(Rayleigh):', params_pdf
+        print 'Empirical Norm Partision Func:', norm_part_value
+        # print 'N*(np.log(cdk) + np.log(k))', norm_part_value
 
         # Calculating and returning the Global J-Objective value for the current Spherical...
         # ...vMF-Mixture set-up.
-        return sum_d + ml_cost + cl_cost - params_pdf + norm_part_value
+        return sum_d + ml_cost + cl_cost + params_pdf + norm_part_value
 
     cdef UpdateDistorParams(self, double [::1] A,
                             double [:, ::1] x_data, mu_arr, cnp.intp_t [::1] clstr_tags_arr):
