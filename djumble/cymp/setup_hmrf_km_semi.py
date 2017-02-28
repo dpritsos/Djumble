@@ -4,7 +4,6 @@ from distutils.extension import Extension
 from Cython.Distutils import build_ext
 
 
-
 ext_module = Extension(
     "hmrf_km_semi",
     ["hmrf_km_semi.pyx"],
