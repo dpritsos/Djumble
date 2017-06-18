@@ -661,7 +661,7 @@ cdef class HMRFKmeans:
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
         if self.globj_norm:
-            for a_idx in self.A_size:
+            for a_idx in range(self.A_size):
                 sum1 += log(self.A[a_idx])
                 sum2 += pow(self.A[a_idx], 2.0) / (2 * pow(self.ray_sigma, 2.0))
             params_pdf = sum1 - sum2 - (2 * self.A_size * log(self.ray_sigma))
