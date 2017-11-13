@@ -6,8 +6,12 @@
 
 import numpy as np
 cimport numpy as cnp
+import cython.parallel as cyp
 import scipy.special as special
+# from libc.stdlib cimport malloc, realloc, free
+# from cpython.mem cimport PyMem_Malloc, PyMem_Realloc, PyMem_Free
 import time as tm
+
 
 cdef extern from "math.h":
     cdef double sqrt(double x) nogil
@@ -72,13 +76,19 @@ cdef class HMRFKmeans:
     cdef cnp.intp_t conv_step
     cdef cnp.intp_t [::1] neg_idxs4clstring
     cdef cnp.intp_t neg_i4c_size
-    cdef double norm_part_val
+
+    def __cinit__(self):
+
+        # The __cinit__() might be the proper place for allocating memory BUT information about...
+        # ...the data size is required thus the memory allocation has moved to fit().
+        pass
+
 
     def __init__(self, cnp.intp_t k_clusters, cnp.intp_t [:, ::1] must_lnk,
                  cnp.intp_t [:, ::1] cannot_lnk, cnp.intp_t [::1] init_centroids=None,
                  double ml_wg=1.0, double cl_wg=1.0, int max_iter=300,
                  double cvg=0.001, double lrn_rate=0.003, double ray_sigma=0.5,
-                 double [::1] d_params=None, bint norm_part=False, double norm_part_val=1000.0, bint globj_norm=False):
+                 double [::1] d_params=None, bint norm_part=False, bint globj_norm=False):
 
         self.k_clusters = k_clusters
 
@@ -107,13 +117,20 @@ cdef class HMRFKmeans:
         if d_params != None:
             self.A_size = d_params.shape[0]
         self.norm_part = norm_part
-        self.norm_part_val = norm_part_val
 
         # This option enables or disables the normalizations values to be included in the...
         # ...calculation of the total values, other than the total cosine distances, the...
         # ...total must-link and cannot-link violation scores.
         self.globj_norm = globj_norm
 
+    def __dealloc__(self):
+
+        # Dealocating the memory at the Heap preCaptured in order returing the resaults of...
+        # ...methods required and let them work on a free-GIL state.
+        # PyMem_Free(self.res)
+        #free(self.res1d)
+        #free(self.res2d)
+        pass
 
     def fit(self, double [:, ::1] x_data, cnp.intp_t [::1] neg_idxs4clstring):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
@@ -238,13 +255,13 @@ cdef class HMRFKmeans:
             # ##################### KOLPAKI - Recalculating centroids upon the new clusters set-up.
             # mu_arr = self.MeanCosA(x_data, clstr_tags_arr)
 
-            # mu_arr = np.divide(
-            #     mu_arr,
-            #     np.sqrt(
-            #         np.diag(np.dot(self.dot2d_ds(mu_arr, self.A), mu_arr.T)),
-            #         dtype=np.float
-            #     ).reshape(mu_arr.shape[0], 1)
-            # )
+            mu_arr = np.divide(
+                mu_arr,
+                np.sqrt(
+                    np.diag(np.dot(self.dot2d_ds(mu_arr, self.A), mu_arr.T)),
+                    dtype=np.float
+                ).reshape(mu_arr.shape[0], 1)
+            )
 
             # Calculating Global JObjective function.
             glob_jobj = self.GlobJObjCosA(x_data, mu_arr, clstr_tags_arr)
@@ -280,8 +297,7 @@ cdef class HMRFKmeans:
             'lrn_rate': self.lrn_rate,
             'ray_sigma': self.ray_sigma,
             'dist_msur_params': self.A,
-            'norm_part': self.norm_part,
-            'norm_part_val': self.norm_part_val
+            'norm_part': self.norm_part
         }
 
     cdef ICM(self, double [:, ::1] x_data, double [:, ::1] mu_arr, object clstr_tags_arr):
@@ -566,11 +582,9 @@ cdef class HMRFKmeans:
         #     norm_part_value = self.NormPart(x_data[clstr_idx_arr])
         # else:
         # norm_part_value = 0.0
-        if self.norm_part and self.globj_norm:
-            norm_part_value = 0.0 # self.norm_part_val
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
-        return dist + ml_cost + cl_cost + params_pdf + norm_part_value
+        return dist + ml_cost + cl_cost - params_pdf + norm_part_value
 
     cdef GlobJObjCosA(self, double [:, ::1] x_data, double [:, ::1] mu_arr,
                       cnp.intp_t [::1] clstr_tags_arr):
@@ -662,19 +676,17 @@ cdef class HMRFKmeans:
         #         clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
         #         norm_part_value += self.NormPart(x_data[clstr_idxs_arr])
         # else:
-        if self.norm_part and self.globj_norm:
-            norm_part_value = self.norm_part_val
+        norm_part_value = 0.0
 
         print 'dims', x_data.shape[1]
-        print 'sum_d, ml_cost, cl_cost:', sum_d, ml_cost, cl_cost
-        print 'sum_d + ml_cost + cl_cost:', sum_d + ml_cost + cl_cost
-        print 'np.log(Rayleigh):', params_pdf
-        print 'Empirical Norm Partision Func:', norm_part_value
-        # print 'N*(np.log(cdk) + np.log(k))', norm_part_value
+        print 'sum_d, ml_cost, cl_cost', sum_d, ml_cost, cl_cost
+        print 'sum_d + ml_cost + cl_cost', sum_d + ml_cost + cl_cost
+        print 'np.log(Rayleigh)', params_pdf
+        print 'N*(np.log(cdk) + np.log(k))', norm_part_value
 
         # Calculating and returning the Global J-Objective value for the current Spherical...
         # ...vMF-Mixture set-up.
-        return sum_d + ml_cost + cl_cost + params_pdf + norm_part_value
+        return sum_d + ml_cost + cl_cost - params_pdf + norm_part_value
 
     cdef UpdateDistorParams(self, double [::1] A,
                             double [:, ::1] x_data, mu_arr, cnp.intp_t [::1] clstr_tags_arr):
@@ -871,15 +883,14 @@ cdef class HMRFKmeans:
         cdef double [:, ::1] res = np.zeros((I, J), dtype=np.float)
 
         # Calculating the dot product.
-        with nogil:
-            for i in range(I):
-                for j in range(J):
-                    for k in range(K):
-                        res[i, j] += m1[i, k] * m2[k, j]
+        for k in cyp.prange(K, nogil=True):
+            for j in range(J):
+                for i in range(I):
+                    res[i, j] += m1[i, k] * m2[k, j]
 
         return res
 
-    cdef inline double vdot(self, double [::1] v1, double [::1] v2):
+    cdef inline double vdot(self, double [::1] v1, double [::1] v2) nogil:
 
         # if v1.shape[0] != v2.shape[0]:
         #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
@@ -892,9 +903,8 @@ cdef class HMRFKmeans:
         cdef double res = <double>0.0
 
         # Calculating the dot product.
-        with nogil:
-            for i in range(I):
-                res += v1[i] * v2[i]
+        for i in range(I):
+            res += v1[i] * v2[i]
 
         return res
 
@@ -912,10 +922,9 @@ cdef class HMRFKmeans:
         cdef double [:, ::1] res = np.zeros((I, J), dtype=np.float)
 
         # Calculating the dot product.
-        with nogil:
-            for i in range(I):
-                for j in range(J):
-                    res[i, j] = m1[i, j] * m2[j]
+        for i in cyp.prange(I, nogil=True):
+            for j in range(J):
+                res[i, j] = m1[i, j] * m2[j]
 
         return res
 
@@ -929,12 +938,14 @@ cdef class HMRFKmeans:
         cdef unsigned int I = v.shape[0]
 
         # Creating the numpy.array for results and its memory view
+        # cdef double* res = <double*> malloc(I*sizeof(double))
+        # for i in range(I):
+        #    res[i] = 0.0
         cdef double [::1] res = np.zeros((I), dtype=np.float)
 
         # Calculating the dot product.
-        with nogil:
-            for i in range(I):
-                res[i] = v[i] * m[i]
+        for i in cyp.prange(I, nogil=True):
+            res[i] = v[i] * m[i]
 
         return res
 
@@ -949,11 +960,10 @@ cdef class HMRFKmeans:
         cdef double [::1] res = np.zeros((J), dtype=np.float)
 
         # Calculating the dot product.
-        with nogil:
-            for j in range(J):
-                for i in range(I):
-                    # The idxs array is giving the actual row index of the data matrix...
-                    # ...to be summed up.
-                    res[j] += m[idxs[i], j]
+        for j in cyp.prange(J, nogil=True):
+            for i in range(I):
+                # The idxs array is giving the actual row index of the data matrix...
+                # ...to be summed up.
+                res[j] += m[idxs[i], j]
 
         return res
