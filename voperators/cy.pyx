@@ -153,11 +153,8 @@ cpdef double [:, ::1] eudis_2d(double [:, ::1] m1, double [:, ::1] m2):
     return eudis_vect
 
 
-# Note: Make it cdef if only for interal usage in cython.
-cpdef double vdot(double [::1] v1, double [::1] v2):
-
-    # if v1.shape[0] != v2.shape[0]:
-    #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
+# Note: For interal usage in cython.
+cdef inline double vdot(double [::1] v1, double [::1] v2):
 
     # Matrix index variables.
     cdef:
@@ -235,9 +232,9 @@ cpdef double [:, ::1] dot2d_ds(double [:, ::1] m1, double [::1] m2):
 
     # Matrix index variables.
     cdef:
-        unsigned int i, j
-        unsigned int I = m1.shape[0]
-        unsigned int J = m2.shape[0]
+        Py_ssize_t i, j
+        Py_ssize_t I = m1.shape[0]
+        Py_ssize_t J = m2.shape[0]
 
         # Creating the numpy.array for results and its memory view
         double [:, ::1] res = np.zeros((I, J), dtype=np.float)
@@ -251,19 +248,16 @@ cpdef double [:, ::1] dot2d_ds(double [:, ::1] m1, double [::1] m2):
     return res
 
 
-# Note: Make it cdef if only for interal usage in cython.
-cpdef double [::1] dot1d_ds(double [::1] v, double [::1] m):
-
-    # if v.shape[0] != m.shape[0]:
-    #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
+# Note: For interal usage in cython.
+cdef inline double [::1] dot1d_ds(double [::1] v, double [::1] m):
 
     # Matrix index variables.
     cdef:
         unsigned int i
         unsigned int I = v.shape[0]
 
-        # Creating the numpy.array for results and its memory view
-        double [::1] res = np.zeros((I), dtype=np.float)
+    # Creating the numpy.array for results and its memory view
+    res = cvarray(shape=(I,), itemsize=sizeof(double), format="d")
 
     # Calculating the dot product.
     with nogil:
@@ -273,25 +267,36 @@ cpdef double [::1] dot1d_ds(double [::1] v, double [::1] m):
     return res
 
 
-# Note: Make it cdef if only for interal usage in cython.
-cpdef double [::1] sum_axs0(double [:, ::1] m, cnp.intp_t [::1] idxs):
+# Note: For interal usage in cython.
+cdef inline double [::1] sum_axs0(double [:, ::1] m,
+                           cnp.intp_t [::1] clust_tags,
+                           cnp.intp_t k,
+                           double zero_val):
 
     # Matrix index variables.
     cdef:
-        unsigned int i, j
-        unsigned int I = idxs.shape[0]
-        unsigned int J = m.shape[1]
+        Py_ssize_t i, jm iz
+        Py_ssize_t ct_I = clust_tags.shape[0]
+        Py_ssize_t J = m.shape[1]
 
         # Creating the numpy.array for results and its memory view
-        double [::1] res = np.zeros((J), dtype=np.float)
+        res = cvarray(shape=(J,), itemsize=sizeof(double), format="d")
 
-    # Calculating the dot product.
-    with nogil:
-        for j in range(J):
-            for i in range(I):
-                # The idxs array is giving the actual row index of the data matrix...
-                # ...to be summed up.
-                res[j] += m[idxs[i], j]
+    # The following operatsion taking place in the non-gil and parallel...
+    # ...openmp emviroment.
+    with nogil, parallel():
+
+        # Initilising temporary storage arrays. NOTE: This is a mandatory process because as...
+        # ...in C garbage values can case floating point overflow, thus, peculiar results...
+        # ...like NaN or incorrect calculatons.
+        for iz in range(J):
+            res[iz] = zero_val
+
+        for j in prange(J, schedule='guided'):
+            for i in range(ct_I):
+                # The i vector has k cluster-tag equal to the requested k the sum it up.
+                if clust_tags[i] == k:
+                    res[j] += m[i, j]
 
     return res
 
@@ -421,3 +426,116 @@ cpdef double PartialDerivative(cnp.intp_t a_idx, double [::1] x1, double [::1] x
             ) / (pow(x1_pnorm, 2.0) * pow(x2_pnorm, 2.0))
 
     return res_a
+
+
+cpdef double [:, ::1] mean_cosA(double [:, ::1] X,
+                                double[::1] clust_tags,
+                                double[::1] A
+                                int k_clustz):
+    """  mean_cosA method: It is calculating the centroids of the hyper-spherical clusters.
+        Using the parametrized cosine mean as explained in the documentation.
+
+    """
+
+    cdef:
+        double zero_val = 1e-15
+        Py_ssize_t i, k, imu, jmu
+        Py_ssize_t X_J = X.shape[1]
+        double k_pnorm
+        double [::1] xk_sum
+
+    mu_arr = cvarray(shape=(k_clustz, X_J), itemsize=sizeof(double), format="d")
+
+    # The following operatsion taking place in the non-gil and parallel...
+    # ...openmp emviroment.
+    with nogil, parallel():
+
+        # Initilising temporary storage arrays. NOTE: This is a mandatory process because as...
+        # ...in C garbage values can case floating point overflow, thus, peculiar results...
+        # ...like NaN or incorrect calculatons.
+        for imu in range(k_clustz):
+            for jmu in range(xdata_J):
+                mu_arr[imu, jmu] = 0.0
+
+
+        for k in prange(k_clustz, schedule='guided'):
+
+            # Summing up all the X data points for the current cluster.
+            xk_sum = sum_axs0(X, clust_tags, k, zero_val)
+
+            # Calculating denominator xk_pnorm(parametrized-norm) == ||Σ xi||(A).
+            xk_pnorm = sqrt(vdot(dot1d_ds(xk_sum, A), xk_sum))
+
+            # Calculating the Centroid of the (assumed) hyper-sphear. Then appended to the mu list.
+            for j in range(X_J):
+                mu_arr = xk_sum[i] / xk_pnorm
+
+
+    return mu_arr
+
+
+cpdef NormPart(self, double [:, ::1] x_data_subset):
+    """ The von Mises and von Mises - Fisher Logarithmic Normalization partition function:...
+        is calculated in this method. For the 2D data the function is simplified for faster
+        calculation.
+
+        *** This function has been build after great research on the subject. However, some
+        things are not very clear this is always in a revision state until theoretically proven
+        to be correctly used.
+
+        Arguments
+        ---------
+            x_data_subset: The subset of the data point are included in the von Mises-Fisher
+                distribution.
+
+        Output
+        ------
+            The logarithmic value of the partition normalization function.
+
+    """
+
+    # Calculating the r.
+    # The r it suppose to be the norm of the data points of the current cluster, not the...
+    # ...whole mixture as it is in the global objective function. ## Might this need to be...
+    # ...revised.
+    r = np.linalg.norm(x_data_subset)
+
+    # Calculating the Von Misses Fisher's k concentration is approximated as seen..
+    # ....in Banerjee et al. 2003.
+    dim = x_data_subset.shape[1]
+
+    if dim == 1:
+        raise Exception("Data points cannot have less than two(2) dimension.")
+
+    if dim > 100:
+        # Returning a heuristically found constant value as normalizer because when the...
+        # ...dimentions are very high Bessel function equals Zero.
+        return dim * x_data_subset.shape[0]
+
+    # Calculating the partition function depending on the vector dimensions.
+    k = (r*dim - np.power(r, 3.0)) / (1 - np.power(r, 2.0))
+    # k=0.001 only for the case where the r is too small. Usually at the 1-2 first iterations...
+    # ...of the EM/Kmeans.
+    if k < 0.0:
+        k = 0.001
+
+    if dim > 3 and dim <= 100:
+
+        # This is the proper way for calculating the von Misses Fisher normalization factor.
+        bessel = np.abs(special.jv((dim/2.0)-1.0, k))
+        # bessel = np.abs(self.Jd((dim/2.0)-1.0, k))
+        cdk = np.power(k, (dim/2.0)-1) / (np.power(2*np.pi, dim/2)*bessel)
+
+    elif dim == 2:
+
+        # This is the proper way for calculating the vMF normalization factor for 2D vectors.
+        bessel = np.abs(special.jv(0, k))
+        # bessel = np.abs(self.Jd(0, k))
+        cdk = 1.0 / (2*np.pi*bessel)
+
+    # Returning the log of the normalization function plus the log of the k that is used in...
+    # ...the von Mises Fisher PDF, which is separated from the Cosine Distance due to the log.
+    # The normalizers are multiplied by the number of all the X data subset, because it is...
+    # the global normalizer after the whole summations has been completed.
+    # Still this need to be revised.
+    return (np.log(cdk) + np.log(k)) * x_data_subset.shape[0]
