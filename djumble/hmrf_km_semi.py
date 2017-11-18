@@ -401,6 +401,8 @@ class HMRFKmeans(object):
         sum_d, ml_cost, cl_cost, norm_part_value, params_pdf = 0.0, 0.0, 0.0, 0.0, 0.0
         smlps_cnt, ml_cnt, cl_cnt = 0.0, 0.0, 0.0
 
+        sum_d = np.sum(vop.cosA_2d(mu_arr, x_data, self.A, np.arrange(x_data.shape[0])))
+
         for i, mu in enumerate(mu_arr):
 
             # Getting the indeces for the i cluster.
@@ -420,7 +422,7 @@ class HMRFKmeans(object):
 
             # Getting the must-link left side of the pair constraints, i.e. the row indeces...
             # ...of the constraints matrix that are in the cluster's set of indeces.
-            in_clstr_ml_rows = np.in1d(self.mst_lnk_idxs[0], clstr_idxs_arr)
+            # in_clstr_ml_rows = np.in1d(self.mst_lnk_idxs[0], clstr_idxs_arr)
 
             # Getting the indeces of must-link than are not in the cluster as they should...
             # ...have been.
