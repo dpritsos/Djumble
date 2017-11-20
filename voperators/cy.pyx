@@ -17,21 +17,113 @@ cdef extern from "math.h":
     cdef double log (double x) nogil
 
 
-cpdef double [:, ::1] cosA_2d(double [:, ::1] m1,
+cpdef double [:, ::1] cos2Da_rows(double [:, ::1] m1,
                               double [:, ::1] m2,
                               double[::1] A,
-                              Py_ssize_t [::1] m2_rows):
+                              int [::1] m1r
+                              int [::1] m2r):
 
     cdef:
         # Matrix index variables.
-        Py_ssize_t i, j, k, iz, jz, ri
+        Py_ssize_t i, i2, j, k
+
+        # Matrices dimentions intilized variables.
+        Py_ssize_t m1r_I = m1r.shape[0]
+        Py_ssize_t m1_J = m1.shape[1]
+        Py_ssize_t m2r_I = m2r.shape[0]
+        Py_ssize_t m2_J = m2.shape[1]
+
+        # MemoryViews for the cython arrays used for sotring the temporary and...
+        # ...to be retured results.
+        double [::1] m1_norms
+        double [::1] m2_norms
+        double [:, ::1] csdis_vect
+
+        # Definding Pi constant.
+        double pi = 3.14159265
+
+    # Creating the temporary cython arrays.
+    m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")
+    m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
+    csdis_vect = cvarray(shape=(m1r_I, m2r_I), itemsize=sizeof(double), format="d")
+
+    # The following operatsion taking place in the non-gil and parallel...
+    # ...openmp emviroment.
+    with nogil, parallel():
+
+        # Initilising temporary storage arrays. NOTE: This is a mandatory process because as...
+        # ...in C garbage values can case floating point overflow, thus, peculiar results...
+        # ...like NaN or incorrect calculatons.
+        for i in range(m1r_I):
+            m1_norms[i] = 0.0
+
+        for i in range(m2r_I):
+            m2_norms[i] = 0.0
+
+        for i in range(m1r_I):
+            for j in range(m2r_I):
+                csdis_vect[i, j] = 0.0
+
+        # Calculating the Norms for the first matrix.
+        for i in prange(m1r_I, schedule='guided'):
+
+            # Calculating Sum.
+            for j in range(m1_J):
+                m1_norms[i] += m1[m1r[i], j] * m1[m1r[i], j] * Α[j]
+
+            # Calculating the Square root of the sum
+            m1_norms[i] = sqrt(m1_norms[i])
+
+            # Preventing Division by Zero.
+            if m1_norms[i] == 0.0:
+                m1_norms[i] = 0.000001
+
+
+        # Calculating the Norms for the second matrix.
+        for i2 in prange(m2r_I, schedule='guided'):
+
+            # Calculating Sum.
+            for j in range(m2_J):
+                m2_norms[i2] += m2[m2r[i2], j] * m2[m2r[i2], j] * Α[j]
+
+            # Calculating the Square root of the sum
+            m2_norms[i2] = sqrt(m2_norms[i2])
+
+            # Preventing Division by Zero.
+            if m2_norms[i2] == 0.0:
+                m2_norms[i2] = 0.000001
+
+
+        # Calculating the cosine similarity.
+        # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
+        for i in prange(m1r_I, schedule='guided'):
+
+            for i2 in range(m2r_I):
+
+                # Calculating the elemnt-wise sum of products distorted by A.
+                for k in range(m1_J):
+                    csdis_vect[i, i2] += m1[m1r[i], k] * m2[m2r[i2], k] * A[k]
+
+                # Normalizing with the products of the respective vector norms.
+                csdis_vect[i, i2] = csdis_vect[i, i2] / (m1_norms[i] * m2_norms[i2])
+
+                # Getting Cosine Distance.
+                csdis_vect[i, i2] =  acos(csdis_vect[i, i2]) / pi
+
+    return csdis_vect
+
+
+cpdef double [:, ::1] cos2Da(double [:, ::1] m1, double [:, ::1] m2, double[::1] A):
+
+    cdef:
+        # Matrix index variables.
+        Py_ssize_t i, i2, j, k
 
         # Matrices dimentions intilized variables.
         Py_ssize_t m1_I = m1.shape[0]
         Py_ssize_t m1_J = m1.shape[1]
-        # Py_ssize_t m2_I = m2.shape[0]
+        Py_ssize_t m2_I = m2.shape[0]
         Py_ssize_t m2_J = m2.shape[1]
-        Py_ssize_t m2r_I = m2_rows.shape[0]
 
         # MemoryViews for the cython arrays used for sotring the temporary and...
         # ...to be retured results.
@@ -44,8 +136,8 @@ cpdef double [:, ::1] cosA_2d(double [:, ::1] m1,
 
     # Creating the temporary cython arrays.
     m1_norms = cvarray(shape=(m1_I,), itemsize=sizeof(double), format="d")
-    m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
-    csdis_vect = cvarray(shape=(m1_I, m2r_I), itemsize=sizeof(double), format="d")
+    m2_norms = cvarray(shape=(m2_I,), itemsize=sizeof(double), format="d")
+    csdis_vect = cvarray(shape=(m1_I, m2_I), itemsize=sizeof(double), format="d")
 
     # The following operatsion taking place in the non-gil and parallel...
     # ...openmp emviroment.
@@ -54,15 +146,15 @@ cpdef double [:, ::1] cosA_2d(double [:, ::1] m1,
         # Initilising temporary storage arrays. NOTE: This is a mandatory process because as...
         # ...in C garbage values can case floating point overflow, thus, peculiar results...
         # ...like NaN or incorrect calculatons.
-        for iz in range(m1_I):
-            m1_norms[iz] = 0.0
+        for i in range(m1_I):
+            m1_norms[i] = 0.0
 
-        for iz in range(m2_I):
-            m2_norms[iz] = 0.0
+        for i in range(m2_I):
+            m2_norms[i] = 0.0
 
-        for iz in range(m1_I):
-            for jz in range(m2_I):
-                csdis_vect[iz, jz] = 0.0
+        for i in range(m1_I):
+            for j in range(m2_I):
+                csdis_vect[i, j] = 0.0
 
         # Calculating the Norms for the first matrix.
         for i in prange(m1_I, schedule='guided'):
@@ -80,35 +172,35 @@ cpdef double [:, ::1] cosA_2d(double [:, ::1] m1,
 
 
         # Calculating the Norms for the second matrix.
-        for ir in prange(m2r_I, schedule='guided'):
+        for i2 in prange(m2_I, schedule='guided'):
 
             # Calculating Sum.
             for j in range(m2_J):
-                m2_norms[ir] += m2[m2_rows[ir], j] * m2[m2_rows[ir], j] * Α[j]
+                m2_norms[i2] += m2[i2, j] * m2[i2, j] * Α[j]
 
             # Calculating the Square root of the sum
-            m2_norms[ir] = sqrt(m2_norms[ir])
+            m2_norms[i2] = sqrt(m2_norms[i2])
 
             # Preventing Division by Zero.
-            if m2_norms[ir] == 0.0:
-                m2_norms[ir] = 0.000001
+            if m2_norms[i2] == 0.0:
+                m2_norms[i2] = 0.000001
 
 
         # Calculating the cosine similarity.
         # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
         for i in prange(m1_I, schedule='guided'):
 
-            for ir in range(m2r_I):
+            for i2 in range(m2_I):
 
                 # Calculating the elemnt-wise sum of products distorted by A.
                 for k in range(m1_J):
-                    csdis_vect[i, j] += m1[i, k] * m2[m2_rows[ir], k] * A[k]
+                    csdis_vect[i, i2] += m1[i, k] * m2[i2, k] * A[k]
 
                 # Normalizing with the products of the respective vector norms.
-                csdis_vect[i, ir] = csdis_vect[i, ir] / (m1_norms[i] * m2_norms[ir])
+                csdis_vect[i, i2] = csdis_vect[i, i2] / (m1_norms[i] * m2_norms[i2])
 
                 # Getting Cosine Distance.
-                csdis_vect[i, ir] =  acos(csdis_vect[i, ir]) / pi
+                csdis_vect[i, i2] =  acos(csdis_vect[i, i2]) / pi
 
     return csdis_vect
 
@@ -316,7 +408,7 @@ cpdef double [:, ::1] dot2d(double [:, ::1] m1, double [:, ::1] m2):
 
 
 # Note: For interal usage in cython.
-cdef double [:, ::1] dot2d_2d(double [:, ::1] m1, double [:, ::1] m2, int [::1] m2_rows):
+cdef double [:, ::1] dot2d_2d(double [:, ::1] m1, double [:, ::1] m2, int [::1] m2r):
 
     # Matrix index variables.
     cdef:
@@ -324,7 +416,7 @@ cdef double [:, ::1] dot2d_2d(double [:, ::1] m1, double [:, ::1] m2, int [::1] 
         Py_ssize_t I = m1.shape[0]
         Py_ssize_t J = m2.shape[1]
         # Py_ssize_t K = m1.shape[1]
-        Py_ssize_t IR = m2_rows.shape[0]
+        Py_ssize_t IR = m2r.shape[0]
 
         # MemoryViews for the cython arrays used for sotring the temporary and...
         # ...to be retured results.
@@ -338,7 +430,7 @@ cdef double [:, ::1] dot2d_2d(double [:, ::1] m1, double [:, ::1] m2, int [::1] 
         for i in prange(I, schedule='guided'):
             for j in range(J):
                 for ir in range(IR):
-                    res[i, j] += m1[i, ir] * m2[m2_rows[ir], j]
+                    res[i, j] += m1[i, ir] * m2[m2r[ir], j]
 
     return res
 
