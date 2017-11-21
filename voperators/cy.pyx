@@ -587,7 +587,7 @@ cpdef double [::1] vsqrt(double [::1] v):
     return res
 
 
-cpdef double PartialDerivative(cnp.intp_t a_idx, double [::1] x1, double [::1] x2, double [::1] A):
+cpdef double partial_derivative(cnp.intp_t a_idx, double [::1] x1, double [::1] x2, double [::1] A):
     """ Partial Derivative: This method is calculating the partial derivative of a specific
         parameter given the proper vectors. That is, for the cosine distance is a x_i with the
         centroid vector (mu) of the cluster where x_i is belonging into. As for the constraint
@@ -626,6 +626,174 @@ cpdef double PartialDerivative(cnp.intp_t a_idx, double [::1] x1, double [::1] x
             ) / (pow(x1_pnorm, 2.0) * pow(x2_pnorm, 2.0))
 
     return res_a
+
+
+cdef inline double pDerivative(double x1_ai,
+                               double x2_ai,
+                               double x1_aipn,
+                               double x2_aipn,
+                               double x1x2dota):
+    """ Partial Derivative: This method is calculating the partial derivative of a specific
+        parameter given the proper vectors. That is, for the cosine distance is a x_i with the
+        centroid vector (mu) of the cluster where x_i is belonging into. As for the constraint
+        violations is the x_1 and x_2 of a specific pair of constraints each time this method
+        is called.
+        **for detail see documentation.
+    """
+    cdef double res_a = 0.0
+
+    # Note: x1x2dota = vdot(dot1d_ds(x1, A), x2)
+    res_a = (
+                (x1_ai * x2_ai] * x1_aipn * x2_aipn) -
+                (
+                    x1x2dota *
+                    (
+                        (
+                            pow(x1_ai, 2.0) * pow(x2_aipn, 2.0) +
+                            pow(x2_ai, 2.0) * pow(x1_aipn, 2.0)
+                        ) / (2 * x1_aipn * x2_aipn)
+                    )
+                )
+            ) / (pow(x1_aipn, 2.0) * pow(x2_aipn, 2.0))
+
+    return res_a
+
+
+cpdef double [::1] pDerivative_seq_rows(double[::1] A,
+                                        double [:, ::1] m1,
+                                        double [:, ::1] m2,
+                                        int [::1] m1r
+                                        int [::1] m2r):
+
+    cdef:
+        # Matrix index variables.
+        Py_ssize_t ai, i, i2, j,
+
+        # Matrices dimentions intilized variables.
+        Py_ssize_t a_I = A.shape[0]
+        Py_ssize_t m1r_I = m1r.shape[0]
+        Py_ssize_t m1_J = m1.shape[1]
+        Py_ssize_t m2r_I = m2r.shape[0]
+        Py_ssize_t m2_J = m2.shape[1]
+
+        # MemoryViews for the cython arrays used for sotring the temporary and...
+        # ...to be retured results.
+        double [::1] m1_norms
+        double [::1] m2_norms
+        double [::1] a_pDz_vect
+        double x1x2dota = 0.0
+
+    # Creating the temporary cython arrays.
+    m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")
+    m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
+    a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
+
+    # The following operatsion taking place in the non-gil and parallel...
+    # ...openmp emviroment.
+    with nogil, parallel():
+
+        # Initilising temporary storage arrays. NOTE: This is a mandatory process because as...
+        # ...in C garbage values can case floating point overflow, thus, peculiar results...
+        # ...like NaN or incorrect calculatons.
+        for i in range(m1r_I):
+            m1_norms[i] = 0.0
+
+        for i in range(m2r_I):
+            m2_norms[i] = 0.0
+
+        for i in range(m1r_I):
+            for j in range(m2r_I):
+                csdis_vect[i, j] = 0.0
+
+        # Calculating the Norms for the first matrix.
+        for i in prange(m1r_I, schedule='guided'):
+
+            # Calculating Sum.
+            for j in range(m1_J):
+                m1_norms[i] += m1[m1r[i], j] * m1[m1r[i], j] * Α[j]
+
+            # Calculating the Square root of the sum
+            m1_norms[i] = sqrt(m1_norms[i])
+
+            # Preventing Division by Zero.
+            if m1_norms[i] == 0.0:
+                m1_norms[i] = 0.000001
+
+
+        # Calculating the Norms for the second matrix.
+        for i2 in prange(m2r_I, schedule='guided'):
+
+            # Calculating distorted dot product.
+            for j in range(m2_J):
+                m2_norms[i2] += m2[m2r[i2], j] * m2[m2r[i2], j] * Α[j]
+
+            # Calculating the Square root of the sum
+            m2_norms[i2] = sqrt(m2_norms[i2])
+
+            # Preventing Division by Zero.
+            if m2_norms[i2] == 0.0:
+                m2_norms[i2] = 0.000001
+
+
+        # Calculating the Sequence of partial derivatives for every A array elements.
+        # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
+        for ai in prange(a_I, schedule='guided'):
+
+            for i in range(m1r_I):
+
+                for i2 in range(m1r_I):
+
+                    # Calculating the elemnt-wise sum of products distorted by A.
+                    # Note: x1x2dota = vdot(dot1d_ds(x1, A), x2)
+                    x1x2dota = 0.0
+                    for j in range(m1_J):
+                        x1x2dota += m1[m1r[i], j] * A[j] * m2[m2r[i2], j]
+
+                    # Calulating partial derivative for elemnt a_i of A array.
+                    a_pDz_vect[ai] = pDerivative(
+                        m1[i, ai], m1[i2, ai], m1_norms[i], m1_norms[i2], x1x2dota
+                    )
+
+    return a_pDz_vect
+
+cpdef double [::1] pDerivative_seq_one2many(double[::1] A,
+                                        double [:, ::1] m1,
+                                        double [:, ::1] m2,
+                                        int [::1] m1r
+                                        int [::1] m2r):
+
+        cdef:
+            # Matrix index variables.
+            Py_ssize_t ai, i, i2, j,
+
+            # Matrices dimentions intilized variables.
+            Py_ssize_t a_I = A.shape[0]
+            Py_ssize_t m1r_I = m1r.shape[0]
+            Py_ssize_t m1_J = m1.shape[1]
+            Py_ssize_t m2r_I = m2r.shape[0]
+            Py_ssize_t m2_J = m2.shape[1]
+
+            # MemoryViews for the cython arrays used for sotring the temporary and...
+            # ...to be retured results.
+            double [::1] m1_norms
+            double [::1] m2_norms
+            double [::1] a_pDz_vect
+            double x1x2dota = 0.0
+
+        # Creating the temporary cython arrays.
+        m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")
+        m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
+        a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
+
+        # The following operatsion taking place in the non-gil and parallel...
+        # ...openmp emviroment.
+        with nogil, parallel():
+
+
+
+        pDerivative_seq_rows(A, m1, m2,
+                                                int [::1] m1r
+                                                int [::1] m2r):
 
 
 cpdef double [:, ::1] mean_cosA(double [:, ::1] X,

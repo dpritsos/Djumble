@@ -559,122 +559,135 @@ class HMRFKmeans(object):
         new_A = np.zeros_like(A.data, dtype=np.float)
 
         # Initializing...
-        xm_pderiv, mlcost_pderiv, clcost_pderiv = 0.0, 0.0, 0.0
-        smpls_cnt, ml_cnt, cl_cnt = 0.0, 0.0, 0.0
+        # xm_pderiv, mlcost_pderiv, clcost_pderiv = 0.0, 0.0, 0.0
+        # smpls_cnt, ml_cnt, cl_cnt = 0.0, 0.0, 0.0
 
-        for a_idx, a in enumerate(np.array([a[0] for a in A.data])):
+        ml_viol_pairs = list()
+        cl_viol_pairs = list()
+        clstr_idxs_arrz_lst = list()
 
-            for i, mu in enumerate(mu_arr):
+        # Collecting Violation Pairs.
+        for i in range(mu_arr.shape[0]):
 
-                # Getting the indeces for the i cluster.
-                clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
+            # Getting the indeces for the i cluster.
+            clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
+            clstr_idxs_arrz_lst.append(clstr_idxs_arr)
 
-                #
-                smpls_cnt += float(clstr_idxs_arr.shape[0])
+            #
+            # smpls_cnt += float(clstr_idxs_arr.shape[0])
 
-                # Calculating the partial derivatives of each parameter for all cluster's member...
-                # ...for each cluster.
-                # ---------------------------------------------------------------------------------
-                for x_clstr_idx in clstr_idxs_arr:
-                    xm_pderiv += vop.PartialDerivative(a_idx, x_data[x_clstr_idx, :], mu, A)
+            # Getting the must-link left side of the pair constraints, i.e. the row indeces...
+            # ...of the constraints matrix that are in the cluster's set of indeces.
+            in_clstr_ml_rows = np.in1d(self.mst_lnk_idxs[0], clstr_idxs_arr)
 
-                # Calculating Must-Link violation cost.
-                # -------------------------------------
+            # Getting the indeces of must-link than are not in the cluster as they should...
+            # ...have been.
 
-                # Getting the must-link left side of the pair constraints, i.e. the row indeces...
-                # ...of the constraints matrix that are in the cluster's set of indeces.
-                in_clstr_ml_rows = np.in1d(self.mst_lnk_idxs[0], clstr_idxs_arr)
+            ml_clstr_comn_idxs = np.in1d(
+                self.mst_lnk_idxs, clstr_idxs_arr
+            ).reshape(2, self.mst_lnk_idxs.shape[1])
 
-                # Getting the indeces of must-link than are not in the cluster as they should...
-                # ...have been.
-
-                ml_clstr_comn_idxs = np.in1d(
-                    self.mst_lnk_idxs, clstr_idxs_arr
-                ).reshape(2, self.mst_lnk_idxs.shape[1])
-
-                ml_viol_columns = np.intersect1d(
-                    np.where(ml_clstr_comn_idxs[0] != ml_clstr_comn_idxs[1])[0],
-                    np.hstack(
-                        (ml_clstr_comn_idxs[0].nonzero()[0], ml_clstr_comn_idxs[1].nonzero()[0])
-                    )
+            ml_viol_columns = np.intersect1d(
+                np.where(ml_clstr_comn_idxs[0] != ml_clstr_comn_idxs[1])[0],
+                np.hstack(
+                    (ml_clstr_comn_idxs[0].nonzero()[0], ml_clstr_comn_idxs[1].nonzero()[0])
                 )
+            )
 
-                viol_ipairs = self.mst_lnk_idxs[:, ml_viol_columns]
+            ml_viol_pairs.append(self.mst_lnk_idxs[:, ml_viol_columns])
 
-                #
-                ml_cnt += float(viol_ipairs.shape[0])
+            #
+            # ml_cnt += float(viol_ipairs.shape[0])
 
-                if viol_ipairs.shape[0]:
+            # Getting the cannot-link left side of the pair constraints, i.e. the row indeces...
+            # ...of the constraints matrix that are in the cluster's set of indeces.
+            in_clstr_cl_rows = np.in1d(self.cnt_lnk_idxs[0], clstr_idxs_arr)
 
-                    # Calculating the partial derivatives of all pairs of violations for...
-                    # ...must-link constraints.
-                    for x in zip(viol_ipairs[0], viol_ipairs[1]):
-                        mlcost_pderiv += self.ml_wg*vop.PartialDerivative(
-                            a_idx, x_data[x[0], :], x_data[x[1], :], A
-                        )
+            # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
+            # ...have been.
 
-                # Calculating Cannot-Link violation cost.
-                # ---------------------------------------
+            cl_clstr_comn_idxs = np.in1d(
+                self.cnt_lnk_idxs, clstr_idxs_arr
+            ).reshape(2, self.cnt_lnk_idxs.shape[1])
 
-                # Getting the cannot-link left side of the pair constraints, i.e. the row indeces...
-                # ...of the constraints matrix that are in the cluster's set of indeces.
-                in_clstr_cl_rows = np.in1d(self.cnt_lnk_idxs[0], clstr_idxs_arr)
+            cl_viol_columns = np.intersect1d(
+                np.where(cl_clstr_comn_idxs[0] == cl_clstr_comn_idxs[1])[0],
+                cl_clstr_comn_idxs[0].nonzero()[0]
+            )
 
-                # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
-                # ...have been.
+            cl_viol_pairs.append(elf.cnt_lnk_idxs[:, cl_viol_columns])
 
-                cl_clstr_comn_idxs = np.in1d(
-                    self.cnt_lnk_idxs, clstr_idxs_arr
-                ).reshape(2, self.cnt_lnk_idxs.shape[1])
+            #
+            # cl_cnt += float(viol_ipairs.shape[0])
 
-                cl_viol_columns = np.intersect1d(
-                    np.where(cl_clstr_comn_idxs[0] == cl_clstr_comn_idxs[1])[0],
-                    cl_clstr_comn_idxs[0].nonzero()[0]
-                )
+        # Calculating the partial derivatives of each parameter for all cluster's member...
+        # ...for each cluster.
+        # ---------------------------------------------------------------------------------
+        for k, clstr_idxs_arr in enumerate(clstr_idxs_arrz_lst):
+            xm_pderiv = vop.pDerivative_seq_rows(A, mu_arr, x_data, )
 
-                viol_ipairs = self.cnt_lnk_idxs[:, cl_viol_columns]
+        # Calculating Must-Link violation cost.
+        # -------------------------------------
+        if ml_viol_pairs:
 
-                #
-                cl_cnt += float(viol_ipairs.shape[0])
+            ml_viol_pairs = np.hstack(ml_viol_pairs)
 
-                if viol_ipairs.shape[0]:
+            # Calculating the partial derivatives of all pairs of violations for...
+            # ...must-link constraints.
+            mlcost_pderiv = vop.pDerivative_seq_rows(
+                A, x_data, x_data, ml_viol_pairs[0], ml_viol_pairs[1]
+            )
 
-                    # Calculating all pairs of violation costs for cannot-link constraints.
-                    # NOTE: The violation cost is equivalent to the maxCosine distance
-                    for x in zip(viol_ipairs[0], viol_ipairs[1]):
-                        clcost_pderiv -= self.cl_wg*vop.PartialDerivative(
-                            a_idx, x_data[x[0], :], x_data[x[1], :], A
-                        )
+        # Calculating Cannot-Link violation cost.
+        # ---------------------------------------
+        if cl_viol_pairs:
 
-            # Averaging EVERYTHING
-            # xm_pderiv = xm_pderiv / smpls_cnt
-            # if ml_cnt:
-            #     mlcost_pderiv = mlcost_pderiv / ml_cnt
-            # if cl_cnt:
-            #     clcost_pderiv = clcost_pderiv / cl_cnt
+            cl_viol_pairs = np.hstack(cl_viol_pairs)
+
+            # Calculating all pairs of violation costs for cannot-link constraints.
+            # NOTE: The violation cost is equivalent to the maxCosine distance
+            clcost_pderiv = vop.pDerivative_seq_rows(
+                A, x_data, x_data, cl_viol_pairs[0], cl_viol_pairs[1]
+            )
+
+        # Averaging EVERYTHING
+        # xm_pderiv = xm_pderiv / smpls_cnt
+        # if ml_cnt:
+        #     mlcost_pderiv = mlcost_pderiv / ml_cnt
+        # if cl_cnt:
+        #     clcost_pderiv = clcost_pderiv / cl_cnt
+
+        # Updating Process.
+        for i, a in enumerate(A):
 
             # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
-            # new_a = a + (self.lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv))
             a_pderiv = (1 / a) - (a / np.square(self.ray_sigma))
-
-            # NOTE!
-            a_pderiv = 0.0
-
+            # NOTE: a_pderiv = 0.0
             # print 'Rayleigh Partial', a_pderiv
 
             if np.abs(a_pderiv) == np.inf:
                 print "Invalid patch for Rayleighs P'(A) triggered: (+/-)INF P'(A)=", a_pderiv
                 a_pderiv = 1e-15
-
             elif a_pderiv == np.nan:
                 print "Invalid patch for Rayleighs P(A) triggered: NaN P'(A)=", a_pderiv
                 a_pderiv = 1e-15
 
             # Changing a diagonal value of the A cosine similarity parameters measure.
-            new_A[a_idx] = (a + (self.lrn_rate *
-                                 (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
-                                 )
-                            )
+            A[i] = a +\
+                (
+                    self.lrn_rate *
+                    (
+                        xm_pderiv[i]
+                        + (self.ml_wg * mlcost_pderiv[i])
+                        - (self.cl_wg * clcost_pderiv[i])
+                        - a_pderiv
+                    )
+                )
+
+
+        """
+        for a_idx, a in enumerate(np.array([a[0] for a in A.data])):
+
 
             # print self.lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
             # print xm_pderiv, mlcost_pderiv, clcost_pderiv, a_pderiv
@@ -702,8 +715,9 @@ class HMRFKmeans(object):
             elif new_A[a_idx] == np.NaN:
                 print "Invalid patch for A triggered: NaN A=", new_A[a_idx], a_pderiv
                 new_A[a_idx] = 1e-15
+        """
 
-        A[:, :] = sp.sparse.lil_matrix(np.diag(new_A))
+        # A[:, :] = sp.sparse.lil_matrix(np.diag(new_A))
 
-        # Returning the A parameters. This is actually a dump return for coding constance reasons.
+        # Returning the A parameters.
         return A
