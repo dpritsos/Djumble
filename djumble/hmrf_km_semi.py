@@ -626,6 +626,8 @@ class HMRFKmeans(object):
         for k, clstr_idxs_arr in enumerate(clstr_idxs_arrz_lst):
             xm_pderiv = vop.pDerivative_seq_rows(A, mu_arr, x_data, )
 
+            vop.pDerivative_seq_one2many()
+
         # Calculating Must-Link violation cost.
         # -------------------------------------
         if ml_viol_pairs:

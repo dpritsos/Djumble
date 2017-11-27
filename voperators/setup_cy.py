@@ -4,14 +4,14 @@ from Cython.Build import cythonize
 
 ext_modules = [
     Extension(
-        "dsmeasures",
-        ["dsmeasures.pyx"],
+        "cy",
+        ["cy.pyx"],
         extra_compile_args=['-fopenmp'],
         extra_link_args=['-fopenmp'],
     )
 ]
 
 setup(
-    name='dsmeasures-parallel',
+    name='cy',
     ext_modules=cythonize(ext_modules),
 )

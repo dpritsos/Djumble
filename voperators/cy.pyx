@@ -18,10 +18,10 @@ cdef extern from "math.h":
 
 
 cpdef double [:, ::1] cos2Da_rows(double [:, ::1] m1,
-                              double [:, ::1] m2,
-                              double[::1] A,
-                              int [::1] m1r
-                              int [::1] m2r):
+                                  double [:, ::1] m2,
+                                  double[::1] A,
+                                  int [::1] m1r,
+                                  int [::1] m2r):
 
     cdef:
         # Matrix index variables.
@@ -69,7 +69,7 @@ cpdef double [:, ::1] cos2Da_rows(double [:, ::1] m1,
 
             # Calculating Sum.
             for j in range(m1_J):
-                m1_norms[i] += m1[m1r[i], j] * m1[m1r[i], j] * Α[j]
+                m1_norms[i] += m1[m1r[i], j] * m1[m1r[i], j] * A[j]
 
             # Calculating the Square root of the sum
             m1_norms[i] = sqrt(m1_norms[i])
@@ -84,7 +84,7 @@ cpdef double [:, ::1] cos2Da_rows(double [:, ::1] m1,
 
             # Calculating Sum.
             for j in range(m2_J):
-                m2_norms[i2] += m2[m2r[i2], j] * m2[m2r[i2], j] * Α[j]
+                m2_norms[i2] += m2[m2r[i2], j] * m2[m2r[i2], j] * A[j]
 
             # Calculating the Square root of the sum
             m2_norms[i2] = sqrt(m2_norms[i2])
@@ -161,7 +161,7 @@ cpdef double [:, ::1] cos2Da(double [:, ::1] m1, double [:, ::1] m2, double[::1]
 
             # Calculating Sum.
             for j in range(m1_J):
-                m1_norms[i] += m1[i, j] * m1[i, j] * Α[j]
+                m1_norms[i] += m1[i, j] * m1[i, j] * A[j]
 
             # Calculating the Square root of the sum
             m1_norms[i] = sqrt(m1_norms[i])
@@ -176,7 +176,7 @@ cpdef double [:, ::1] cos2Da(double [:, ::1] m1, double [:, ::1] m2, double[::1]
 
             # Calculating Sum.
             for j in range(m2_J):
-                m2_norms[i2] += m2[i2, j] * m2[i2, j] * Α[j]
+                m2_norms[i2] += m2[i2, j] * m2[i2, j] * A[j]
 
             # Calculating the Square root of the sum
             m2_norms[i2] = sqrt(m2_norms[i2])
@@ -381,6 +381,7 @@ cdef inline double [::1] dot1d_ds(double [::1] v, double [::1] m):
 
     return res
 
+"""
 # Note: Make it cdef if only for interal usage in cython.
 cpdef double [:, ::1] dot2d(double [:, ::1] m1, double [:, ::1] m2):
 
@@ -405,7 +406,7 @@ cpdef double [:, ::1] dot2d(double [:, ::1] m1, double [:, ::1] m2):
                     res[i, j] += m1[i, k] * m2[k, j]
 
     return res
-
+"""
 
 # Note: For interal usage in cython.
 cdef double [:, ::1] dot2d_2d(double [:, ::1] m1, double [:, ::1] m2, int [::1] m2r):
@@ -471,7 +472,7 @@ cdef inline double [::1] sum_axs0(double [:, ::1] m,
 
     # Matrix index variables.
     cdef:
-        Py_ssize_t i, jm iz
+        Py_ssize_t i, jm, iz
         Py_ssize_t ct_I = clust_tags.shape[0]
         Py_ssize_t J = m.shape[1]
 
@@ -644,7 +645,7 @@ cdef inline double pDerivative(double x1_ai,
 
     # Note: x1x2dota = vdot(dot1d_ds(x1, A), x2)
     res_a = (
-                (x1_ai * x2_ai] * x1_aipn * x2_aipn) -
+                (x1_ai * x2_ai * x1_aipn * x2_aipn) -
                 (
                     x1x2dota *
                     (
@@ -662,7 +663,7 @@ cdef inline double pDerivative(double x1_ai,
 cpdef double [::1] pDerivative_seq_rows(double[::1] A,
                                         double [:, ::1] m1,
                                         double [:, ::1] m2,
-                                        int [::1] m1r
+                                        int [::1] m1r,
                                         int [::1] m2r):
 
     cdef:
@@ -710,7 +711,7 @@ cpdef double [::1] pDerivative_seq_rows(double[::1] A,
 
             # Calculating Sum.
             for j in range(m1_J):
-                m1_norms[i] += m1[m1r[i], j] * m1[m1r[i], j] * Α[j]
+                m1_norms[i] += m1[m1r[i], j] * m1[m1r[i], j] * A[j]
 
             # Calculating the Square root of the sum
             m1_norms[i] = sqrt(m1_norms[i])
@@ -725,7 +726,7 @@ cpdef double [::1] pDerivative_seq_rows(double[::1] A,
 
             # Calculating distorted dot product.
             for j in range(m2_J):
-                m2_norms[i2] += m2[m2r[i2], j] * m2[m2r[i2], j] * Α[j]
+                m2_norms[i2] += m2[m2r[i2], j] * m2[m2r[i2], j] * A[j]
 
             # Calculating the Square root of the sum
             m2_norms[i2] = sqrt(m2_norms[i2])
@@ -759,7 +760,7 @@ cpdef double [::1] pDerivative_seq_rows(double[::1] A,
 cpdef double [::1] pDerivative_seq_one2many(double[::1] A,
                                         double [:, ::1] m1,
                                         double [:, ::1] m2,
-                                        int [::1] m1r
+                                        int [::1] m1r,
                                         int [::1] m2r):
 
         cdef:
@@ -788,8 +789,6 @@ cpdef double [::1] pDerivative_seq_one2many(double[::1] A,
         # The following operatsion taking place in the non-gil and parallel...
         # ...openmp emviroment.
         with nogil, parallel():
-
-
 
         pDerivative_seq_rows(A, m1, m2,
                                                 int [::1] m1r
