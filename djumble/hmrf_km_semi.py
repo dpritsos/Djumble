@@ -623,10 +623,7 @@ class HMRFKmeans(object):
         # Calculating the partial derivatives of each parameter for all cluster's member...
         # ...for each cluster.
         # ---------------------------------------------------------------------------------
-        for k, clstr_idxs_arr in enumerate(clstr_idxs_arrz_lst):
-            xm_pderiv = vop.pDerivative_seq_rows(A, mu_arr, x_data, )
-
-            vop.pDerivative_seq_one2many()
+        xm_pderiv = vop.pDerivative_seq_one2many()
 
         # Calculating Must-Link violation cost.
         # -------------------------------------
@@ -685,7 +682,6 @@ class HMRFKmeans(object):
                         - a_pderiv
                     )
                 )
-
 
         """
         for a_idx, a in enumerate(np.array([a[0] for a in A.data])):
