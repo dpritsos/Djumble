@@ -598,26 +598,19 @@ cpdef double partial_derivative(cnp.intp_t a_idx, double [::1] x1, double [::1] 
             res_a: The partial derivative's value.
 
     """
-    cdef double res_a = 0.0
+    cdef:
+        double x1_pnorm
+        double x2_pnorm
+        double x1x2dota
 
     # Calculating parametrized Norms ||Σ xi||(A)
     x1_pnorm = sqrt(vdot(dot1d_ds(x1, A), x1))
     x2_pnorm = sqrt(vdot(dot1d_ds(x2, A), x2))
 
-    res_a = (
-                (x1[a_idx] * x2[a_idx] * x1_pnorm * x2_pnorm) -
-                (
-                    vdot(dot1d_ds(x1, A), x2) *
-                    (
-                        (
-                            pow(x1[a_idx], 2.0) * pow(x2_pnorm, 2.0) +
-                            pow(x2[a_idx], 2.0) * pow(x1_pnorm, 2.0)
-                        ) / (2 * x1_pnorm * x2_pnorm)
-                    )
-                )
-            ) / (pow(x1_pnorm, 2.0) * pow(x2_pnorm, 2.0))
+    # Claculating dot_A product of x1 and x2.
+    x1x2dota = vdot(dot1d_ds(x1, A), x2)
 
-    return res_a
+    return pDerivative(x1[a_idx], x2[a_idx], x1_pnorm, x2_pnorm, x1x2dota)
 
 
 cdef inline double pDerivative(double x1_ai,

@@ -298,7 +298,7 @@ class HMRFKmeans(object):
 
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
         # --------------------------------------------------------------------------------
-        dist = cos2Da(mu, x_data[x_idx, :], self.A)
+        dist = vop.cos2Da(mu, x_data[x_idx, :], self.A)
 
         # Calculating Must-Link violation cost.
         # -------------------------------------
@@ -322,7 +322,7 @@ class HMRFKmeans(object):
                 # NOTE: The violation cost is equivalent to the parametrized Cosine distance...
                 # ...which here is equivalent to the (1 - dot product) because the data points...
                 # ...assumed to be normalized by the parametrized Norm of the vectors.
-                viol_costs = cos2Da_rows(x_data, x_data, self.A, x_idx, viol_idxs[1])
+                viol_costs = vop.cos2Da_rows(x_data, x_data, self.A, x_idx, viol_idxs[1])
 
                 # Sum-ing up Weighted violations costs.
                 ml_cost = np.sum(viol_costs)
@@ -352,7 +352,7 @@ class HMRFKmeans(object):
                 # ...parametrized Cosine distance of the vectors. Since MaxCosine is 1 then...
                 # ...maxCosineDistance - CosineDistance == CosineSimilarty of the vectors....
                 # ...Again the data points assumed to be normalized.
-                viol_costs = cos2Da_rows(x_data, x_data, self.A, x_idx, viol_idxs[1])
+                viol_costs = vop.cos2Da_rows(x_data, x_data, self.A, x_idx, viol_idxs[1])
                 # viol_costs = np.ones_like(viol_costs) - viol_costs
 
                 # Sum-ing up Weighted violations costs.
@@ -372,7 +372,7 @@ class HMRFKmeans(object):
             (2 * np.diag(self.A[:, :].toarray()).shape[0] * np.log(self.ray_sigma))
 
         # NOTE!
-        params_pdf = 0.0
+        # params_pdf = 0.0
 
         # Calculating the log normalization function of the von Mises-Fisher distribution...
         # ...NOTE: Only for this cluster i.e. this vMF of the whole PDF mixture.
@@ -623,7 +623,9 @@ class HMRFKmeans(object):
         # Calculating the partial derivatives of each parameter for all cluster's member...
         # ...for each cluster.
         # ---------------------------------------------------------------------------------
-        xm_pderiv = vop.pDerivative_seq_one2many()
+        xm_pderiv = vop.pDerivative_seq_one2many(
+            A, mu_arr, x_data, np.arange(mu_arr.shape[0]), clstr_tags_arr
+        )
 
         # Calculating Must-Link violation cost.
         # -------------------------------------
