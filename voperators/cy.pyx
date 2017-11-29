@@ -654,8 +654,30 @@ cdef inline double pDerivative(double x1_ai,
 cpdef double [::1] pDerivative_seq_rows(double[::1] A,
                                         double [:, ::1] m1,
                                         double [:, ::1] m2,
-                                        cnp.intp_t [::1] m1r,
-                                        cnp.intp_t [::1] m2r):
+                                        int [::1] m1r,
+                                        int [::1] m2r):
+    cdef:
+        # Matrices dimentions intilized variables.
+        Py_ssize_t a_I = A.shape[0]
+        Py_ssize_t m1r_I = m1r.shape[0]
+        Py_ssize_t m2r_I = m2r.shape[0]
+
+    # Creating the temporary cython arrays.
+    m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")
+    m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
+    a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
+
+    return _pDerivative_seq_rows(A, m1, m2, m1r, m2r, m1_norms, m2_norms, a_pDz_vect)
+
+
+cdef double [::1] _pDerivative_seq_rows(double[::1] A,
+                                        double [:, ::1] m1,
+                                        double [:, ::1] m2,
+                                        int [::1] m1r,
+                                        int [::1] m2r,
+                                        double [::1] m1_norms,
+                                        double [::1] m2_norms,
+                                        double [::1] a_pDz_vect) nogil:
 
     cdef:
         # Matrix index variables.
@@ -670,15 +692,10 @@ cpdef double [::1] pDerivative_seq_rows(double[::1] A,
 
         # MemoryViews for the cython arrays used for sotring the temporary and...
         # ...to be retured results.
-        double [::1] m1_norms
-        double [::1] m2_norms
-        double [::1] a_pDz_vect
-        double x1x2dota = 0.0
-
-    # Creating the temporary cython arrays.
-    m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")
-    m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
-    a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
+        # double [::1] m1_norms
+        # double [::1] m2_norms
+        # double [::1] a_pDz_vect
+        double x1x2dota
 
     # The following operatsion taking place in the non-gil and parallel...
     # ...openmp emviroment.
@@ -738,7 +755,7 @@ cpdef double [::1] pDerivative_seq_rows(double[::1] A,
                     # Note: x1x2dota = vdot(dot1d_ds(x1, A), x2)
                     x1x2dota = 0.0
                     for k2 in range(m1_J):
-                        x1x2dota += m1[m1r[i3], k2] * A[k2] * m2[m2r[k], k2]
+                        x1x2dota = x1x2dota + m1[m1r[i3], k2] * A[k2] * m2[m2r[k], k2]
 
                     # Calulating partial derivative for elemnt a_i of A array.
                     a_pDz_vect[j3] = pDerivative(
@@ -750,8 +767,8 @@ cpdef double [::1] pDerivative_seq_rows(double[::1] A,
 cpdef double [::1] pDerivative_seq_one2many(double[::1] A,
                                         double [:, ::1] m1,
                                         double [:, ::1] m2,
-                                        cnp.intp_t [::1] m1r,
-                                        cnp.intp_t [::1] m2r):
+                                        int [::1] m1r,
+                                        int [::1] m2r):
 
         cdef:
             # Matrix index variables.
@@ -760,20 +777,24 @@ cpdef double [::1] pDerivative_seq_one2many(double[::1] A,
             # Matrices dimentions intilized variables.
             Py_ssize_t a_I = A.shape[0]
             Py_ssize_t m1r_I = m1r.shape[0]
+            Py_ssize_t m2r_I = m2r.shape[0]
 
             # MemoryViews for the cython arrays used for sotring the temporary and...
             # ...to be retured results.
             double [::1] a_pDz_vect
             double [::1] tmp_vect
+            int [::1] one_elem_cp
             double x1x2dota = 0.0
 
         # Creating the temporary cython arrays.
-        # tmp_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
         a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
+        m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")
+        m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
+        tmp_a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
 
         # The following operatsion taking place in the non-gil and parallel...
         # ...openmp emviroment.
-        with nogil, parallel():
+        with nogil:
 
             # Initilising temporary storage arrays. NOTE: This is a mandatory process because as...
             # ...in C garbage values can case floating point overflow, thus, peculiar results...
@@ -781,12 +802,19 @@ cpdef double [::1] pDerivative_seq_one2many(double[::1] A,
             for i in range(a_I):
                 a_pDz_vect[i] = 0.0
 
-            for i1 in prange(m1r_I, schedule='guided'):
+            for i1 in range(m1r_I):
 
                 # Calculating the partial derivatives form each centroid.
-                tmp_vect = pDerivative_seq_rows(A, m1, m2, m1r[i1], m2r)
 
-                # Summing up the
+                # NOTE: For some reason this copy is required for passing one elemnt memory...
+                # ...view slice to the cython funtion.
+                one_elem_cp[:] = m1r[i1]
+
+                tmp_vect = _pDerivative_seq_rows(
+                    A, m1, m2, one_elem_cp, m2r, m1_norms, m2_norms, tmp_a_pDz_vect
+                )
+
+                # Summing up the.
                 for i2 in range(a_I):
                     a_pDz_vect[i2] += tmp_vect[i2]
 
