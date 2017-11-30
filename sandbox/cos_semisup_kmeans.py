@@ -16,9 +16,9 @@ import copy
 import warnings
 
 
-sys.path.append('../djumble/')
-from cos_semisup_km import CosineKmeans
-from cos_semisup_km_narray import CosineKmeans as CosineKmeans_arr
+sys.path.append('../')
+import djumble.hmrf_km_semi as hks
+
 
 
 test_dims = 1000
@@ -97,24 +97,22 @@ init_centrs = [set([0]), set([550]), set([1100])]
 init_centrs_arr = [0, 550, 1100]
 
 print "Running HMRF Kmeans"
-ckmeans = CosineKmeans(
-    k_clusters,  must_lnk_con, cannot_lnk_con, init_centroids=init_centrs, max_iter=300, cvg=0.0001
+hkmeans = hks.HMRFKmeans(
+    k_clusters, must_lnk_con_arr, cannot_lnk_con_arr, init_centroids=None,
+    ml_wg=1.0, cl_wg=1.0, max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5,
+    d_params=None, norm_part=False, globj_norm=False
 )
 
-res = ckmeans.fit(copy.deepcopy(x_data_2d_arr), set([50]))
+res = hkmeans.fit(copy.deepcopy(x_data_2d_arr))
 
 # print res[1]
 
-ckmeans_arr = CosineKmeans_arr(
-    k_clusters, must_lnk_con_arr, cannot_lnk_con_arr, init_centroids=init_centrs_arr, max_iter=300,
-    cvg=0.0001
-)
 
-res = ckmeans_arr.fit(x_data_2d_arr, np.array([50]))
+# res = ckmeans_arr.fit(x_data_2d_arr, np.array([50]))
 
 print len(res[1]), np.in1d(-9, res[1]), np.in1d(30, res[1])
 
-"""
+
 for mu_idx, clstr_idxs in enumerate(res[1]):
 
     print mu_idx+1, len(clstr_idxs), np.sort(clstr_idxs)
@@ -126,6 +124,7 @@ for mu_idx, clstr_idxs in enumerate(res[1]):
 
 plt.show()
 
+"""
 for mu_idx, mu in enumerate(res[0]):
 
     clstr_idxs = np.where(res[1] == mu_idx)[0]

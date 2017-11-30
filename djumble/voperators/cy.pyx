@@ -20,8 +20,8 @@ cdef extern from "math.h":
 cpdef double [:, ::1] cos2Da_rows(double [:, ::1] m1,
                                   double [:, ::1] m2,
                                   double[::1] A,
-                                  int [::1] m1r,
-                                  int [::1] m2r):
+                                  cnp.intp_t [::1] m1r,
+                                  cnp.intp_t [::1] m2r):
 
     cdef:
         # Matrix index variables.
@@ -409,7 +409,7 @@ cpdef double [:, ::1] dot2d(double [:, ::1] m1, double [:, ::1] m2):
 """
 
 # Note: For interal usage in cython.
-cdef double [:, ::1] dot2d_2d(double [:, ::1] m1, double [:, ::1] m2, int [::1] m2r):
+cdef double [:, ::1] dot2d_2d(double [:, ::1] m1, double [:, ::1] m2, cnp.intp_t [::1] m2r):
 
     # Matrix index variables.
     cdef:
@@ -462,35 +462,6 @@ cdef double [:, ::1] dot2d_ds(double [:, ::1] m1, double [::1] m2):
                 res[i, j] = m1[i, j] * m2[j]
 
     return res
-
-
-# Note: For interal usage in cython.
-cdef inline void sum_axs0(double [::1] res, double [:, ::1] m,
-                          cnp.intp_t [::1] clust_tags,
-                          cnp.intp_t k,
-                          double zero_val) nogil:
-
-    # Matrix index variables.
-    cdef:
-        Py_ssize_t i, j, iz
-        Py_ssize_t ct_I = clust_tags.shape[0]
-        Py_ssize_t J = m.shape[1]
-
-    # The following operatsion taking place in the non-gil and parallel...
-    # ...openmp emviroment.
-    with nogil, parallel():
-
-        # Initilising temporary storage arrays. NOTE: This is a mandatory process because as...
-        # ...in C garbage values can case floating point overflow, thus, peculiar results...
-        # ...like NaN or incorrect calculatons.
-        for iz in range(J):
-            res[iz] = zero_val
-
-        for j in prange(J, schedule='guided'):
-            for i in range(ct_I):
-                # The i vector has k cluster-tag equal to the requested k the sum it up.
-                if clust_tags[i] == k:
-                    res[j] += m[i, j]
 
 
 # Note: Make it cdef if only for interal usage in cython.
@@ -647,8 +618,8 @@ cdef inline double pDerivative(double x1_ai,
 cpdef double [::1] pDerivative_seq_rows(double[::1] A,
                                         double [:, ::1] m1,
                                         double [:, ::1] m2,
-                                        int [::1] m1r,
-                                        int [::1] m2r):
+                                        cnp.intp_t [::1] m1r,
+                                        cnp.intp_t [::1] m2r):
     cdef:
         # Matrices dimentions intilized variables.
         Py_ssize_t a_I = A.shape[0]
@@ -666,8 +637,8 @@ cpdef double [::1] pDerivative_seq_rows(double[::1] A,
 cdef double [::1] _pDerivative_seq_rows(double[::1] A,
                                         double [:, ::1] m1,
                                         double [:, ::1] m2,
-                                        int [::1] m1r,
-                                        int [::1] m2r,
+                                        cnp.intp_t [::1] m1r,
+                                        cnp.intp_t [::1] m2r,
                                         double [::1] m1_norms,
                                         double [::1] m2_norms,
                                         double [::1] a_pDz_vect) nogil:
@@ -760,8 +731,9 @@ cdef double [::1] _pDerivative_seq_rows(double[::1] A,
 cpdef double [::1] pDerivative_seq_one2many(double[::1] A,
                                         double [:, ::1] m1,
                                         double [:, ::1] m2,
-                                        int [::1] m1r,
-                                        int [::1] m2r):
+                                        cnp.intp_t [::1] m1r,
+                                        cnp.intp_t [::1] m2r):
+                                        # cnp.int64p_t ??
 
         cdef:
             # Matrix index variables.
@@ -776,7 +748,7 @@ cpdef double [::1] pDerivative_seq_one2many(double[::1] A,
             # ...to be retured results.
             double [::1] a_pDz_vect
             double [::1] tmp_vect
-            int [::1] one_elem_cp
+            cnp.intp_t [::1] one_elem_cp
             double x1x2dota = 0.0
 
         # Creating the temporary cython arrays.
@@ -825,8 +797,9 @@ cpdef double [:, ::1] mean_cosA(double [:, ::1] X,
 
     cdef:
         double zero_val = 1e-15
-        Py_ssize_t k, i, j, ip, jp
+        Py_ssize_t k, i, j, ip, jp, ip2, jp2
         Py_ssize_t X_J = X.shape[1]
+        Py_ssize_t ct_I = clust_tags.shape[0]
 
         # MemoryViews for the cython arrays used for sotring the temporary and...
         # ...to be retured results.
@@ -839,7 +812,7 @@ cpdef double [:, ::1] mean_cosA(double [:, ::1] X,
 
     # The following operatsion taking place in the non-gil and parallel...
     # ...openmp emviroment.
-    with nogil:
+    with nogil, parallel():
 
         # Initilising temporary storage arrays. NOTE: This is a mandatory process because as...
         # ...in C garbage values can case floating point overflow, thus, peculiar results...
@@ -848,19 +821,25 @@ cpdef double [:, ::1] mean_cosA(double [:, ::1] X,
             for j in range(X_J):
                 mu_arr[i, j] = 0.0
 
-        for k in range(k_clustz):
+        for i in range(X_J):
+            xk_sum[i] = zero_val
 
-            # Summing up all the X data points for the current cluster.
-            # NOTE: Returning results buffer is given as argument for enabling NoGIL parrallel...
-            sum_axs0(xk_sum, X, clust_tags, k, zero_val)
+        for k in prange(k_clustz, schedule='guided'):
+
+            # Summing up all the X data points for the current cluster. Equivalent to sum in axis-0.
+            for jp in prange(X_J):
+                for ip in range(ct_I):
+                    # The i vector has k cluster-tag equal to the requested k the sum it up.
+                    if clust_tags[ip] == k:
+                        xk_sum[jp] += X[ip, jp]
 
             # Calculating denominator xk_pnorm(parametrized-norm) == ||Σ xi||(A).
-            for ip in range(X_J):
-                xk_pnorm += sqrt(xk_sum[ip] * A[ip] * xk_sum[ip])
+            for ip2 in range(X_J):
+                xk_pnorm = xk_pnorm + sqrt(xk_sum[ip2] * A[ip2] * xk_sum[ip2])
 
             # Calculating the Centroid of the (assumed) hyper-sphear.
-            for jp in range(X_J):
-                mu_arr[k, jp] = xk_sum[jp] / xk_pnorm
+            for jp2 in range(X_J):
+                mu_arr[k, jp2] = xk_sum[jp2] / xk_pnorm
 
     return mu_arr
 

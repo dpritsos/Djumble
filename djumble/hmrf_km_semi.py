@@ -7,7 +7,7 @@ import scipy.stats as sps
 import random as rnd
 import scipy.special as special
 
-import ..dsmeasure.cy as vop
+from .voperators import cy as vop
 
 
 class HMRFKmeans(object):
@@ -91,8 +91,8 @@ class HMRFKmeans(object):
             self.A = np.ones((x_data.shape[1]), dtype=np.float)
         # A should be a diagonal matrix form for the calculations in the functions bellow. The...
         # ...sparse form will save space and the csr_matrix will make the dia_matrix write-able.
-        self.A = np.diag(self.A)
-        self.A = sp.sparse.lil_matrix(self.A)
+        # self.A = self.A
+        # self.A = sp.sparse.lil_matrix(self.A)
 
         # Setting up the violation weights matrix if not have been passed as class argument.
         # if self.w_violations is None:
@@ -104,7 +104,7 @@ class HMRFKmeans(object):
         # init_clstr_sets_lst = FarFirstCosntraint()
         # init_clstr_sets_lst = ConsolidateAL()
         clstr_tags_arr = np.empty(x_data.shape[0], dtype=np.int)
-        clstr_tags_arr[:] = np.Inf
+        clstr_tags_arr[:] = 100
 
         # Selecting a random set of centroids if not any given as class initialization argument.
         if self.init_centroids is None:
@@ -124,16 +124,16 @@ class HMRFKmeans(object):
         # NOTE: Initially normalizing the samples under the distortion parameters values in...
         # ...order to reducing the cosine distance calculation to a simple dot products...
         # ...calculation in the rest of the EM (sub)steps.
-        x_data = np.divide(
-            x_data,
-            np.sqrt(
-                np.diag(np.dot(np.dot(x_data, self.A[:, :].toarray()), x_data.T)),
-                dtype=np.float
-            ).reshape(x_data.shape[0], 1)
-        )
+        # x_data = np.divide(
+        #     x_data,
+        #     np.sqrt(
+        #         np.diag(np.dot(np.dot(x_data, self.A[:, :].toarray()), x_data.T)),
+        #         dtype=np.float
+        #     ).reshape(x_data.shape[0], 1)
+        # )
 
         # Calculating the initial Centroids of the assumed hyper-shperical clusters.
-        mu_arr = self.MeanCosA(x_data, clstr_tags_arr)
+        mu_arr = vop.mean_cosA(x_data, clstr_tags_arr, self.A, self.k_clusters)
 
         # EM algorithm execution.
 
@@ -156,8 +156,7 @@ class HMRFKmeans(object):
             # The M-Step.
 
             # Recalculating centroids upon the new clusters set-up.
-            mu_arr = self.MeanCosA(x_data, clstr_tags_arr)
-            # print mu_lst
+            mu_arr = vop.mean_cosA(x_data, clstr_tags_arr, self.A, self.k_clusters)
 
             # Re-estimating distortion measure parameters upon the new clusters set-up.
             self.A = self.UpdateDistorParams(self.A, x_data, mu_arr, clstr_tags_arr)
@@ -242,17 +241,17 @@ class HMRFKmeans(object):
                 last_jobj = np.Inf
 
                 # Calculating the J-Objective for every x_i vector of the x_data set.
-                for i, mu in enumerate(mu_arr):
+                for mu_i in np.arange(mu_arr.shape[0]):
 
                     # Getting the indeces for this cluster.
-                    clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
+                    clstr_idxs_arr = np.where(clstr_tags_arr == mu_i)[0]
 
                     # Calculating the J-Objective.
-                    j_obj = self.JObjCosA(x_idx, x_data, mu, clstr_idxs_arr)
+                    j_obj = self.JObjCosA(x_idx, x_data, mu_i, mu_arr, clstr_idxs_arr)
 
                     if j_obj < last_jobj:
                         last_jobj = j_obj
-                        new_clstr_tag = i
+                        new_clstr_tag = mu_i
 
                 # Checking if the cluster where the data-point belongs into has been changed.
                 if clstr_tags_arr[x_idx] != new_clstr_tag:
@@ -273,7 +272,7 @@ class HMRFKmeans(object):
         # Returning clstr_tags_arr.
         return clstr_tags_arr
 
-    def JObjCosA(self, x_idx, x_data, mu, clstr_idx_arr):
+    def JObjCosA(self, x_idx, x_data, mu_i, mu_arr, clstr_idx_arr):
         """ JObjCosA: J-Objective function for parametrized Cosine Distortion Measure. It cannot
             be very generic because the gradient decent (partial derivative) calculations should be
             applied, they are totally dependent on the distortion measure (here is Cosine Distance).
@@ -298,7 +297,9 @@ class HMRFKmeans(object):
 
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
         # --------------------------------------------------------------------------------
-        dist = vop.cos2Da(mu, x_data[x_idx, :], self.A)
+        dist = vop.cos2Da_rows(
+            mu_arr, x_data, self.A, np.array([mu_i], dtype=np.int), np.array([x_idx], dtype=np.int)
+        )
 
         # Calculating Must-Link violation cost.
         # -------------------------------------
@@ -365,11 +366,11 @@ class HMRFKmeans(object):
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
         sum1, sum2 = 0.0, 0.0
-        for a in np.diag(self.A[:, :].toarray()):
+        for a in self.A:
             sum1 += np.log(a)
             sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
         params_pdf = sum1 - sum2 -\
-            (2 * np.diag(self.A[:, :].toarray()).shape[0] * np.log(self.ray_sigma))
+            (2 * self.A.shape[0] * np.log(self.ray_sigma))
 
         # NOTE!
         # params_pdf = 0.0
@@ -385,6 +386,7 @@ class HMRFKmeans(object):
         # print "Params are: ", self.A
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
+        print np.array(dist), ml_cost, cl_cost,  params_pdf,  norm_part_value
         return dist + ml_cost + cl_cost - params_pdf + norm_part_value
 
     def GlobJObjCosA(self, x_data, mu_arr, clstr_tags_arr):
