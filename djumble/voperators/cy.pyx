@@ -16,8 +16,99 @@ cdef extern from "math.h":
     cdef double pow(double x, double y) nogil
     cdef double log (double x) nogil
 
+cpdef double [:, ::1] cosDa(double [:, ::1] m1, double [:, ::1] m2, double[::1] A):
 
-cpdef double [:, ::1] cos2Da_rows(double [:, ::1] m1,
+    cdef:
+        # Matrix index variables.
+        Py_ssize_t i, j, i2, j2, i3, j3, k, im1, im2
+
+        # Matrices dimentions intilized variables.
+        Py_ssize_t m1_I = m1.shape[0]
+        Py_ssize_t m1_J = m1.shape[1]
+        Py_ssize_t m2_I = m2.shape[0]
+        Py_ssize_t m2_J = m2.shape[1]
+
+        # MemoryViews for the cython arrays used for sotring the temporary and...
+        # ...to be retured results.
+        double [::1] m1_norms
+        double [::1] m2_norms
+        double [:, ::1] csdis_vect
+
+        # Definding Pi constant.
+        double pi = 3.14159265
+
+    # Creating the temporary cython arrays.
+    m1_norms = cvarray(shape=(m1_I,), itemsize=sizeof(double), format="d")
+    m2_norms = cvarray(shape=(m2_I,), itemsize=sizeof(double), format="d")
+    csdis_vect = cvarray(shape=(m1_I, m2_I), itemsize=sizeof(double), format="d")
+
+    # The following operatsion taking place in the non-gil and parallel...
+    # ...openmp emviroment.
+    with nogil, parallel():
+
+        # Initilising temporary storage arrays. NOTE: This is a mandatory process because as...
+        # ...in C garbage values can case floating point overflow, thus, peculiar results...
+        # ...like NaN or incorrect calculatons.
+        for im1 in range(m1_I):
+            m1_norms[im1] = 0.0
+
+        for im2 in range(m2_I):
+            m2_norms[im2] = 0.0
+
+        for im1 in range(m1_I):
+            for im2 in range(m2_I):
+                csdis_vect[im1, im2] = 0.0
+
+        # Calculating the Norms for the first matrix.
+        for i in prange(m1_I, schedule='guided'):
+
+            # Calculating Sum.
+            for j in range(m1_J):
+                m1_norms[i] += m1[i, j] * m1[i, j] * A[j]
+
+            # Calculating the Square root of the sum
+            m1_norms[i] = sqrt(m1_norms[i])
+
+            # Preventing Division by Zero.
+            if m1_norms[i] == 0.0:
+                m1_norms[i] = 0.000001
+
+
+        # Calculating the Norms for the second matrix.
+        for i2 in prange(m2_I, schedule='guided'):
+
+            # Calculating Sum.
+            for j2 in range(m2_J):
+                m2_norms[i2] += m2[i2, j2] * m2[i2, j2] * A[j2]
+
+            # Calculating the Square root of the sum
+            m2_norms[i2] = sqrt(m2_norms[i2])
+
+            # Preventing Division by Zero.
+            if m2_norms[i2] == 0.0:
+                m2_norms[i2] = 0.000001
+
+
+        # Calculating the cosine similarity.
+        # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
+        for i3 in prange(m1_I, schedule='guided'):
+
+            for j3 in range(m2_I):
+
+                # Calculating the elemnt-wise sum of products distorted by A.
+                for k in range(m1_J):
+                    csdis_vect[i3, j3] += m1[i3, k] * m2[j3, k] * A[k]
+
+                # Normalizing with the products of the respective vector norms.
+                csdis_vect[i3, j3] = csdis_vect[i3, j3] / (m1_norms[i3] * m2_norms[j3])
+
+                # Getting Cosine Distance.
+                csdis_vect[i3, j3] =  acos(csdis_vect[i3, j3]) / pi
+
+    return csdis_vect
+
+
+cpdef double [:, ::1] cosDa_rows(double [:, ::1] m1,
                                   double [:, ::1] m2,
                                   double[::1] A,
                                   cnp.intp_t [::1] m1r,
@@ -113,31 +204,31 @@ cpdef double [:, ::1] cos2Da_rows(double [:, ::1] m1,
     return csdis_vect
 
 
-cpdef double [:, ::1] cos2Da(double [:, ::1] m1, double [:, ::1] m2, double[::1] A):
+cpdef double [::1] cosDa_v2r(double [::1] v,
+                                double [:, ::1] m,
+                                double[::1] A,
+                                cnp.intp_t [::1] mr):
 
     cdef:
         # Matrix index variables.
-        Py_ssize_t i, j, i2, j2, i3, j3, k, im1, im2
+        Py_ssize_t vi, mi, i, j, i2, j2
 
         # Matrices dimentions intilized variables.
-        Py_ssize_t m1_I = m1.shape[0]
-        Py_ssize_t m1_J = m1.shape[1]
-        Py_ssize_t m2_I = m2.shape[0]
-        Py_ssize_t m2_J = m2.shape[1]
+        Py_ssize_t v_I = v.shape[0]
+        Py_ssize_t mr_I = mr.shape[0]
 
         # MemoryViews for the cython arrays used for sotring the temporary and...
         # ...to be retured results.
-        double [::1] m1_norms
-        double [::1] m2_norms
-        double [:, ::1] csdis_vect
+        double v_norm = 0.0
+        double [::1] m_norms
+        double [::1] csdis_vect
 
         # Definding Pi constant.
         double pi = 3.14159265
 
     # Creating the temporary cython arrays.
-    m1_norms = cvarray(shape=(m1_I,), itemsize=sizeof(double), format="d")
-    m2_norms = cvarray(shape=(m2_I,), itemsize=sizeof(double), format="d")
-    csdis_vect = cvarray(shape=(m1_I, m2_I), itemsize=sizeof(double), format="d")
+    m_norms = cvarray(shape=(mr_I,), itemsize=sizeof(double), format="d")
+    csdis_vect = cvarray(shape=(mr_I,), itemsize=sizeof(double), format="d")
 
     # The following operatsion taking place in the non-gil and parallel...
     # ...openmp emviroment.
@@ -146,66 +237,102 @@ cpdef double [:, ::1] cos2Da(double [:, ::1] m1, double [:, ::1] m2, double[::1]
         # Initilising temporary storage arrays. NOTE: This is a mandatory process because as...
         # ...in C garbage values can case floating point overflow, thus, peculiar results...
         # ...like NaN or incorrect calculatons.
-        for im1 in range(m1_I):
-            m1_norms[im1] = 0.0
+        for mi in range(mr_I):
+            m_norms[mi] = 0.0
+            csdis_vect[mi] = 0.0
 
-        for im2 in range(m2_I):
-            m2_norms[im2] = 0.0
-
-        for im1 in range(m1_I):
-            for im2 in range(m2_I):
-                csdis_vect[im1, im2] = 0.0
-
-        # Calculating the Norms for the first matrix.
-        for i in prange(m1_I, schedule='guided'):
+        # Calculating the Norms for the 2D matrix.
+        for i in prange(mr_I, schedule='guided'):
 
             # Calculating Sum.
-            for j in range(m1_J):
-                m1_norms[i] += m1[i, j] * m1[i, j] * A[j]
+            for j in range(v_I):
+                m_norms[i] += m[mr[i], j] * m[mr[i], j] * A[j]
 
             # Calculating the Square root of the sum
-            m1_norms[i] = sqrt(m1_norms[i])
+            m_norms[i] = sqrt(m_norms[i])
 
             # Preventing Division by Zero.
-            if m1_norms[i] == 0.0:
-                m1_norms[i] = 0.000001
+            if m_norms[i] == 0.0:
+                m_norms[i] = 0.000001
 
 
         # Calculating the Norms for the second matrix.
-        for i2 in prange(m2_I, schedule='guided'):
+        for vi in range(v_I):
+            v_norm = v_norm + v[vi] * v[vi] * A[vi]
 
-            # Calculating Sum.
-            for j2 in range(m2_J):
-                m2_norms[i2] += m2[i2, j2] * m2[i2, j2] * A[j2]
-
-            # Calculating the Square root of the sum
-            m2_norms[i2] = sqrt(m2_norms[i2])
-
-            # Preventing Division by Zero.
-            if m2_norms[i2] == 0.0:
-                m2_norms[i2] = 0.000001
+        # Preventing Division by Zero.
+        if v_norm == 0.0:
+            v_norm = 0.000001
 
 
         # Calculating the cosine similarity.
         # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
-        for i3 in prange(m1_I, schedule='guided'):
+        for i2 in prange(mr_I, schedule='guided'):
 
-            for j3 in range(m2_I):
+            for j2 in range(v_I):
+                csdis_vect[i2] += m[mr[i2], j2] * v[j2] * A[j2]
 
-                # Calculating the elemnt-wise sum of products distorted by A.
-                for k in range(m1_J):
-                    csdis_vect[i3, j3] += m1[i3, k] * m2[j3, k] * A[k]
+            # Normalizing with the products of the respective vector norms.
+            csdis_vect[i2] = csdis_vect[i2] / (m_norms[i2] * v_norm)
 
-                # Normalizing with the products of the respective vector norms.
-                csdis_vect[i3, j3] = csdis_vect[i3, j3] / (m1_norms[i3] * m2_norms[j3])
-
-                # Getting Cosine Distance.
-                csdis_vect[i3, j3] =  acos(csdis_vect[i3, j3]) / pi
+            # Getting Cosine Distance.
+            csdis_vect[i2] =  acos(csdis_vect[i2]) / pi
 
     return csdis_vect
 
 
-cpdef double [:, ::1] cosdis_2d(double [:, ::1] m1, double [:, ::1] m2):
+cpdef double cosDa_vect(double [::1] v1, double [::1] v2, double[::1] A):
+
+    cdef:
+        # Matrix index variables.
+        Py_ssize_t i
+
+        # Matrices dimentions intilized variables.
+        Py_ssize_t v_I = v1.shape[0]
+
+        # MemoryViews for the cython arrays used for sotring the temporary and...
+        # ...to be retured results.
+        double v1_norm = 0.0
+        double v2_norm = 0.0
+        double csdis = 0.0
+
+        # Definding Pi constant.
+        double pi = 3.14159265
+
+    # The following operatsion taking place in the non-gil.
+    with nogil:
+
+        # Calculating the cosine similarity.
+        # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
+        for i in range(v_I):
+
+            # Calculating the elemnt-wise sum of products distorted by A.
+            csdis = csdis + v1[i] * v2[i] * A[i]
+
+            # Calculating the Norms for the v1 and v2 vectors.
+            v1_norm = v1_norm + v1[i] * v1[i] * A[i]
+            v1_norm = sqrt(v1_norm)
+
+            v2_norm = v2_norm + v2[i] * v2[i] * A[i]
+            v2_norm = sqrt(v2_norm)
+
+        # Preventing Division by Zero.
+        if v1_norm == 0.0:
+            v1_norm = 0.000001
+
+        if v2_norm == 0.0:
+            v2_norm = 0.000001
+
+        # Normalizing with the products of the respective vector norms.
+        csdis = csdis / (v1_norm * v2_norm)
+
+        # Getting Cosine Distance.
+        csdis =  acos(csdis) / pi
+
+    return csdis
+
+
+cpdef double [:, ::1] cosD(double [:, ::1] m1, double [:, ::1] m2):
 
     cdef:
         # Matrix index variables.
@@ -618,7 +745,7 @@ cdef inline double pDerivative(double x1_ai,
 cpdef double [::1] pDerivative_seq_rows(double[::1] A,
                                         double [:, ::1] m1,
                                         double [:, ::1] m2,
-                                        cnp.intp_t [::1] m1r,
+                                        int [::1] m1r,
                                         cnp.intp_t [::1] m2r):
     cdef:
         # Matrices dimentions intilized variables.
@@ -637,7 +764,7 @@ cpdef double [::1] pDerivative_seq_rows(double[::1] A,
 cdef double [::1] _pDerivative_seq_rows(double[::1] A,
                                         double [:, ::1] m1,
                                         double [:, ::1] m2,
-                                        cnp.intp_t [::1] m1r,
+                                        int [::1] m1r,
                                         cnp.intp_t [::1] m2r,
                                         double [::1] m1_norms,
                                         double [::1] m2_norms,
@@ -731,7 +858,7 @@ cdef double [::1] _pDerivative_seq_rows(double[::1] A,
 cpdef double [::1] pDerivative_seq_one2many(double[::1] A,
                                         double [:, ::1] m1,
                                         double [:, ::1] m2,
-                                        cnp.intp_t [::1] m1r,
+                                        int [::1] m1r,
                                         cnp.intp_t [::1] m2r):
                                         # cnp.int64p_t ??
 
@@ -748,7 +875,7 @@ cpdef double [::1] pDerivative_seq_one2many(double[::1] A,
             # ...to be retured results.
             double [::1] a_pDz_vect
             double [::1] tmp_vect
-            cnp.intp_t [::1] one_elem_cp
+            int [::1] one_elem_cp
             double x1x2dota = 0.0
 
         # Creating the temporary cython arrays.
@@ -756,6 +883,7 @@ cpdef double [::1] pDerivative_seq_one2many(double[::1] A,
         m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")
         m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
         tmp_a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
+        one_elem_cp = cvarray(shape=(1,), itemsize=sizeof(int), format="i")
 
         # The following operatsion taking place in the non-gil and parallel...
         # ...openmp emviroment.
@@ -805,10 +933,11 @@ cpdef double [:, ::1] mean_cosA(double [:, ::1] X,
         # ...to be retured results.
         double [:, ::1] mu_arr
         double [::1] xk_sum
-        double xk_pnorm
+        double [::1] xk_pnorms
 
     mu_arr = cvarray(shape=(k_clustz, X_J), itemsize=sizeof(double), format="d")
     xk_sum = cvarray(shape=(X_J,), itemsize=sizeof(double), format="d")
+    xk_pnorms = cvarray(shape=(k_clustz,), itemsize=sizeof(double), format="d")
 
     # The following operatsion taking place in the non-gil and parallel...
     # ...openmp emviroment.
@@ -822,12 +951,12 @@ cpdef double [:, ::1] mean_cosA(double [:, ::1] X,
                 mu_arr[i, j] = 0.0
 
         for i in range(X_J):
-            xk_sum[i] = zero_val
+            xk_sum[i] = 0.0
 
         for k in prange(k_clustz, schedule='guided'):
 
             # Summing up all the X data points for the current cluster. Equivalent to sum in axis-0.
-            for jp in prange(X_J):
+            for jp in prange(X_J, schedule='guided'):
                 for ip in range(ct_I):
                     # The i vector has k cluster-tag equal to the requested k the sum it up.
                     if clust_tags[ip] == k:
@@ -835,11 +964,15 @@ cpdef double [:, ::1] mean_cosA(double [:, ::1] X,
 
             # Calculating denominator xk_pnorm(parametrized-norm) == ||Σ xi||(A).
             for ip2 in range(X_J):
-                xk_pnorm = xk_pnorm + sqrt(xk_sum[ip2] * A[ip2] * xk_sum[ip2])
+                xk_pnorms[k] += sqrt(xk_sum[ip2] * A[ip2] * xk_sum[ip2])
+
+            # Preveting division by 0.0
+            if xk_pnorms[k] == 0.0:
+                xk_pnorms[k] = 0.000001
 
             # Calculating the Centroid of the (assumed) hyper-sphear.
             for jp2 in range(X_J):
-                mu_arr[k, jp2] = xk_sum[jp2] / xk_pnorm
+                mu_arr[k, jp2] = xk_sum[jp2] / xk_pnorms[k]
 
     return mu_arr
 

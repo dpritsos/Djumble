@@ -1081,8 +1081,6 @@ static void __Pyx_WriteUnraisable(const char *name, int clineno,
                                   int lineno, const char *filename,
                                   int full_traceback, int nogil);
 
-static void __Pyx_RaiseUnboundMemoryviewSliceNogil(const char *varname);
-
 static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
 
 #if PY_MAJOR_VERSION >= 3 && !CYTHON_COMPILING_IN_PYPY
@@ -1306,6 +1304,8 @@ static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dc_nn_
 
 static CYTHON_INLINE Py_intptr_t __Pyx_PyInt_As_Py_intptr_t(PyObject *);
 
+static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dc_int(PyObject *);
+
 static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *);
 
 static PyObject *__pyx_memview_get_double(const char *itemp);
@@ -1507,9 +1507,11 @@ static PyObject *strided = 0;
 static PyObject *indirect = 0;
 static PyObject *contiguous = 0;
 static PyObject *indirect_contiguous = 0;
-static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows(__Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
-static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da(__Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
-static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
+static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa(__Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
+static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_rows(__Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
+static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_v2r(__Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
+static double __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_vect(__Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
+static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosD(__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
 static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
 static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_vdot(__Pyx_memviewslice, __Pyx_memviewslice); /*proto*/
 static CYTHON_INLINE __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot1d_ds(__Pyx_memviewslice, __Pyx_memviewslice); /*proto*/
@@ -1556,6 +1558,7 @@ static void __pyx_memoryview_slice_assign_scalar(__Pyx_memviewslice *, int, size
 static void __pyx_memoryview__slice_assign_scalar(char *, Py_ssize_t *, Py_ssize_t *, int, size_t, void *); /*proto*/
 static __Pyx_TypeInfo __Pyx_TypeInfo_double = { "double", NULL, sizeof(double), { 0 }, 0, 'R', 0, 0 };
 static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_intp_t = { "intp_t", NULL, sizeof(__pyx_t_5numpy_intp_t), { 0 }, 0, IS_UNSIGNED(__pyx_t_5numpy_intp_t) ? 'U' : 'I', IS_UNSIGNED(__pyx_t_5numpy_intp_t), 0 };
+static __Pyx_TypeInfo __Pyx_TypeInfo_int = { "int", NULL, sizeof(int), { 0 }, 0, IS_UNSIGNED(int) ? 'U' : 'I', IS_UNSIGNED(int), 0 };
 #define __Pyx_MODULE_NAME "Djumble.djumble.voperators.cy"
 int __pyx_module_is_main_Djumble__djumble__voperators__cy = 0;
 
@@ -1585,6 +1588,7 @@ static char __pyx_k_g[] = "g";
 static char __pyx_k_h[] = "h";
 static char __pyx_k_i[] = "i";
 static char __pyx_k_l[] = "l";
+static char __pyx_k_m[] = "m";
 static char __pyx_k_q[] = "q";
 static char __pyx_k_v[] = "v";
 static char __pyx_k_Zd[] = "Zd";
@@ -1593,7 +1597,10 @@ static char __pyx_k_Zg[] = "Zg";
 static char __pyx_k_id[] = "id";
 static char __pyx_k_m1[] = "m1";
 static char __pyx_k_m2[] = "m2";
+static char __pyx_k_mr[] = "mr";
 static char __pyx_k_np[] = "np";
+static char __pyx_k_v1[] = "v1";
+static char __pyx_k_v2[] = "v2";
 static char __pyx_k_x1[] = "x1";
 static char __pyx_k_x2[] = "x2";
 static char __pyx_k_m1r[] = "m1r";
@@ -1721,11 +1728,13 @@ static PyObject *__pyx_n_s_format;
 static PyObject *__pyx_n_s_fortran;
 static PyObject *__pyx_n_u_fortran;
 static PyObject *__pyx_kp_s_got_differing_extents_in_dimensi;
+static PyObject *__pyx_n_s_i;
 static PyObject *__pyx_n_s_id;
 static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_itemsize;
 static PyObject *__pyx_kp_s_itemsize_0_for_cython_array;
 static PyObject *__pyx_n_s_k_clustz;
+static PyObject *__pyx_n_s_m;
 static PyObject *__pyx_n_s_m1;
 static PyObject *__pyx_n_s_m1r;
 static PyObject *__pyx_n_s_m2;
@@ -1733,6 +1742,7 @@ static PyObject *__pyx_n_s_m2r;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_memview;
 static PyObject *__pyx_n_s_mode;
+static PyObject *__pyx_n_s_mr;
 static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_n_s_name_2;
 static PyObject *__pyx_kp_u_ndarray_is_not_C_contiguous;
@@ -1761,20 +1771,24 @@ static PyObject *__pyx_kp_s_unable_to_allocate_shape_and_str;
 static PyObject *__pyx_kp_u_unknown_dtype_code_in_numpy_pxd;
 static PyObject *__pyx_n_s_unpack;
 static PyObject *__pyx_n_s_v;
+static PyObject *__pyx_n_s_v1;
+static PyObject *__pyx_n_s_v2;
 static PyObject *__pyx_n_s_x1;
 static PyObject *__pyx_n_s_x2;
 static PyObject *__pyx_n_s_zeros;
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_cos2Da_rows(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r); /* proto */
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_2cos2Da(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_A); /* proto */
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_4cosdis_2d(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2); /* proto */
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_6eudis_2d(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2); /* proto */
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_8get_diag(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m); /* proto */
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_10vdiv_num(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_v, double __pyx_v_num); /* proto */
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_12vsqrt(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_v); /* proto */
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_14partial_derivative(CYTHON_UNUSED PyObject *__pyx_self, __pyx_t_5numpy_intp_t __pyx_v_a_idx, __Pyx_memviewslice __pyx_v_x1, __Pyx_memviewslice __pyx_v_x2, __Pyx_memviewslice __pyx_v_A); /* proto */
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_16pDerivative_seq_rows(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r); /* proto */
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_18pDerivative_seq_one2many(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r); /* proto */
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_20mean_cosA(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_X, __Pyx_memviewslice __pyx_v_clust_tags, __Pyx_memviewslice __pyx_v_A, int __pyx_v_k_clustz); /* proto */
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_cosDa(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_A); /* proto */
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_2cosDa_rows(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r); /* proto */
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_4cosDa_v2r(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_v, __Pyx_memviewslice __pyx_v_m, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_mr); /* proto */
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_6cosDa_vect(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_v1, __Pyx_memviewslice __pyx_v_v2, __Pyx_memviewslice __pyx_v_A); /* proto */
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_8cosD(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2); /* proto */
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_10eudis_2d(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2); /* proto */
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_12get_diag(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m); /* proto */
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_14vdiv_num(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_v, double __pyx_v_num); /* proto */
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_16vsqrt(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_v); /* proto */
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_18partial_derivative(CYTHON_UNUSED PyObject *__pyx_self, __pyx_t_5numpy_intp_t __pyx_v_a_idx, __Pyx_memviewslice __pyx_v_x1, __Pyx_memviewslice __pyx_v_x2, __Pyx_memviewslice __pyx_v_A); /* proto */
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_20pDerivative_seq_rows(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r); /* proto */
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_22pDerivative_seq_one2many(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r); /* proto */
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_24mean_cosA(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_X, __Pyx_memviewslice __pyx_v_clust_tags, __Pyx_memviewslice __pyx_v_A, int __pyx_v_k_clustz); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
@@ -1825,32 +1839,879 @@ static PyObject *__pyx_tuple__6;
 static PyObject *__pyx_tuple__7;
 static PyObject *__pyx_tuple__8;
 static PyObject *__pyx_tuple__9;
-static PyObject *__pyx_slice__16;
 static PyObject *__pyx_slice__17;
 static PyObject *__pyx_slice__18;
+static PyObject *__pyx_slice__19;
 static PyObject *__pyx_tuple__10;
 static PyObject *__pyx_tuple__11;
 static PyObject *__pyx_tuple__12;
 static PyObject *__pyx_tuple__13;
 static PyObject *__pyx_tuple__14;
 static PyObject *__pyx_tuple__15;
-static PyObject *__pyx_tuple__19;
+static PyObject *__pyx_tuple__16;
 static PyObject *__pyx_tuple__20;
 static PyObject *__pyx_tuple__21;
 static PyObject *__pyx_tuple__22;
 static PyObject *__pyx_tuple__23;
 static PyObject *__pyx_tuple__24;
+static PyObject *__pyx_tuple__25;
 
-/* "Djumble/djumble/voperators/cy.pyx":20
+/* "Djumble/djumble/voperators/cy.pyx":19
+ *     cdef double log (double x) nogil
+ * 
+ * cpdef double [:, ::1] cosDa(double [:, ::1] m1, double [:, ::1] m2, double[::1] A):             # <<<<<<<<<<<<<<
+ * 
+ *     cdef:
+ */
+
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_1cosDa(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa(__Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_A, CYTHON_UNUSED int __pyx_skip_dispatch) {
+  Py_ssize_t __pyx_v_i;
+  Py_ssize_t __pyx_v_j;
+  Py_ssize_t __pyx_v_i2;
+  Py_ssize_t __pyx_v_j2;
+  Py_ssize_t __pyx_v_i3;
+  Py_ssize_t __pyx_v_j3;
+  Py_ssize_t __pyx_v_k;
+  Py_ssize_t __pyx_v_im1;
+  Py_ssize_t __pyx_v_im2;
+  Py_ssize_t __pyx_v_m1_I;
+  Py_ssize_t __pyx_v_m1_J;
+  Py_ssize_t __pyx_v_m2_I;
+  Py_ssize_t __pyx_v_m2_J;
+  __Pyx_memviewslice __pyx_v_m1_norms = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v_m2_norms = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v_csdis_vect = { 0, 0, { 0 }, { 0 }, { 0 } };
+  double __pyx_v_pi;
+  __Pyx_memviewslice __pyx_r = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  __Pyx_memviewslice __pyx_t_4 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  PyObject *__pyx_t_5 = NULL;
+  __Pyx_memviewslice __pyx_t_6 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  Py_ssize_t __pyx_t_7;
+  Py_ssize_t __pyx_t_8;
+  Py_ssize_t __pyx_t_9;
+  Py_ssize_t __pyx_t_10;
+  Py_ssize_t __pyx_t_11;
+  Py_ssize_t __pyx_t_12;
+  Py_ssize_t __pyx_t_13;
+  Py_ssize_t __pyx_t_14;
+  Py_ssize_t __pyx_t_15;
+  Py_ssize_t __pyx_t_16;
+  Py_ssize_t __pyx_t_17;
+  Py_ssize_t __pyx_t_18;
+  Py_ssize_t __pyx_t_19;
+  Py_ssize_t __pyx_t_20;
+  Py_ssize_t __pyx_t_21;
+  Py_ssize_t __pyx_t_22;
+  Py_ssize_t __pyx_t_23;
+  Py_ssize_t __pyx_t_24;
+  int __pyx_t_25;
+  Py_ssize_t __pyx_t_26;
+  Py_ssize_t __pyx_t_27;
+  Py_ssize_t __pyx_t_28;
+  Py_ssize_t __pyx_t_29;
+  Py_ssize_t __pyx_t_30;
+  Py_ssize_t __pyx_t_31;
+  Py_ssize_t __pyx_t_32;
+  Py_ssize_t __pyx_t_33;
+  Py_ssize_t __pyx_t_34;
+  Py_ssize_t __pyx_t_35;
+  Py_ssize_t __pyx_t_36;
+  Py_ssize_t __pyx_t_37;
+  Py_ssize_t __pyx_t_38;
+  Py_ssize_t __pyx_t_39;
+  Py_ssize_t __pyx_t_40;
+  Py_ssize_t __pyx_t_41;
+  Py_ssize_t __pyx_t_42;
+  Py_ssize_t __pyx_t_43;
+  Py_ssize_t __pyx_t_44;
+  Py_ssize_t __pyx_t_45;
+  Py_ssize_t __pyx_t_46;
+  Py_ssize_t __pyx_t_47;
+  Py_ssize_t __pyx_t_48;
+  Py_ssize_t __pyx_t_49;
+  Py_ssize_t __pyx_t_50;
+  Py_ssize_t __pyx_t_51;
+  Py_ssize_t __pyx_t_52;
+  Py_ssize_t __pyx_t_53;
+  Py_ssize_t __pyx_t_54;
+  Py_ssize_t __pyx_t_55;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("cosDa", 0);
+
+  /* "Djumble/djumble/voperators/cy.pyx":26
+ * 
+ *         # Matrices dimentions intilized variables.
+ *         Py_ssize_t m1_I = m1.shape[0]             # <<<<<<<<<<<<<<
+ *         Py_ssize_t m1_J = m1.shape[1]
+ *         Py_ssize_t m2_I = m2.shape[0]
+ */
+  __pyx_v_m1_I = (__pyx_v_m1.shape[0]);
+
+  /* "Djumble/djumble/voperators/cy.pyx":27
+ *         # Matrices dimentions intilized variables.
+ *         Py_ssize_t m1_I = m1.shape[0]
+ *         Py_ssize_t m1_J = m1.shape[1]             # <<<<<<<<<<<<<<
+ *         Py_ssize_t m2_I = m2.shape[0]
+ *         Py_ssize_t m2_J = m2.shape[1]
+ */
+  __pyx_v_m1_J = (__pyx_v_m1.shape[1]);
+
+  /* "Djumble/djumble/voperators/cy.pyx":28
+ *         Py_ssize_t m1_I = m1.shape[0]
+ *         Py_ssize_t m1_J = m1.shape[1]
+ *         Py_ssize_t m2_I = m2.shape[0]             # <<<<<<<<<<<<<<
+ *         Py_ssize_t m2_J = m2.shape[1]
+ * 
+ */
+  __pyx_v_m2_I = (__pyx_v_m2.shape[0]);
+
+  /* "Djumble/djumble/voperators/cy.pyx":29
+ *         Py_ssize_t m1_J = m1.shape[1]
+ *         Py_ssize_t m2_I = m2.shape[0]
+ *         Py_ssize_t m2_J = m2.shape[1]             # <<<<<<<<<<<<<<
+ * 
+ *         # MemoryViews for the cython arrays used for sotring the temporary and...
+ */
+  __pyx_v_m2_J = (__pyx_v_m2.shape[1]);
+
+  /* "Djumble/djumble/voperators/cy.pyx":38
+ * 
+ *         # Definding Pi constant.
+ *         double pi = 3.14159265             # <<<<<<<<<<<<<<
+ * 
+ *     # Creating the temporary cython arrays.
+ */
+  __pyx_v_pi = 3.14159265;
+
+  /* "Djumble/djumble/voperators/cy.pyx":41
+ * 
+ *     # Creating the temporary cython arrays.
+ *     m1_norms = cvarray(shape=(m1_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
+ *     m2_norms = cvarray(shape=(m2_I,), itemsize=sizeof(double), format="d")
+ *     csdis_vect = cvarray(shape=(m1_I, m2_I), itemsize=sizeof(double), format="d")
+ */
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_m1_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
+  __pyx_t_2 = 0;
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_3);
+  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_v_m1_norms = __pyx_t_4;
+  __pyx_t_4.memview = NULL;
+  __pyx_t_4.data = NULL;
+
+  /* "Djumble/djumble/voperators/cy.pyx":42
+ *     # Creating the temporary cython arrays.
+ *     m1_norms = cvarray(shape=(m1_I,), itemsize=sizeof(double), format="d")
+ *     m2_norms = cvarray(shape=(m2_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
+ *     csdis_vect = cvarray(shape=(m1_I, m2_I), itemsize=sizeof(double), format="d")
+ * 
+ */
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m2_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
+  __pyx_t_1 = 0;
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_shape, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_itemsize, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_2);
+  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_v_m2_norms = __pyx_t_4;
+  __pyx_t_4.memview = NULL;
+  __pyx_t_4.data = NULL;
+
+  /* "Djumble/djumble/voperators/cy.pyx":43
+ *     m1_norms = cvarray(shape=(m1_I,), itemsize=sizeof(double), format="d")
+ *     m2_norms = cvarray(shape=(m2_I,), itemsize=sizeof(double), format="d")
+ *     csdis_vect = cvarray(shape=(m1_I, m2_I), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
+ * 
+ *     # The following operatsion taking place in the non-gil and parallel...
+ */
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_m1_I); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m2_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_5);
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_1);
+  __pyx_t_3 = 0;
+  __pyx_t_1 = 0;
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_shape, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __pyx_t_5 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_5);
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_itemsize, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_5);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_5);
+  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __pyx_v_csdis_vect = __pyx_t_6;
+  __pyx_t_6.memview = NULL;
+  __pyx_t_6.data = NULL;
+
+  /* "Djumble/djumble/voperators/cy.pyx":47
+ *     # The following operatsion taking place in the non-gil and parallel...
+ *     # ...openmp emviroment.
+ *     with nogil, parallel():             # <<<<<<<<<<<<<<
+ * 
+ *         # Initilising temporary storage arrays. NOTE: This is a mandatory process because as...
+ */
+  {
+      #ifdef WITH_THREAD
+      PyThreadState *_save;
+      Py_UNBLOCK_THREADS
+      #endif
+      /*try:*/ {
+        {
+            #if ((defined(__APPLE__) || defined(__OSX__)) && (defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && (__GNUC_MINOR__ > 95)))))
+                #undef likely
+                #undef unlikely
+                #define likely(x)   (x)
+                #define unlikely(x) (x)
+            #endif
+            #ifdef _OPENMP
+            #pragma omp parallel private(__pyx_v_im2, __pyx_v_im1) private(__pyx_t_35, __pyx_t_42, __pyx_t_27, __pyx_t_16, __pyx_t_24, __pyx_t_53, __pyx_t_8, __pyx_t_47, __pyx_t_34, __pyx_t_31, __pyx_t_43, __pyx_t_15, __pyx_t_13, __pyx_t_48, __pyx_t_7, __pyx_t_44, __pyx_t_36, __pyx_t_52, __pyx_t_38, __pyx_t_29, __pyx_t_14, __pyx_t_19, __pyx_t_22, __pyx_t_51, __pyx_t_30, __pyx_t_25, __pyx_t_11, __pyx_t_54, __pyx_t_20, __pyx_t_49, __pyx_t_33, __pyx_t_45, __pyx_t_40, __pyx_t_9, __pyx_t_12, __pyx_t_18, __pyx_t_23, __pyx_t_26, __pyx_t_50, __pyx_t_28, __pyx_t_17, __pyx_t_39, __pyx_t_21, __pyx_t_37, __pyx_t_32, __pyx_t_41, __pyx_t_10, __pyx_t_55, __pyx_t_46)
+            #endif /* _OPENMP */
+            {
+                /* Initialize private variables to invalid values */
+                __pyx_v_im2 = ((Py_ssize_t)0xbad0bad0);
+                __pyx_v_im1 = ((Py_ssize_t)0xbad0bad0);
+
+                /* "Djumble/djumble/voperators/cy.pyx":52
+ *         # ...in C garbage values can case floating point overflow, thus, peculiar results...
+ *         # ...like NaN or incorrect calculatons.
+ *         for im1 in range(m1_I):             # <<<<<<<<<<<<<<
+ *             m1_norms[im1] = 0.0
+ * 
+ */
+                __pyx_t_7 = __pyx_v_m1_I;
+                for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
+                  __pyx_v_im1 = __pyx_t_8;
+
+                  /* "Djumble/djumble/voperators/cy.pyx":53
+ *         # ...like NaN or incorrect calculatons.
+ *         for im1 in range(m1_I):
+ *             m1_norms[im1] = 0.0             # <<<<<<<<<<<<<<
+ * 
+ *         for im2 in range(m2_I):
+ */
+                  __pyx_t_9 = __pyx_v_im1;
+                  if (__pyx_t_9 < 0) __pyx_t_9 += __pyx_v_m1_norms.shape[0];
+                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_9)) )) = 0.0;
+                }
+
+                /* "Djumble/djumble/voperators/cy.pyx":55
+ *             m1_norms[im1] = 0.0
+ * 
+ *         for im2 in range(m2_I):             # <<<<<<<<<<<<<<
+ *             m2_norms[im2] = 0.0
+ * 
+ */
+                __pyx_t_7 = __pyx_v_m2_I;
+                for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
+                  __pyx_v_im2 = __pyx_t_8;
+
+                  /* "Djumble/djumble/voperators/cy.pyx":56
+ * 
+ *         for im2 in range(m2_I):
+ *             m2_norms[im2] = 0.0             # <<<<<<<<<<<<<<
+ * 
+ *         for im1 in range(m1_I):
+ */
+                  __pyx_t_10 = __pyx_v_im2;
+                  if (__pyx_t_10 < 0) __pyx_t_10 += __pyx_v_m2_norms.shape[0];
+                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_10)) )) = 0.0;
+                }
+
+                /* "Djumble/djumble/voperators/cy.pyx":58
+ *             m2_norms[im2] = 0.0
+ * 
+ *         for im1 in range(m1_I):             # <<<<<<<<<<<<<<
+ *             for im2 in range(m2_I):
+ *                 csdis_vect[im1, im2] = 0.0
+ */
+                __pyx_t_7 = __pyx_v_m1_I;
+                for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
+                  __pyx_v_im1 = __pyx_t_8;
+
+                  /* "Djumble/djumble/voperators/cy.pyx":59
+ * 
+ *         for im1 in range(m1_I):
+ *             for im2 in range(m2_I):             # <<<<<<<<<<<<<<
+ *                 csdis_vect[im1, im2] = 0.0
+ * 
+ */
+                  __pyx_t_11 = __pyx_v_m2_I;
+                  for (__pyx_t_12 = 0; __pyx_t_12 < __pyx_t_11; __pyx_t_12+=1) {
+                    __pyx_v_im2 = __pyx_t_12;
+
+                    /* "Djumble/djumble/voperators/cy.pyx":60
+ *         for im1 in range(m1_I):
+ *             for im2 in range(m2_I):
+ *                 csdis_vect[im1, im2] = 0.0             # <<<<<<<<<<<<<<
+ * 
+ *         # Calculating the Norms for the first matrix.
+ */
+                    __pyx_t_13 = __pyx_v_im1;
+                    __pyx_t_14 = __pyx_v_im2;
+                    if (__pyx_t_13 < 0) __pyx_t_13 += __pyx_v_csdis_vect.shape[0];
+                    if (__pyx_t_14 < 0) __pyx_t_14 += __pyx_v_csdis_vect.shape[1];
+                    *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_13 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_14)) )) = 0.0;
+                  }
+                }
+
+                /* "Djumble/djumble/voperators/cy.pyx":63
+ * 
+ *         # Calculating the Norms for the first matrix.
+ *         for i in prange(m1_I, schedule='guided'):             # <<<<<<<<<<<<<<
+ * 
+ *             # Calculating Sum.
+ */
+                __pyx_t_7 = __pyx_v_m1_I;
+                if (1 == 0) abort();
+                {
+                    __pyx_t_11 = (__pyx_t_7 - 0) / 1;
+                    if (__pyx_t_11 > 0)
+                    {
+                        #ifdef _OPENMP
+                        #pragma omp for lastprivate(__pyx_v_j) firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) schedule(guided)
+                        #endif /* _OPENMP */
+                        for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_11; __pyx_t_8++){
+                            {
+                                __pyx_v_i = 0 + 1 * __pyx_t_8;
+                                /* Initialize private variables to invalid values */
+                                __pyx_v_j = ((Py_ssize_t)0xbad0bad0);
+
+                                /* "Djumble/djumble/voperators/cy.pyx":66
+ * 
+ *             # Calculating Sum.
+ *             for j in range(m1_J):             # <<<<<<<<<<<<<<
+ *                 m1_norms[i] += m1[i, j] * m1[i, j] * A[j]
+ * 
+ */
+                                __pyx_t_12 = __pyx_v_m1_J;
+                                for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_12; __pyx_t_15+=1) {
+                                  __pyx_v_j = __pyx_t_15;
+
+                                  /* "Djumble/djumble/voperators/cy.pyx":67
+ *             # Calculating Sum.
+ *             for j in range(m1_J):
+ *                 m1_norms[i] += m1[i, j] * m1[i, j] * A[j]             # <<<<<<<<<<<<<<
+ * 
+ *             # Calculating the Square root of the sum
+ */
+                                  __pyx_t_16 = __pyx_v_i;
+                                  __pyx_t_17 = __pyx_v_j;
+                                  if (__pyx_t_16 < 0) __pyx_t_16 += __pyx_v_m1.shape[0];
+                                  if (__pyx_t_17 < 0) __pyx_t_17 += __pyx_v_m1.shape[1];
+                                  __pyx_t_18 = __pyx_v_i;
+                                  __pyx_t_19 = __pyx_v_j;
+                                  if (__pyx_t_18 < 0) __pyx_t_18 += __pyx_v_m1.shape[0];
+                                  if (__pyx_t_19 < 0) __pyx_t_19 += __pyx_v_m1.shape[1];
+                                  __pyx_t_20 = __pyx_v_j;
+                                  if (__pyx_t_20 < 0) __pyx_t_20 += __pyx_v_A.shape[0];
+                                  __pyx_t_21 = __pyx_v_i;
+                                  if (__pyx_t_21 < 0) __pyx_t_21 += __pyx_v_m1_norms.shape[0];
+                                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_21)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_16 * __pyx_v_m1.strides[0]) )) + __pyx_t_17)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_18 * __pyx_v_m1.strides[0]) )) + __pyx_t_19)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_20)) ))));
+                                }
+
+                                /* "Djumble/djumble/voperators/cy.pyx":70
+ * 
+ *             # Calculating the Square root of the sum
+ *             m1_norms[i] = sqrt(m1_norms[i])             # <<<<<<<<<<<<<<
+ * 
+ *             # Preventing Division by Zero.
+ */
+                                __pyx_t_22 = __pyx_v_i;
+                                if (__pyx_t_22 < 0) __pyx_t_22 += __pyx_v_m1_norms.shape[0];
+                                __pyx_t_23 = __pyx_v_i;
+                                if (__pyx_t_23 < 0) __pyx_t_23 += __pyx_v_m1_norms.shape[0];
+                                *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_23)) )) = sqrt((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_22)) ))));
+
+                                /* "Djumble/djumble/voperators/cy.pyx":73
+ * 
+ *             # Preventing Division by Zero.
+ *             if m1_norms[i] == 0.0:             # <<<<<<<<<<<<<<
+ *                 m1_norms[i] = 0.000001
+ * 
+ */
+                                __pyx_t_24 = __pyx_v_i;
+                                if (__pyx_t_24 < 0) __pyx_t_24 += __pyx_v_m1_norms.shape[0];
+                                __pyx_t_25 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_24)) ))) == 0.0) != 0);
+                                if (__pyx_t_25) {
+
+                                  /* "Djumble/djumble/voperators/cy.pyx":74
+ *             # Preventing Division by Zero.
+ *             if m1_norms[i] == 0.0:
+ *                 m1_norms[i] = 0.000001             # <<<<<<<<<<<<<<
  * 
  * 
- * cpdef double [:, ::1] cos2Da_rows(double [:, ::1] m1,             # <<<<<<<<<<<<<<
+ */
+                                  __pyx_t_26 = __pyx_v_i;
+                                  if (__pyx_t_26 < 0) __pyx_t_26 += __pyx_v_m1_norms.shape[0];
+                                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_26)) )) = 0.000001;
+
+                                  /* "Djumble/djumble/voperators/cy.pyx":73
+ * 
+ *             # Preventing Division by Zero.
+ *             if m1_norms[i] == 0.0:             # <<<<<<<<<<<<<<
+ *                 m1_norms[i] = 0.000001
+ * 
+ */
+                                }
+                            }
+                        }
+                    }
+                }
+
+                /* "Djumble/djumble/voperators/cy.pyx":78
+ * 
+ *         # Calculating the Norms for the second matrix.
+ *         for i2 in prange(m2_I, schedule='guided'):             # <<<<<<<<<<<<<<
+ * 
+ *             # Calculating Sum.
+ */
+                __pyx_t_11 = __pyx_v_m2_I;
+                if (1 == 0) abort();
+                {
+                    __pyx_t_7 = (__pyx_t_11 - 0) / 1;
+                    if (__pyx_t_7 > 0)
+                    {
+                        #ifdef _OPENMP
+                        #pragma omp for firstprivate(__pyx_v_i2) lastprivate(__pyx_v_i2) lastprivate(__pyx_v_j2) schedule(guided)
+                        #endif /* _OPENMP */
+                        for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8++){
+                            {
+                                __pyx_v_i2 = 0 + 1 * __pyx_t_8;
+                                /* Initialize private variables to invalid values */
+                                __pyx_v_j2 = ((Py_ssize_t)0xbad0bad0);
+
+                                /* "Djumble/djumble/voperators/cy.pyx":81
+ * 
+ *             # Calculating Sum.
+ *             for j2 in range(m2_J):             # <<<<<<<<<<<<<<
+ *                 m2_norms[i2] += m2[i2, j2] * m2[i2, j2] * A[j2]
+ * 
+ */
+                                __pyx_t_12 = __pyx_v_m2_J;
+                                for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_12; __pyx_t_15+=1) {
+                                  __pyx_v_j2 = __pyx_t_15;
+
+                                  /* "Djumble/djumble/voperators/cy.pyx":82
+ *             # Calculating Sum.
+ *             for j2 in range(m2_J):
+ *                 m2_norms[i2] += m2[i2, j2] * m2[i2, j2] * A[j2]             # <<<<<<<<<<<<<<
+ * 
+ *             # Calculating the Square root of the sum
+ */
+                                  __pyx_t_27 = __pyx_v_i2;
+                                  __pyx_t_28 = __pyx_v_j2;
+                                  if (__pyx_t_27 < 0) __pyx_t_27 += __pyx_v_m2.shape[0];
+                                  if (__pyx_t_28 < 0) __pyx_t_28 += __pyx_v_m2.shape[1];
+                                  __pyx_t_29 = __pyx_v_i2;
+                                  __pyx_t_30 = __pyx_v_j2;
+                                  if (__pyx_t_29 < 0) __pyx_t_29 += __pyx_v_m2.shape[0];
+                                  if (__pyx_t_30 < 0) __pyx_t_30 += __pyx_v_m2.shape[1];
+                                  __pyx_t_31 = __pyx_v_j2;
+                                  if (__pyx_t_31 < 0) __pyx_t_31 += __pyx_v_A.shape[0];
+                                  __pyx_t_32 = __pyx_v_i2;
+                                  if (__pyx_t_32 < 0) __pyx_t_32 += __pyx_v_m2_norms.shape[0];
+                                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_32)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_27 * __pyx_v_m2.strides[0]) )) + __pyx_t_28)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_29 * __pyx_v_m2.strides[0]) )) + __pyx_t_30)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_31)) ))));
+                                }
+
+                                /* "Djumble/djumble/voperators/cy.pyx":85
+ * 
+ *             # Calculating the Square root of the sum
+ *             m2_norms[i2] = sqrt(m2_norms[i2])             # <<<<<<<<<<<<<<
+ * 
+ *             # Preventing Division by Zero.
+ */
+                                __pyx_t_33 = __pyx_v_i2;
+                                if (__pyx_t_33 < 0) __pyx_t_33 += __pyx_v_m2_norms.shape[0];
+                                __pyx_t_34 = __pyx_v_i2;
+                                if (__pyx_t_34 < 0) __pyx_t_34 += __pyx_v_m2_norms.shape[0];
+                                *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_34)) )) = sqrt((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_33)) ))));
+
+                                /* "Djumble/djumble/voperators/cy.pyx":88
+ * 
+ *             # Preventing Division by Zero.
+ *             if m2_norms[i2] == 0.0:             # <<<<<<<<<<<<<<
+ *                 m2_norms[i2] = 0.000001
+ * 
+ */
+                                __pyx_t_35 = __pyx_v_i2;
+                                if (__pyx_t_35 < 0) __pyx_t_35 += __pyx_v_m2_norms.shape[0];
+                                __pyx_t_25 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_35)) ))) == 0.0) != 0);
+                                if (__pyx_t_25) {
+
+                                  /* "Djumble/djumble/voperators/cy.pyx":89
+ *             # Preventing Division by Zero.
+ *             if m2_norms[i2] == 0.0:
+ *                 m2_norms[i2] = 0.000001             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+                                  __pyx_t_36 = __pyx_v_i2;
+                                  if (__pyx_t_36 < 0) __pyx_t_36 += __pyx_v_m2_norms.shape[0];
+                                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_36)) )) = 0.000001;
+
+                                  /* "Djumble/djumble/voperators/cy.pyx":88
+ * 
+ *             # Preventing Division by Zero.
+ *             if m2_norms[i2] == 0.0:             # <<<<<<<<<<<<<<
+ *                 m2_norms[i2] = 0.000001
+ * 
+ */
+                                }
+                            }
+                        }
+                    }
+                }
+
+                /* "Djumble/djumble/voperators/cy.pyx":94
+ *         # Calculating the cosine similarity.
+ *         # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
+ *         for i3 in prange(m1_I, schedule='guided'):             # <<<<<<<<<<<<<<
+ * 
+ *             for j3 in range(m2_I):
+ */
+                __pyx_t_7 = __pyx_v_m1_I;
+                if (1 == 0) abort();
+                {
+                    __pyx_t_11 = (__pyx_t_7 - 0) / 1;
+                    if (__pyx_t_11 > 0)
+                    {
+                        #ifdef _OPENMP
+                        #pragma omp for lastprivate(__pyx_v_j3) lastprivate(__pyx_v_k) firstprivate(__pyx_v_i3) lastprivate(__pyx_v_i3) schedule(guided)
+                        #endif /* _OPENMP */
+                        for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_11; __pyx_t_8++){
+                            {
+                                __pyx_v_i3 = 0 + 1 * __pyx_t_8;
+                                /* Initialize private variables to invalid values */
+                                __pyx_v_j3 = ((Py_ssize_t)0xbad0bad0);
+                                __pyx_v_k = ((Py_ssize_t)0xbad0bad0);
+
+                                /* "Djumble/djumble/voperators/cy.pyx":96
+ *         for i3 in prange(m1_I, schedule='guided'):
+ * 
+ *             for j3 in range(m2_I):             # <<<<<<<<<<<<<<
+ * 
+ *                 # Calculating the elemnt-wise sum of products distorted by A.
+ */
+                                __pyx_t_12 = __pyx_v_m2_I;
+                                for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_12; __pyx_t_15+=1) {
+                                  __pyx_v_j3 = __pyx_t_15;
+
+                                  /* "Djumble/djumble/voperators/cy.pyx":99
+ * 
+ *                 # Calculating the elemnt-wise sum of products distorted by A.
+ *                 for k in range(m1_J):             # <<<<<<<<<<<<<<
+ *                     csdis_vect[i3, j3] += m1[i3, k] * m2[j3, k] * A[k]
+ * 
+ */
+                                  __pyx_t_37 = __pyx_v_m1_J;
+                                  for (__pyx_t_38 = 0; __pyx_t_38 < __pyx_t_37; __pyx_t_38+=1) {
+                                    __pyx_v_k = __pyx_t_38;
+
+                                    /* "Djumble/djumble/voperators/cy.pyx":100
+ *                 # Calculating the elemnt-wise sum of products distorted by A.
+ *                 for k in range(m1_J):
+ *                     csdis_vect[i3, j3] += m1[i3, k] * m2[j3, k] * A[k]             # <<<<<<<<<<<<<<
+ * 
+ *                 # Normalizing with the products of the respective vector norms.
+ */
+                                    __pyx_t_39 = __pyx_v_i3;
+                                    __pyx_t_40 = __pyx_v_k;
+                                    if (__pyx_t_39 < 0) __pyx_t_39 += __pyx_v_m1.shape[0];
+                                    if (__pyx_t_40 < 0) __pyx_t_40 += __pyx_v_m1.shape[1];
+                                    __pyx_t_41 = __pyx_v_j3;
+                                    __pyx_t_42 = __pyx_v_k;
+                                    if (__pyx_t_41 < 0) __pyx_t_41 += __pyx_v_m2.shape[0];
+                                    if (__pyx_t_42 < 0) __pyx_t_42 += __pyx_v_m2.shape[1];
+                                    __pyx_t_43 = __pyx_v_k;
+                                    if (__pyx_t_43 < 0) __pyx_t_43 += __pyx_v_A.shape[0];
+                                    __pyx_t_44 = __pyx_v_i3;
+                                    __pyx_t_45 = __pyx_v_j3;
+                                    if (__pyx_t_44 < 0) __pyx_t_44 += __pyx_v_csdis_vect.shape[0];
+                                    if (__pyx_t_45 < 0) __pyx_t_45 += __pyx_v_csdis_vect.shape[1];
+                                    *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_44 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_45)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_39 * __pyx_v_m1.strides[0]) )) + __pyx_t_40)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_41 * __pyx_v_m2.strides[0]) )) + __pyx_t_42)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_43)) ))));
+                                  }
+
+                                  /* "Djumble/djumble/voperators/cy.pyx":103
+ * 
+ *                 # Normalizing with the products of the respective vector norms.
+ *                 csdis_vect[i3, j3] = csdis_vect[i3, j3] / (m1_norms[i3] * m2_norms[j3])             # <<<<<<<<<<<<<<
+ * 
+ *                 # Getting Cosine Distance.
+ */
+                                  __pyx_t_46 = __pyx_v_i3;
+                                  __pyx_t_47 = __pyx_v_j3;
+                                  if (__pyx_t_46 < 0) __pyx_t_46 += __pyx_v_csdis_vect.shape[0];
+                                  if (__pyx_t_47 < 0) __pyx_t_47 += __pyx_v_csdis_vect.shape[1];
+                                  __pyx_t_48 = __pyx_v_i3;
+                                  if (__pyx_t_48 < 0) __pyx_t_48 += __pyx_v_m1_norms.shape[0];
+                                  __pyx_t_49 = __pyx_v_j3;
+                                  if (__pyx_t_49 < 0) __pyx_t_49 += __pyx_v_m2_norms.shape[0];
+                                  __pyx_t_50 = __pyx_v_i3;
+                                  __pyx_t_51 = __pyx_v_j3;
+                                  if (__pyx_t_50 < 0) __pyx_t_50 += __pyx_v_csdis_vect.shape[0];
+                                  if (__pyx_t_51 < 0) __pyx_t_51 += __pyx_v_csdis_vect.shape[1];
+                                  *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_50 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_51)) )) = ((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_46 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_47)) ))) / ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_48)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_49)) )))));
+
+                                  /* "Djumble/djumble/voperators/cy.pyx":106
+ * 
+ *                 # Getting Cosine Distance.
+ *                 csdis_vect[i3, j3] =  acos(csdis_vect[i3, j3]) / pi             # <<<<<<<<<<<<<<
+ * 
+ *     return csdis_vect
+ */
+                                  __pyx_t_52 = __pyx_v_i3;
+                                  __pyx_t_53 = __pyx_v_j3;
+                                  if (__pyx_t_52 < 0) __pyx_t_52 += __pyx_v_csdis_vect.shape[0];
+                                  if (__pyx_t_53 < 0) __pyx_t_53 += __pyx_v_csdis_vect.shape[1];
+                                  __pyx_t_54 = __pyx_v_i3;
+                                  __pyx_t_55 = __pyx_v_j3;
+                                  if (__pyx_t_54 < 0) __pyx_t_54 += __pyx_v_csdis_vect.shape[0];
+                                  if (__pyx_t_55 < 0) __pyx_t_55 += __pyx_v_csdis_vect.shape[1];
+                                  *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_54 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_55)) )) = (acos((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_52 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_53)) )))) / __pyx_v_pi);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #if ((defined(__APPLE__) || defined(__OSX__)) && (defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && (__GNUC_MINOR__ > 95)))))
+            #undef likely
+            #undef unlikely
+            #define likely(x)   __builtin_expect(!!(x), 1)
+            #define unlikely(x) __builtin_expect(!!(x), 0)
+        #endif
+      }
+
+      /* "Djumble/djumble/voperators/cy.pyx":47
+ *     # The following operatsion taking place in the non-gil and parallel...
+ *     # ...openmp emviroment.
+ *     with nogil, parallel():             # <<<<<<<<<<<<<<
+ * 
+ *         # Initilising temporary storage arrays. NOTE: This is a mandatory process because as...
+ */
+      /*finally:*/ {
+        /*normal exit:*/{
+          #ifdef WITH_THREAD
+          Py_BLOCK_THREADS
+          #endif
+          goto __pyx_L5;
+        }
+        __pyx_L5:;
+      }
+  }
+
+  /* "Djumble/djumble/voperators/cy.pyx":108
+ *                 csdis_vect[i3, j3] =  acos(csdis_vect[i3, j3]) / pi
+ * 
+ *     return csdis_vect             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __PYX_INC_MEMVIEW(&__pyx_v_csdis_vect, 0);
+  __pyx_r = __pyx_v_csdis_vect;
+  goto __pyx_L0;
+
+  /* "Djumble/djumble/voperators/cy.pyx":19
+ *     cdef double log (double x) nogil
+ * 
+ * cpdef double [:, ::1] cosDa(double [:, ::1] m1, double [:, ::1] m2, double[::1] A):             # <<<<<<<<<<<<<<
+ * 
+ *     cdef:
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_4, 1);
+  __Pyx_XDECREF(__pyx_t_5);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
+  __pyx_r.data = NULL;
+  __pyx_r.memview = NULL;
+  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosDa", __pyx_clineno, __pyx_lineno, __pyx_filename);
+
+  goto __pyx_L2;
+  __pyx_L0:;
+  if (unlikely(!__pyx_r.memview)) {
+    PyErr_SetString(PyExc_TypeError,"Memoryview return value is not initialized");
+  }
+  __pyx_L2:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v_m1_norms, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_m2_norms, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_csdis_vect, 1);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_1cosDa(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_1cosDa(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  __Pyx_memviewslice __pyx_v_m1 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v_m2 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v_A = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("cosDa (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_m1,&__pyx_n_s_m2,&__pyx_n_s_A,0};
+    PyObject* values[3] = {0,0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m1)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        case  1:
+        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m2)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("cosDa", 1, 3, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+        case  2:
+        if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_A)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("cosDa", 1, 3, 3, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cosDa") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+      values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+    }
+    __pyx_v_m1 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0]); if (unlikely(!__pyx_v_m1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m2 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1]); if (unlikely(!__pyx_v_m2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_A = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2]); if (unlikely(!__pyx_v_A.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("cosDa", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosDa", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_cosDa(__pyx_self, __pyx_v_m1, __pyx_v_m2, __pyx_v_A);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_cosDa(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_A) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  PyObject *__pyx_t_2 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("cosDa", 0);
+  __Pyx_XDECREF(__pyx_r);
+  if (unlikely(!__pyx_v_m1.memview)) { __Pyx_RaiseUnboundLocalError("m1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_m2.memview)) { __Pyx_RaiseUnboundLocalError("m2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_A.memview)) { __Pyx_RaiseUnboundLocalError("A"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa(__pyx_v_m1, __pyx_v_m2, __pyx_v_A, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+  __pyx_r = __pyx_t_2;
+  __pyx_t_2 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosDa", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v_m1, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_m2, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_A, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Djumble/djumble/voperators/cy.pyx":111
+ * 
+ * 
+ * cpdef double [:, ::1] cosDa_rows(double [:, ::1] m1,             # <<<<<<<<<<<<<<
  *                                   double [:, ::1] m2,
  *                                   double[::1] A,
  */
 
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_1cos2Da_rows(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows(__Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r, CYTHON_UNUSED int __pyx_skip_dispatch) {
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_3cosDa_rows(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_rows(__Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r, CYTHON_UNUSED int __pyx_skip_dispatch) {
   Py_ssize_t __pyx_v_im1;
   Py_ssize_t __pyx_v_im2;
   Py_ssize_t __pyx_v_i;
@@ -1934,9 +2795,9 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("cos2Da_rows", 0);
+  __Pyx_RefNannySetupContext("cosDa_rows", 0);
 
-  /* "Djumble/djumble/voperators/cy.pyx":31
+  /* "Djumble/djumble/voperators/cy.pyx":122
  * 
  *         # Matrices dimentions intilized variables.
  *         Py_ssize_t m1r_I = m1r.shape[0]             # <<<<<<<<<<<<<<
@@ -1945,7 +2806,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
  */
   __pyx_v_m1r_I = (__pyx_v_m1r.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":32
+  /* "Djumble/djumble/voperators/cy.pyx":123
  *         # Matrices dimentions intilized variables.
  *         Py_ssize_t m1r_I = m1r.shape[0]
  *         Py_ssize_t m1_J = m1.shape[1]             # <<<<<<<<<<<<<<
@@ -1954,7 +2815,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
  */
   __pyx_v_m1_J = (__pyx_v_m1.shape[1]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":33
+  /* "Djumble/djumble/voperators/cy.pyx":124
  *         Py_ssize_t m1r_I = m1r.shape[0]
  *         Py_ssize_t m1_J = m1.shape[1]
  *         Py_ssize_t m2r_I = m2r.shape[0]             # <<<<<<<<<<<<<<
@@ -1963,7 +2824,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
  */
   __pyx_v_m2r_I = (__pyx_v_m2r.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":34
+  /* "Djumble/djumble/voperators/cy.pyx":125
  *         Py_ssize_t m1_J = m1.shape[1]
  *         Py_ssize_t m2r_I = m2r.shape[0]
  *         Py_ssize_t m2_J = m2.shape[1]             # <<<<<<<<<<<<<<
@@ -1972,7 +2833,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
  */
   __pyx_v_m2_J = (__pyx_v_m2.shape[1]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":43
+  /* "Djumble/djumble/voperators/cy.pyx":134
  * 
  *         # Definding Pi constant.
  *         double pi = 3.14159265             # <<<<<<<<<<<<<<
@@ -1981,86 +2842,86 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
  */
   __pyx_v_pi = 3.14159265;
 
-  /* "Djumble/djumble/voperators/cy.pyx":46
+  /* "Djumble/djumble/voperators/cy.pyx":137
  * 
  *     # Creating the temporary cython arrays.
  *     m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  *     m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
  *     csdis_vect = cvarray(shape=(m1r_I, m2r_I), itemsize=sizeof(double), format="d")
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 137; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_m1r_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_m1r_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 137; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 137; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 137; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 137; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 137; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 137; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 137; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_3);
-  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 137; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_m1_norms = __pyx_t_4;
   __pyx_t_4.memview = NULL;
   __pyx_t_4.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":47
+  /* "Djumble/djumble/voperators/cy.pyx":138
  *     # Creating the temporary cython arrays.
  *     m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")
  *     m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  *     csdis_vect = cvarray(shape=(m1r_I, m2r_I), itemsize=sizeof(double), format="d")
  * 
  */
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m2r_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m2r_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_shape, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_shape, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_itemsize, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_itemsize, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_2);
-  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_m2_norms = __pyx_t_4;
   __pyx_t_4.memview = NULL;
   __pyx_t_4.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":48
+  /* "Djumble/djumble/voperators/cy.pyx":139
  *     m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")
  *     m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
  *     csdis_vect = cvarray(shape=(m1r_I, m2r_I), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  * 
  *     # The following operatsion taking place in the non-gil and parallel...
  */
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_m1r_I); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_m1r_I); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m2r_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m2r_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3);
@@ -2068,24 +2929,24 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
   PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_1);
   __pyx_t_3 = 0;
   __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_shape, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_shape, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_itemsize, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_itemsize, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_5);
-  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_v_csdis_vect = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":52
+  /* "Djumble/djumble/voperators/cy.pyx":143
  *     # The following operatsion taking place in the non-gil and parallel...
  *     # ...openmp emviroment.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -2106,14 +2967,14 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                 #define unlikely(x) (x)
             #endif
             #ifdef _OPENMP
-            #pragma omp parallel private(__pyx_v_im1, __pyx_v_im2) private(__pyx_t_35, __pyx_t_27, __pyx_t_37, __pyx_t_16, __pyx_t_24, __pyx_t_56, __pyx_t_53, __pyx_t_41, __pyx_t_8, __pyx_t_47, __pyx_t_34, __pyx_t_31, __pyx_t_43, __pyx_t_28, __pyx_t_13, __pyx_t_48, __pyx_t_7, __pyx_t_44, __pyx_t_36, __pyx_t_25, __pyx_t_52, __pyx_t_60, __pyx_t_39, __pyx_t_14, __pyx_t_19, __pyx_t_22, __pyx_t_51, __pyx_t_30, __pyx_t_29, __pyx_t_11, __pyx_t_54, __pyx_t_20, __pyx_t_49, __pyx_t_33, __pyx_t_45, __pyx_t_40, __pyx_t_9, __pyx_t_42, __pyx_t_38, __pyx_t_12, __pyx_t_18, __pyx_t_59, __pyx_t_23, __pyx_t_26, __pyx_t_50, __pyx_t_15, __pyx_t_17, __pyx_t_57, __pyx_t_21, __pyx_t_58, __pyx_t_32, __pyx_t_10, __pyx_t_55, __pyx_t_61, __pyx_t_46)
+            #pragma omp parallel private(__pyx_v_im1, __pyx_v_im2) private(__pyx_t_35, __pyx_t_27, __pyx_t_37, __pyx_t_16, __pyx_t_24, __pyx_t_56, __pyx_t_53, __pyx_t_8, __pyx_t_47, __pyx_t_34, __pyx_t_31, __pyx_t_43, __pyx_t_15, __pyx_t_13, __pyx_t_48, __pyx_t_7, __pyx_t_44, __pyx_t_36, __pyx_t_25, __pyx_t_52, __pyx_t_60, __pyx_t_39, __pyx_t_14, __pyx_t_19, __pyx_t_22, __pyx_t_51, __pyx_t_30, __pyx_t_29, __pyx_t_11, __pyx_t_54, __pyx_t_20, __pyx_t_49, __pyx_t_33, __pyx_t_45, __pyx_t_40, __pyx_t_9, __pyx_t_42, __pyx_t_38, __pyx_t_12, __pyx_t_18, __pyx_t_59, __pyx_t_23, __pyx_t_26, __pyx_t_50, __pyx_t_41, __pyx_t_28, __pyx_t_17, __pyx_t_57, __pyx_t_21, __pyx_t_58, __pyx_t_32, __pyx_t_10, __pyx_t_55, __pyx_t_61, __pyx_t_46)
             #endif /* _OPENMP */
             {
                 /* Initialize private variables to invalid values */
                 __pyx_v_im1 = ((Py_ssize_t)0xbad0bad0);
                 __pyx_v_im2 = ((Py_ssize_t)0xbad0bad0);
 
-                /* "Djumble/djumble/voperators/cy.pyx":57
+                /* "Djumble/djumble/voperators/cy.pyx":148
  *         # ...in C garbage values can case floating point overflow, thus, peculiar results...
  *         # ...like NaN or incorrect calculatons.
  *         for im1 in range(m1r_I):             # <<<<<<<<<<<<<<
@@ -2124,7 +2985,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                 for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
                   __pyx_v_im1 = __pyx_t_8;
 
-                  /* "Djumble/djumble/voperators/cy.pyx":58
+                  /* "Djumble/djumble/voperators/cy.pyx":149
  *         # ...like NaN or incorrect calculatons.
  *         for im1 in range(m1r_I):
  *             m1_norms[im1] = 0.0             # <<<<<<<<<<<<<<
@@ -2136,7 +2997,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_9)) )) = 0.0;
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":60
+                /* "Djumble/djumble/voperators/cy.pyx":151
  *             m1_norms[im1] = 0.0
  * 
  *         for im2 in range(m2r_I):             # <<<<<<<<<<<<<<
@@ -2147,7 +3008,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                 for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
                   __pyx_v_im2 = __pyx_t_8;
 
-                  /* "Djumble/djumble/voperators/cy.pyx":61
+                  /* "Djumble/djumble/voperators/cy.pyx":152
  * 
  *         for im2 in range(m2r_I):
  *             m2_norms[im2] = 0.0             # <<<<<<<<<<<<<<
@@ -2159,7 +3020,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_10)) )) = 0.0;
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":63
+                /* "Djumble/djumble/voperators/cy.pyx":154
  *             m2_norms[im2] = 0.0
  * 
  *         for im1 in range(m1r_I):             # <<<<<<<<<<<<<<
@@ -2170,7 +3031,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                 for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
                   __pyx_v_im1 = __pyx_t_8;
 
-                  /* "Djumble/djumble/voperators/cy.pyx":64
+                  /* "Djumble/djumble/voperators/cy.pyx":155
  * 
  *         for im1 in range(m1r_I):
  *             for im2 in range(m2r_I):             # <<<<<<<<<<<<<<
@@ -2181,7 +3042,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                   for (__pyx_t_12 = 0; __pyx_t_12 < __pyx_t_11; __pyx_t_12+=1) {
                     __pyx_v_im2 = __pyx_t_12;
 
-                    /* "Djumble/djumble/voperators/cy.pyx":65
+                    /* "Djumble/djumble/voperators/cy.pyx":156
  *         for im1 in range(m1r_I):
  *             for im2 in range(m2r_I):
  *                 csdis_vect[im1, im2] = 0.0             # <<<<<<<<<<<<<<
@@ -2196,7 +3057,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                   }
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":68
+                /* "Djumble/djumble/voperators/cy.pyx":159
  * 
  *         # Calculating the Norms for the first matrix.
  *         for i in prange(m1r_I, schedule='guided'):             # <<<<<<<<<<<<<<
@@ -2210,7 +3071,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                     if (__pyx_t_11 > 0)
                     {
                         #ifdef _OPENMP
-                        #pragma omp for lastprivate(__pyx_v_j) firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) schedule(guided)
+                        #pragma omp for firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) lastprivate(__pyx_v_j) schedule(guided)
                         #endif /* _OPENMP */
                         for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_11; __pyx_t_8++){
                             {
@@ -2218,7 +3079,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                 /* Initialize private variables to invalid values */
                                 __pyx_v_j = ((Py_ssize_t)0xbad0bad0);
 
-                                /* "Djumble/djumble/voperators/cy.pyx":71
+                                /* "Djumble/djumble/voperators/cy.pyx":162
  * 
  *             # Calculating Sum.
  *             for j in range(m1_J):             # <<<<<<<<<<<<<<
@@ -2229,7 +3090,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                 for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_12; __pyx_t_15+=1) {
                                   __pyx_v_j = __pyx_t_15;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":72
+                                  /* "Djumble/djumble/voperators/cy.pyx":163
  *             # Calculating Sum.
  *             for j in range(m1_J):
  *                 m1_norms[i] += m1[m1r[i], j] * m1[m1r[i], j] * A[j]             # <<<<<<<<<<<<<<
@@ -2255,7 +3116,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_23)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_17 * __pyx_v_m1.strides[0]) )) + __pyx_t_18)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_20 * __pyx_v_m1.strides[0]) )) + __pyx_t_21)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_22)) ))));
                                 }
 
-                                /* "Djumble/djumble/voperators/cy.pyx":75
+                                /* "Djumble/djumble/voperators/cy.pyx":166
  * 
  *             # Calculating the Square root of the sum
  *             m1_norms[i] = sqrt(m1_norms[i])             # <<<<<<<<<<<<<<
@@ -2268,7 +3129,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                 if (__pyx_t_25 < 0) __pyx_t_25 += __pyx_v_m1_norms.shape[0];
                                 *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_25)) )) = sqrt((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_24)) ))));
 
-                                /* "Djumble/djumble/voperators/cy.pyx":78
+                                /* "Djumble/djumble/voperators/cy.pyx":169
  * 
  *             # Preventing Division by Zero.
  *             if m1_norms[i] == 0.0:             # <<<<<<<<<<<<<<
@@ -2280,7 +3141,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                 __pyx_t_27 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_26)) ))) == 0.0) != 0);
                                 if (__pyx_t_27) {
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":79
+                                  /* "Djumble/djumble/voperators/cy.pyx":170
  *             # Preventing Division by Zero.
  *             if m1_norms[i] == 0.0:
  *                 m1_norms[i] = 0.000001             # <<<<<<<<<<<<<<
@@ -2291,7 +3152,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                   if (__pyx_t_28 < 0) __pyx_t_28 += __pyx_v_m1_norms.shape[0];
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_28)) )) = 0.000001;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":78
+                                  /* "Djumble/djumble/voperators/cy.pyx":169
  * 
  *             # Preventing Division by Zero.
  *             if m1_norms[i] == 0.0:             # <<<<<<<<<<<<<<
@@ -2304,7 +3165,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                     }
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":83
+                /* "Djumble/djumble/voperators/cy.pyx":174
  * 
  *         # Calculating the Norms for the second matrix.
  *         for i2 in prange(m2r_I, schedule='guided'):             # <<<<<<<<<<<<<<
@@ -2326,7 +3187,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                 /* Initialize private variables to invalid values */
                                 __pyx_v_j2 = ((Py_ssize_t)0xbad0bad0);
 
-                                /* "Djumble/djumble/voperators/cy.pyx":86
+                                /* "Djumble/djumble/voperators/cy.pyx":177
  * 
  *             # Calculating Sum.
  *             for j2 in range(m2_J):             # <<<<<<<<<<<<<<
@@ -2337,7 +3198,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                 for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_12; __pyx_t_15+=1) {
                                   __pyx_v_j2 = __pyx_t_15;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":87
+                                  /* "Djumble/djumble/voperators/cy.pyx":178
  *             # Calculating Sum.
  *             for j2 in range(m2_J):
  *                 m2_norms[i2] += m2[m2r[i2], j2] * m2[m2r[i2], j2] * A[j2]             # <<<<<<<<<<<<<<
@@ -2363,7 +3224,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_36)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_30 * __pyx_v_m2.strides[0]) )) + __pyx_t_31)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_33 * __pyx_v_m2.strides[0]) )) + __pyx_t_34)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_35)) ))));
                                 }
 
-                                /* "Djumble/djumble/voperators/cy.pyx":90
+                                /* "Djumble/djumble/voperators/cy.pyx":181
  * 
  *             # Calculating the Square root of the sum
  *             m2_norms[i2] = sqrt(m2_norms[i2])             # <<<<<<<<<<<<<<
@@ -2376,7 +3237,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                 if (__pyx_t_38 < 0) __pyx_t_38 += __pyx_v_m2_norms.shape[0];
                                 *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_38)) )) = sqrt((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_37)) ))));
 
-                                /* "Djumble/djumble/voperators/cy.pyx":93
+                                /* "Djumble/djumble/voperators/cy.pyx":184
  * 
  *             # Preventing Division by Zero.
  *             if m2_norms[i2] == 0.0:             # <<<<<<<<<<<<<<
@@ -2388,7 +3249,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                 __pyx_t_27 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_39)) ))) == 0.0) != 0);
                                 if (__pyx_t_27) {
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":94
+                                  /* "Djumble/djumble/voperators/cy.pyx":185
  *             # Preventing Division by Zero.
  *             if m2_norms[i2] == 0.0:
  *                 m2_norms[i2] = 0.000001             # <<<<<<<<<<<<<<
@@ -2399,7 +3260,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                   if (__pyx_t_40 < 0) __pyx_t_40 += __pyx_v_m2_norms.shape[0];
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_40)) )) = 0.000001;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":93
+                                  /* "Djumble/djumble/voperators/cy.pyx":184
  * 
  *             # Preventing Division by Zero.
  *             if m2_norms[i2] == 0.0:             # <<<<<<<<<<<<<<
@@ -2412,7 +3273,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                     }
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":99
+                /* "Djumble/djumble/voperators/cy.pyx":190
  *         # Calculating the cosine similarity.
  *         # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
  *         for i3 in prange(m1r_I, schedule='guided'):             # <<<<<<<<<<<<<<
@@ -2426,7 +3287,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                     if (__pyx_t_11 > 0)
                     {
                         #ifdef _OPENMP
-                        #pragma omp for lastprivate(__pyx_v_j3) lastprivate(__pyx_v_k) firstprivate(__pyx_v_i3) lastprivate(__pyx_v_i3) schedule(guided)
+                        #pragma omp for firstprivate(__pyx_v_i3) lastprivate(__pyx_v_i3) lastprivate(__pyx_v_j3) lastprivate(__pyx_v_k) schedule(guided)
                         #endif /* _OPENMP */
                         for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_11; __pyx_t_8++){
                             {
@@ -2435,7 +3296,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                 __pyx_v_j3 = ((Py_ssize_t)0xbad0bad0);
                                 __pyx_v_k = ((Py_ssize_t)0xbad0bad0);
 
-                                /* "Djumble/djumble/voperators/cy.pyx":101
+                                /* "Djumble/djumble/voperators/cy.pyx":192
  *         for i3 in prange(m1r_I, schedule='guided'):
  * 
  *             for j3 in range(m2r_I):             # <<<<<<<<<<<<<<
@@ -2446,7 +3307,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                 for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_12; __pyx_t_15+=1) {
                                   __pyx_v_j3 = __pyx_t_15;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":104
+                                  /* "Djumble/djumble/voperators/cy.pyx":195
  * 
  *                 # Calculating the elemnt-wise sum of products distorted by A.
  *                 for k in range(m1_J):             # <<<<<<<<<<<<<<
@@ -2457,7 +3318,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                   for (__pyx_t_42 = 0; __pyx_t_42 < __pyx_t_41; __pyx_t_42+=1) {
                                     __pyx_v_k = __pyx_t_42;
 
-                                    /* "Djumble/djumble/voperators/cy.pyx":105
+                                    /* "Djumble/djumble/voperators/cy.pyx":196
  *                 # Calculating the elemnt-wise sum of products distorted by A.
  *                 for k in range(m1_J):
  *                     csdis_vect[i3, j3] += m1[m1r[i3], k] * m2[m2r[j3], k] * A[k]             # <<<<<<<<<<<<<<
@@ -2485,7 +3346,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_50 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_51)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_44 * __pyx_v_m1.strides[0]) )) + __pyx_t_45)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_47 * __pyx_v_m2.strides[0]) )) + __pyx_t_48)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_49)) ))));
                                   }
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":108
+                                  /* "Djumble/djumble/voperators/cy.pyx":199
  * 
  *                 # Normalizing with the products of the respective vector norms.
  *                 csdis_vect[i3, j3] = csdis_vect[i3, j3] / (m1_norms[i3] * m2_norms[j3])             # <<<<<<<<<<<<<<
@@ -2506,7 +3367,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
                                   if (__pyx_t_57 < 0) __pyx_t_57 += __pyx_v_csdis_vect.shape[1];
                                   *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_56 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_57)) )) = ((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_52 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_53)) ))) / ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_54)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_55)) )))));
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":111
+                                  /* "Djumble/djumble/voperators/cy.pyx":202
  * 
  *                 # Getting Cosine Distance.
  *                 csdis_vect[i3, j3] =  acos(csdis_vect[i3, j3]) / pi             # <<<<<<<<<<<<<<
@@ -2537,7 +3398,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
         #endif
       }
 
-      /* "Djumble/djumble/voperators/cy.pyx":52
+      /* "Djumble/djumble/voperators/cy.pyx":143
  *     # The following operatsion taking place in the non-gil and parallel...
  *     # ...openmp emviroment.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -2555,7 +3416,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
       }
   }
 
-  /* "Djumble/djumble/voperators/cy.pyx":113
+  /* "Djumble/djumble/voperators/cy.pyx":204
  *                 csdis_vect[i3, j3] =  acos(csdis_vect[i3, j3]) / pi
  * 
  *     return csdis_vect             # <<<<<<<<<<<<<<
@@ -2566,10 +3427,10 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
   __pyx_r = __pyx_v_csdis_vect;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":20
+  /* "Djumble/djumble/voperators/cy.pyx":111
  * 
  * 
- * cpdef double [:, ::1] cos2Da_rows(double [:, ::1] m1,             # <<<<<<<<<<<<<<
+ * cpdef double [:, ::1] cosDa_rows(double [:, ::1] m1,             # <<<<<<<<<<<<<<
  *                                   double [:, ::1] m2,
  *                                   double[::1] A,
  */
@@ -2584,7 +3445,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
   __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
   __pyx_r.data = NULL;
   __pyx_r.memview = NULL;
-  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cos2Da_rows", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosDa_rows", __pyx_clineno, __pyx_lineno, __pyx_filename);
 
   goto __pyx_L2;
   __pyx_L0:;
@@ -2600,8 +3461,8 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_1cos2Da_rows(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_1cos2Da_rows(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_3cosDa_rows(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_3cosDa_rows(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_m1 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_m2 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_A = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -2612,7 +3473,7 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_1cos2Da_rows(PyObje
   int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("cos2Da_rows (wrapper)", 0);
+  __Pyx_RefNannySetupContext("cosDa_rows (wrapper)", 0);
   {
     static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_m1,&__pyx_n_s_m2,&__pyx_n_s_A,&__pyx_n_s_m1r,&__pyx_n_s_m2r,0};
     PyObject* values[5] = {0,0,0,0,0};
@@ -2636,26 +3497,26 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_1cos2Da_rows(PyObje
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m2)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cos2Da_rows", 1, 5, 5, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cosDa_rows", 1, 5, 5, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_A)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cos2Da_rows", 1, 5, 5, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cosDa_rows", 1, 5, 5, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m1r)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cos2Da_rows", 1, 5, 5, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cosDa_rows", 1, 5, 5, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m2r)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cos2Da_rows", 1, 5, 5, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cosDa_rows", 1, 5, 5, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cos2Da_rows") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cosDa_rows") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 5) {
       goto __pyx_L5_argtuple_error;
@@ -2666,28 +3527,28 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_1cos2Da_rows(PyObje
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
       values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
     }
-    __pyx_v_m1 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0]); if (unlikely(!__pyx_v_m1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_m2 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1]); if (unlikely(!__pyx_v_m2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 21; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_A = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2]); if (unlikely(!__pyx_v_A.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_m1r = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_5numpy_intp_t(values[3]); if (unlikely(!__pyx_v_m1r.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 23; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_m2r = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_5numpy_intp_t(values[4]); if (unlikely(!__pyx_v_m2r.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m1 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0]); if (unlikely(!__pyx_v_m1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m2 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1]); if (unlikely(!__pyx_v_m2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_A = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2]); if (unlikely(!__pyx_v_A.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 113; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m1r = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_5numpy_intp_t(values[3]); if (unlikely(!__pyx_v_m1r.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 114; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m2r = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_5numpy_intp_t(values[4]); if (unlikely(!__pyx_v_m2r.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 115; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cos2Da_rows", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("cosDa_rows", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
-  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cos2Da_rows", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosDa_rows", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_cos2Da_rows(__pyx_self, __pyx_v_m1, __pyx_v_m2, __pyx_v_A, __pyx_v_m1r, __pyx_v_m2r);
+  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_2cosDa_rows(__pyx_self, __pyx_v_m1, __pyx_v_m2, __pyx_v_A, __pyx_v_m1r, __pyx_v_m2r);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_cos2Da_rows(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r) {
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_2cosDa_rows(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -2695,15 +3556,15 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_cos2Da_rows(CYTHON_
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("cos2Da_rows", 0);
+  __Pyx_RefNannySetupContext("cosDa_rows", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_m1.memview)) { __Pyx_RaiseUnboundLocalError("m1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_m2.memview)) { __Pyx_RaiseUnboundLocalError("m2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_A.memview)) { __Pyx_RaiseUnboundLocalError("A"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_m1r.memview)) { __Pyx_RaiseUnboundLocalError("m1r"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_m2r.memview)) { __Pyx_RaiseUnboundLocalError("m2r"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da_rows(__pyx_v_m1, __pyx_v_m2, __pyx_v_A, __pyx_v_m1r, __pyx_v_m2r, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_v_m1.memview)) { __Pyx_RaiseUnboundLocalError("m1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_m2.memview)) { __Pyx_RaiseUnboundLocalError("m2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_A.memview)) { __Pyx_RaiseUnboundLocalError("A"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_m1r.memview)) { __Pyx_RaiseUnboundLocalError("m1r"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_m2r.memview)) { __Pyx_RaiseUnboundLocalError("m2r"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_rows(__pyx_v_m1, __pyx_v_m2, __pyx_v_A, __pyx_v_m1r, __pyx_v_m2r, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
   __pyx_r = __pyx_t_2;
@@ -2714,7 +3575,7 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_cos2Da_rows(CYTHON_
   __pyx_L1_error:;
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cos2Da_rows", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosDa_rows", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __PYX_XDEC_MEMVIEW(&__pyx_v_m1, 1);
@@ -2727,31 +3588,26 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_cos2Da_rows(CYTHON_
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":116
+/* "Djumble/djumble/voperators/cy.pyx":207
  * 
  * 
- * cpdef double [:, ::1] cos2Da(double [:, ::1] m1, double [:, ::1] m2, double[::1] A):             # <<<<<<<<<<<<<<
- * 
- *     cdef:
+ * cpdef double [::1] cosDa_v2r(double [::1] v,             # <<<<<<<<<<<<<<
+ *                                 double [:, ::1] m,
+ *                                 double[::1] A,
  */
 
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_3cos2Da(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da(__Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_A, CYTHON_UNUSED int __pyx_skip_dispatch) {
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_5cosDa_v2r(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_v2r(__Pyx_memviewslice __pyx_v_v, __Pyx_memviewslice __pyx_v_m, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_mr, CYTHON_UNUSED int __pyx_skip_dispatch) {
+  Py_ssize_t __pyx_v_vi;
+  Py_ssize_t __pyx_v_mi;
   Py_ssize_t __pyx_v_i;
   Py_ssize_t __pyx_v_j;
   Py_ssize_t __pyx_v_i2;
   Py_ssize_t __pyx_v_j2;
-  Py_ssize_t __pyx_v_i3;
-  Py_ssize_t __pyx_v_j3;
-  Py_ssize_t __pyx_v_k;
-  Py_ssize_t __pyx_v_im1;
-  Py_ssize_t __pyx_v_im2;
-  Py_ssize_t __pyx_v_m1_I;
-  Py_ssize_t __pyx_v_m1_J;
-  Py_ssize_t __pyx_v_m2_I;
-  Py_ssize_t __pyx_v_m2_J;
-  __Pyx_memviewslice __pyx_v_m1_norms = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __Pyx_memviewslice __pyx_v_m2_norms = { 0, 0, { 0 }, { 0 }, { 0 } };
+  Py_ssize_t __pyx_v_v_I;
+  Py_ssize_t __pyx_v_mr_I;
+  double __pyx_v_v_norm;
+  __Pyx_memviewslice __pyx_v_m_norms = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_csdis_vect = { 0, 0, { 0 }, { 0 }, { 0 } };
   double __pyx_v_pi;
   __Pyx_memviewslice __pyx_r = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -2760,8 +3616,8 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da(__Py
   PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
   __Pyx_memviewslice __pyx_t_4 = { 0, 0, { 0 }, { 0 }, { 0 } };
-  PyObject *__pyx_t_5 = NULL;
-  __Pyx_memviewslice __pyx_t_6 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  Py_ssize_t __pyx_t_5;
+  Py_ssize_t __pyx_t_6;
   Py_ssize_t __pyx_t_7;
   Py_ssize_t __pyx_t_8;
   Py_ssize_t __pyx_t_9;
@@ -2778,9 +3634,9 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da(__Py
   Py_ssize_t __pyx_t_20;
   Py_ssize_t __pyx_t_21;
   Py_ssize_t __pyx_t_22;
-  Py_ssize_t __pyx_t_23;
+  int __pyx_t_23;
   Py_ssize_t __pyx_t_24;
-  int __pyx_t_25;
+  Py_ssize_t __pyx_t_25;
   Py_ssize_t __pyx_t_26;
   Py_ssize_t __pyx_t_27;
   Py_ssize_t __pyx_t_28;
@@ -2794,65 +3650,39 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da(__Py
   Py_ssize_t __pyx_t_36;
   Py_ssize_t __pyx_t_37;
   Py_ssize_t __pyx_t_38;
-  Py_ssize_t __pyx_t_39;
-  Py_ssize_t __pyx_t_40;
-  Py_ssize_t __pyx_t_41;
-  Py_ssize_t __pyx_t_42;
-  Py_ssize_t __pyx_t_43;
-  Py_ssize_t __pyx_t_44;
-  Py_ssize_t __pyx_t_45;
-  Py_ssize_t __pyx_t_46;
-  Py_ssize_t __pyx_t_47;
-  Py_ssize_t __pyx_t_48;
-  Py_ssize_t __pyx_t_49;
-  Py_ssize_t __pyx_t_50;
-  Py_ssize_t __pyx_t_51;
-  Py_ssize_t __pyx_t_52;
-  Py_ssize_t __pyx_t_53;
-  Py_ssize_t __pyx_t_54;
-  Py_ssize_t __pyx_t_55;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("cos2Da", 0);
+  __Pyx_RefNannySetupContext("cosDa_v2r", 0);
 
-  /* "Djumble/djumble/voperators/cy.pyx":123
+  /* "Djumble/djumble/voperators/cy.pyx":217
  * 
  *         # Matrices dimentions intilized variables.
- *         Py_ssize_t m1_I = m1.shape[0]             # <<<<<<<<<<<<<<
- *         Py_ssize_t m1_J = m1.shape[1]
- *         Py_ssize_t m2_I = m2.shape[0]
- */
-  __pyx_v_m1_I = (__pyx_v_m1.shape[0]);
-
-  /* "Djumble/djumble/voperators/cy.pyx":124
- *         # Matrices dimentions intilized variables.
- *         Py_ssize_t m1_I = m1.shape[0]
- *         Py_ssize_t m1_J = m1.shape[1]             # <<<<<<<<<<<<<<
- *         Py_ssize_t m2_I = m2.shape[0]
- *         Py_ssize_t m2_J = m2.shape[1]
- */
-  __pyx_v_m1_J = (__pyx_v_m1.shape[1]);
-
-  /* "Djumble/djumble/voperators/cy.pyx":125
- *         Py_ssize_t m1_I = m1.shape[0]
- *         Py_ssize_t m1_J = m1.shape[1]
- *         Py_ssize_t m2_I = m2.shape[0]             # <<<<<<<<<<<<<<
- *         Py_ssize_t m2_J = m2.shape[1]
+ *         Py_ssize_t v_I = v.shape[0]             # <<<<<<<<<<<<<<
+ *         Py_ssize_t mr_I = mr.shape[0]
  * 
  */
-  __pyx_v_m2_I = (__pyx_v_m2.shape[0]);
+  __pyx_v_v_I = (__pyx_v_v.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":126
- *         Py_ssize_t m1_J = m1.shape[1]
- *         Py_ssize_t m2_I = m2.shape[0]
- *         Py_ssize_t m2_J = m2.shape[1]             # <<<<<<<<<<<<<<
+  /* "Djumble/djumble/voperators/cy.pyx":218
+ *         # Matrices dimentions intilized variables.
+ *         Py_ssize_t v_I = v.shape[0]
+ *         Py_ssize_t mr_I = mr.shape[0]             # <<<<<<<<<<<<<<
  * 
  *         # MemoryViews for the cython arrays used for sotring the temporary and...
  */
-  __pyx_v_m2_J = (__pyx_v_m2.shape[1]);
+  __pyx_v_mr_I = (__pyx_v_mr.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":135
+  /* "Djumble/djumble/voperators/cy.pyx":222
+ *         # MemoryViews for the cython arrays used for sotring the temporary and...
+ *         # ...to be retured results.
+ *         double v_norm = 0.0             # <<<<<<<<<<<<<<
+ *         double [::1] m_norms
+ *         double [::1] csdis_vect
+ */
+  __pyx_v_v_norm = 0.0;
+
+  /* "Djumble/djumble/voperators/cy.pyx":227
  * 
  *         # Definding Pi constant.
  *         double pi = 3.14159265             # <<<<<<<<<<<<<<
@@ -2861,111 +3691,73 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da(__Py
  */
   __pyx_v_pi = 3.14159265;
 
-  /* "Djumble/djumble/voperators/cy.pyx":138
+  /* "Djumble/djumble/voperators/cy.pyx":230
  * 
  *     # Creating the temporary cython arrays.
- *     m1_norms = cvarray(shape=(m1_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
- *     m2_norms = cvarray(shape=(m2_I,), itemsize=sizeof(double), format="d")
- *     csdis_vect = cvarray(shape=(m1_I, m2_I), itemsize=sizeof(double), format="d")
+ *     m_norms = cvarray(shape=(mr_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
+ *     csdis_vect = cvarray(shape=(mr_I,), itemsize=sizeof(double), format="d")
+ * 
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_m1_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_mr_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_3);
-  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v_m1_norms = __pyx_t_4;
+  __pyx_v_m_norms = __pyx_t_4;
   __pyx_t_4.memview = NULL;
   __pyx_t_4.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":139
+  /* "Djumble/djumble/voperators/cy.pyx":231
  *     # Creating the temporary cython arrays.
- *     m1_norms = cvarray(shape=(m1_I,), itemsize=sizeof(double), format="d")
- *     m2_norms = cvarray(shape=(m2_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
- *     csdis_vect = cvarray(shape=(m1_I, m2_I), itemsize=sizeof(double), format="d")
+ *     m_norms = cvarray(shape=(mr_I,), itemsize=sizeof(double), format="d")
+ *     csdis_vect = cvarray(shape=(mr_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  * 
+ *     # The following operatsion taking place in the non-gil and parallel...
  */
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m2_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_mr_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_shape, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_shape, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_itemsize, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_itemsize, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_2);
-  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_v_m2_norms = __pyx_t_4;
+  __pyx_v_csdis_vect = __pyx_t_4;
   __pyx_t_4.memview = NULL;
   __pyx_t_4.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":140
- *     m1_norms = cvarray(shape=(m1_I,), itemsize=sizeof(double), format="d")
- *     m2_norms = cvarray(shape=(m2_I,), itemsize=sizeof(double), format="d")
- *     csdis_vect = cvarray(shape=(m1_I, m2_I), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
- * 
- *     # The following operatsion taking place in the non-gil and parallel...
- */
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_m1_I); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m2_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_1);
-  __pyx_t_3 = 0;
-  __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_shape, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_itemsize, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_5);
-  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_v_csdis_vect = __pyx_t_6;
-  __pyx_t_6.memview = NULL;
-  __pyx_t_6.data = NULL;
-
-  /* "Djumble/djumble/voperators/cy.pyx":144
+  /* "Djumble/djumble/voperators/cy.pyx":235
  *     # The following operatsion taking place in the non-gil and parallel...
  *     # ...openmp emviroment.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -2986,192 +3778,148 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da(__Py
                 #define unlikely(x) (x)
             #endif
             #ifdef _OPENMP
-            #pragma omp parallel private(__pyx_v_im1, __pyx_v_im2) private(__pyx_t_35, __pyx_t_42, __pyx_t_27, __pyx_t_16, __pyx_t_24, __pyx_t_53, __pyx_t_8, __pyx_t_47, __pyx_t_34, __pyx_t_31, __pyx_t_43, __pyx_t_28, __pyx_t_13, __pyx_t_48, __pyx_t_7, __pyx_t_44, __pyx_t_36, __pyx_t_52, __pyx_t_38, __pyx_t_29, __pyx_t_14, __pyx_t_19, __pyx_t_22, __pyx_t_51, __pyx_t_30, __pyx_t_25, __pyx_t_11, __pyx_t_54, __pyx_t_20, __pyx_t_49, __pyx_t_33, __pyx_t_45, __pyx_t_40, __pyx_t_9, __pyx_t_12, __pyx_t_18, __pyx_t_23, __pyx_t_26, __pyx_t_50, __pyx_t_15, __pyx_t_17, __pyx_t_39, __pyx_t_21, __pyx_t_37, __pyx_t_32, __pyx_t_41, __pyx_t_10, __pyx_t_55, __pyx_t_46)
+            #pragma omp parallel private(__pyx_v_mi, __pyx_v_v_norm, __pyx_v_vi) private(__pyx_t_35, __pyx_t_27, __pyx_t_37, __pyx_t_16, __pyx_t_24, __pyx_t_34, __pyx_t_31, __pyx_t_28, __pyx_t_23, __pyx_t_13, __pyx_t_36, __pyx_t_25, __pyx_t_6, __pyx_t_14, __pyx_t_19, __pyx_t_22, __pyx_t_30, __pyx_t_29, __pyx_t_11, __pyx_t_12, __pyx_t_20, __pyx_t_5, __pyx_t_33, __pyx_t_10, __pyx_t_38, __pyx_t_18, __pyx_t_26, __pyx_t_17, __pyx_t_21, __pyx_t_7, __pyx_t_32, __pyx_t_15, __pyx_t_8, __pyx_t_9)
             #endif /* _OPENMP */
             {
                 /* Initialize private variables to invalid values */
-                __pyx_v_im1 = ((Py_ssize_t)0xbad0bad0);
-                __pyx_v_im2 = ((Py_ssize_t)0xbad0bad0);
+                __pyx_v_mi = ((Py_ssize_t)0xbad0bad0);
+                __pyx_v_v_norm = ((double)__PYX_NAN());
+                __pyx_v_vi = ((Py_ssize_t)0xbad0bad0);
 
-                /* "Djumble/djumble/voperators/cy.pyx":149
+                /* "Djumble/djumble/voperators/cy.pyx":240
  *         # ...in C garbage values can case floating point overflow, thus, peculiar results...
  *         # ...like NaN or incorrect calculatons.
- *         for im1 in range(m1_I):             # <<<<<<<<<<<<<<
- *             m1_norms[im1] = 0.0
- * 
+ *         for mi in range(mr_I):             # <<<<<<<<<<<<<<
+ *             m_norms[mi] = 0.0
+ *             csdis_vect[mi] = 0.0
  */
-                __pyx_t_7 = __pyx_v_m1_I;
-                for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
-                  __pyx_v_im1 = __pyx_t_8;
+                __pyx_t_5 = __pyx_v_mr_I;
+                for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
+                  __pyx_v_mi = __pyx_t_6;
 
-                  /* "Djumble/djumble/voperators/cy.pyx":150
+                  /* "Djumble/djumble/voperators/cy.pyx":241
  *         # ...like NaN or incorrect calculatons.
- *         for im1 in range(m1_I):
- *             m1_norms[im1] = 0.0             # <<<<<<<<<<<<<<
+ *         for mi in range(mr_I):
+ *             m_norms[mi] = 0.0             # <<<<<<<<<<<<<<
+ *             csdis_vect[mi] = 0.0
  * 
- *         for im2 in range(m2_I):
  */
-                  __pyx_t_9 = __pyx_v_im1;
-                  if (__pyx_t_9 < 0) __pyx_t_9 += __pyx_v_m1_norms.shape[0];
-                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_9)) )) = 0.0;
+                  __pyx_t_7 = __pyx_v_mi;
+                  if (__pyx_t_7 < 0) __pyx_t_7 += __pyx_v_m_norms.shape[0];
+                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m_norms.data) + __pyx_t_7)) )) = 0.0;
+
+                  /* "Djumble/djumble/voperators/cy.pyx":242
+ *         for mi in range(mr_I):
+ *             m_norms[mi] = 0.0
+ *             csdis_vect[mi] = 0.0             # <<<<<<<<<<<<<<
+ * 
+ *         # Calculating the Norms for the 2D matrix.
+ */
+                  __pyx_t_8 = __pyx_v_mi;
+                  if (__pyx_t_8 < 0) __pyx_t_8 += __pyx_v_csdis_vect.shape[0];
+                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_csdis_vect.data) + __pyx_t_8)) )) = 0.0;
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":152
- *             m1_norms[im1] = 0.0
+                /* "Djumble/djumble/voperators/cy.pyx":245
  * 
- *         for im2 in range(m2_I):             # <<<<<<<<<<<<<<
- *             m2_norms[im2] = 0.0
- * 
- */
-                __pyx_t_7 = __pyx_v_m2_I;
-                for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
-                  __pyx_v_im2 = __pyx_t_8;
-
-                  /* "Djumble/djumble/voperators/cy.pyx":153
- * 
- *         for im2 in range(m2_I):
- *             m2_norms[im2] = 0.0             # <<<<<<<<<<<<<<
- * 
- *         for im1 in range(m1_I):
- */
-                  __pyx_t_10 = __pyx_v_im2;
-                  if (__pyx_t_10 < 0) __pyx_t_10 += __pyx_v_m2_norms.shape[0];
-                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_10)) )) = 0.0;
-                }
-
-                /* "Djumble/djumble/voperators/cy.pyx":155
- *             m2_norms[im2] = 0.0
- * 
- *         for im1 in range(m1_I):             # <<<<<<<<<<<<<<
- *             for im2 in range(m2_I):
- *                 csdis_vect[im1, im2] = 0.0
- */
-                __pyx_t_7 = __pyx_v_m1_I;
-                for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
-                  __pyx_v_im1 = __pyx_t_8;
-
-                  /* "Djumble/djumble/voperators/cy.pyx":156
- * 
- *         for im1 in range(m1_I):
- *             for im2 in range(m2_I):             # <<<<<<<<<<<<<<
- *                 csdis_vect[im1, im2] = 0.0
- * 
- */
-                  __pyx_t_11 = __pyx_v_m2_I;
-                  for (__pyx_t_12 = 0; __pyx_t_12 < __pyx_t_11; __pyx_t_12+=1) {
-                    __pyx_v_im2 = __pyx_t_12;
-
-                    /* "Djumble/djumble/voperators/cy.pyx":157
- *         for im1 in range(m1_I):
- *             for im2 in range(m2_I):
- *                 csdis_vect[im1, im2] = 0.0             # <<<<<<<<<<<<<<
- * 
- *         # Calculating the Norms for the first matrix.
- */
-                    __pyx_t_13 = __pyx_v_im1;
-                    __pyx_t_14 = __pyx_v_im2;
-                    if (__pyx_t_13 < 0) __pyx_t_13 += __pyx_v_csdis_vect.shape[0];
-                    if (__pyx_t_14 < 0) __pyx_t_14 += __pyx_v_csdis_vect.shape[1];
-                    *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_13 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_14)) )) = 0.0;
-                  }
-                }
-
-                /* "Djumble/djumble/voperators/cy.pyx":160
- * 
- *         # Calculating the Norms for the first matrix.
- *         for i in prange(m1_I, schedule='guided'):             # <<<<<<<<<<<<<<
+ *         # Calculating the Norms for the 2D matrix.
+ *         for i in prange(mr_I, schedule='guided'):             # <<<<<<<<<<<<<<
  * 
  *             # Calculating Sum.
  */
-                __pyx_t_7 = __pyx_v_m1_I;
+                __pyx_t_5 = __pyx_v_mr_I;
                 if (1 == 0) abort();
                 {
-                    __pyx_t_11 = (__pyx_t_7 - 0) / 1;
-                    if (__pyx_t_11 > 0)
+                    __pyx_t_9 = (__pyx_t_5 - 0) / 1;
+                    if (__pyx_t_9 > 0)
                     {
                         #ifdef _OPENMP
-                        #pragma omp for lastprivate(__pyx_v_j) firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) schedule(guided)
+                        #pragma omp for firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) lastprivate(__pyx_v_j) schedule(guided)
                         #endif /* _OPENMP */
-                        for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_11; __pyx_t_8++){
+                        for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_9; __pyx_t_6++){
                             {
-                                __pyx_v_i = 0 + 1 * __pyx_t_8;
+                                __pyx_v_i = 0 + 1 * __pyx_t_6;
                                 /* Initialize private variables to invalid values */
                                 __pyx_v_j = ((Py_ssize_t)0xbad0bad0);
 
-                                /* "Djumble/djumble/voperators/cy.pyx":163
+                                /* "Djumble/djumble/voperators/cy.pyx":248
  * 
  *             # Calculating Sum.
- *             for j in range(m1_J):             # <<<<<<<<<<<<<<
- *                 m1_norms[i] += m1[i, j] * m1[i, j] * A[j]
+ *             for j in range(v_I):             # <<<<<<<<<<<<<<
+ *                 m_norms[i] += m[mr[i], j] * m[mr[i], j] * A[j]
  * 
  */
-                                __pyx_t_12 = __pyx_v_m1_J;
-                                for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_12; __pyx_t_15+=1) {
-                                  __pyx_v_j = __pyx_t_15;
+                                __pyx_t_10 = __pyx_v_v_I;
+                                for (__pyx_t_11 = 0; __pyx_t_11 < __pyx_t_10; __pyx_t_11+=1) {
+                                  __pyx_v_j = __pyx_t_11;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":164
+                                  /* "Djumble/djumble/voperators/cy.pyx":249
  *             # Calculating Sum.
- *             for j in range(m1_J):
- *                 m1_norms[i] += m1[i, j] * m1[i, j] * A[j]             # <<<<<<<<<<<<<<
+ *             for j in range(v_I):
+ *                 m_norms[i] += m[mr[i], j] * m[mr[i], j] * A[j]             # <<<<<<<<<<<<<<
  * 
  *             # Calculating the Square root of the sum
  */
-                                  __pyx_t_16 = __pyx_v_i;
+                                  __pyx_t_12 = __pyx_v_i;
+                                  if (__pyx_t_12 < 0) __pyx_t_12 += __pyx_v_mr.shape[0];
+                                  __pyx_t_13 = (*((__pyx_t_5numpy_intp_t *) ( /* dim=0 */ ((char *) (((__pyx_t_5numpy_intp_t *) __pyx_v_mr.data) + __pyx_t_12)) )));
+                                  __pyx_t_14 = __pyx_v_j;
+                                  if (__pyx_t_13 < 0) __pyx_t_13 += __pyx_v_m.shape[0];
+                                  if (__pyx_t_14 < 0) __pyx_t_14 += __pyx_v_m.shape[1];
+                                  __pyx_t_15 = __pyx_v_i;
+                                  if (__pyx_t_15 < 0) __pyx_t_15 += __pyx_v_mr.shape[0];
+                                  __pyx_t_16 = (*((__pyx_t_5numpy_intp_t *) ( /* dim=0 */ ((char *) (((__pyx_t_5numpy_intp_t *) __pyx_v_mr.data) + __pyx_t_15)) )));
                                   __pyx_t_17 = __pyx_v_j;
-                                  if (__pyx_t_16 < 0) __pyx_t_16 += __pyx_v_m1.shape[0];
-                                  if (__pyx_t_17 < 0) __pyx_t_17 += __pyx_v_m1.shape[1];
-                                  __pyx_t_18 = __pyx_v_i;
-                                  __pyx_t_19 = __pyx_v_j;
-                                  if (__pyx_t_18 < 0) __pyx_t_18 += __pyx_v_m1.shape[0];
-                                  if (__pyx_t_19 < 0) __pyx_t_19 += __pyx_v_m1.shape[1];
-                                  __pyx_t_20 = __pyx_v_j;
-                                  if (__pyx_t_20 < 0) __pyx_t_20 += __pyx_v_A.shape[0];
-                                  __pyx_t_21 = __pyx_v_i;
-                                  if (__pyx_t_21 < 0) __pyx_t_21 += __pyx_v_m1_norms.shape[0];
-                                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_21)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_16 * __pyx_v_m1.strides[0]) )) + __pyx_t_17)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_18 * __pyx_v_m1.strides[0]) )) + __pyx_t_19)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_20)) ))));
+                                  if (__pyx_t_16 < 0) __pyx_t_16 += __pyx_v_m.shape[0];
+                                  if (__pyx_t_17 < 0) __pyx_t_17 += __pyx_v_m.shape[1];
+                                  __pyx_t_18 = __pyx_v_j;
+                                  if (__pyx_t_18 < 0) __pyx_t_18 += __pyx_v_A.shape[0];
+                                  __pyx_t_19 = __pyx_v_i;
+                                  if (__pyx_t_19 < 0) __pyx_t_19 += __pyx_v_m_norms.shape[0];
+                                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m_norms.data) + __pyx_t_19)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m.data + __pyx_t_13 * __pyx_v_m.strides[0]) )) + __pyx_t_14)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m.data + __pyx_t_16 * __pyx_v_m.strides[0]) )) + __pyx_t_17)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_18)) ))));
                                 }
 
-                                /* "Djumble/djumble/voperators/cy.pyx":167
+                                /* "Djumble/djumble/voperators/cy.pyx":252
  * 
  *             # Calculating the Square root of the sum
- *             m1_norms[i] = sqrt(m1_norms[i])             # <<<<<<<<<<<<<<
+ *             m_norms[i] = sqrt(m_norms[i])             # <<<<<<<<<<<<<<
  * 
  *             # Preventing Division by Zero.
+ */
+                                __pyx_t_20 = __pyx_v_i;
+                                if (__pyx_t_20 < 0) __pyx_t_20 += __pyx_v_m_norms.shape[0];
+                                __pyx_t_21 = __pyx_v_i;
+                                if (__pyx_t_21 < 0) __pyx_t_21 += __pyx_v_m_norms.shape[0];
+                                *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m_norms.data) + __pyx_t_21)) )) = sqrt((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m_norms.data) + __pyx_t_20)) ))));
+
+                                /* "Djumble/djumble/voperators/cy.pyx":255
+ * 
+ *             # Preventing Division by Zero.
+ *             if m_norms[i] == 0.0:             # <<<<<<<<<<<<<<
+ *                 m_norms[i] = 0.000001
+ * 
  */
                                 __pyx_t_22 = __pyx_v_i;
-                                if (__pyx_t_22 < 0) __pyx_t_22 += __pyx_v_m1_norms.shape[0];
-                                __pyx_t_23 = __pyx_v_i;
-                                if (__pyx_t_23 < 0) __pyx_t_23 += __pyx_v_m1_norms.shape[0];
-                                *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_23)) )) = sqrt((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_22)) ))));
+                                if (__pyx_t_22 < 0) __pyx_t_22 += __pyx_v_m_norms.shape[0];
+                                __pyx_t_23 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m_norms.data) + __pyx_t_22)) ))) == 0.0) != 0);
+                                if (__pyx_t_23) {
 
-                                /* "Djumble/djumble/voperators/cy.pyx":170
- * 
+                                  /* "Djumble/djumble/voperators/cy.pyx":256
  *             # Preventing Division by Zero.
- *             if m1_norms[i] == 0.0:             # <<<<<<<<<<<<<<
- *                 m1_norms[i] = 0.000001
- * 
- */
-                                __pyx_t_24 = __pyx_v_i;
-                                if (__pyx_t_24 < 0) __pyx_t_24 += __pyx_v_m1_norms.shape[0];
-                                __pyx_t_25 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_24)) ))) == 0.0) != 0);
-                                if (__pyx_t_25) {
-
-                                  /* "Djumble/djumble/voperators/cy.pyx":171
- *             # Preventing Division by Zero.
- *             if m1_norms[i] == 0.0:
- *                 m1_norms[i] = 0.000001             # <<<<<<<<<<<<<<
+ *             if m_norms[i] == 0.0:
+ *                 m_norms[i] = 0.000001             # <<<<<<<<<<<<<<
  * 
  * 
  */
-                                  __pyx_t_26 = __pyx_v_i;
-                                  if (__pyx_t_26 < 0) __pyx_t_26 += __pyx_v_m1_norms.shape[0];
-                                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_26)) )) = 0.000001;
+                                  __pyx_t_24 = __pyx_v_i;
+                                  if (__pyx_t_24 < 0) __pyx_t_24 += __pyx_v_m_norms.shape[0];
+                                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m_norms.data) + __pyx_t_24)) )) = 0.000001;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":170
+                                  /* "Djumble/djumble/voperators/cy.pyx":255
  * 
  *             # Preventing Division by Zero.
- *             if m1_norms[i] == 0.0:             # <<<<<<<<<<<<<<
- *                 m1_norms[i] = 0.000001
+ *             if m_norms[i] == 0.0:             # <<<<<<<<<<<<<<
+ *                 m_norms[i] = 0.000001
  * 
  */
                                 }
@@ -3180,217 +3928,143 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da(__Py
                     }
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":175
+                /* "Djumble/djumble/voperators/cy.pyx":260
  * 
  *         # Calculating the Norms for the second matrix.
- *         for i2 in prange(m2_I, schedule='guided'):             # <<<<<<<<<<<<<<
+ *         for vi in range(v_I):             # <<<<<<<<<<<<<<
+ *             v_norm = v_norm + v[vi] * v[vi] * A[vi]
  * 
- *             # Calculating Sum.
  */
-                __pyx_t_11 = __pyx_v_m2_I;
+                __pyx_t_9 = __pyx_v_v_I;
+                for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_9; __pyx_t_6+=1) {
+                  __pyx_v_vi = __pyx_t_6;
+
+                  /* "Djumble/djumble/voperators/cy.pyx":261
+ *         # Calculating the Norms for the second matrix.
+ *         for vi in range(v_I):
+ *             v_norm = v_norm + v[vi] * v[vi] * A[vi]             # <<<<<<<<<<<<<<
+ * 
+ *         # Preventing Division by Zero.
+ */
+                  __pyx_t_25 = __pyx_v_vi;
+                  if (__pyx_t_25 < 0) __pyx_t_25 += __pyx_v_v.shape[0];
+                  __pyx_t_26 = __pyx_v_vi;
+                  if (__pyx_t_26 < 0) __pyx_t_26 += __pyx_v_v.shape[0];
+                  __pyx_t_27 = __pyx_v_vi;
+                  if (__pyx_t_27 < 0) __pyx_t_27 += __pyx_v_A.shape[0];
+                  __pyx_v_v_norm = (__pyx_v_v_norm + (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v.data) + __pyx_t_25)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v.data) + __pyx_t_26)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_27)) )))));
+                }
+
+                /* "Djumble/djumble/voperators/cy.pyx":264
+ * 
+ *         # Preventing Division by Zero.
+ *         if v_norm == 0.0:             # <<<<<<<<<<<<<<
+ *             v_norm = 0.000001
+ * 
+ */
+                __pyx_t_23 = ((__pyx_v_v_norm == 0.0) != 0);
+                if (__pyx_t_23) {
+
+                  /* "Djumble/djumble/voperators/cy.pyx":265
+ *         # Preventing Division by Zero.
+ *         if v_norm == 0.0:
+ *             v_norm = 0.000001             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+                  __pyx_v_v_norm = 0.000001;
+
+                  /* "Djumble/djumble/voperators/cy.pyx":264
+ * 
+ *         # Preventing Division by Zero.
+ *         if v_norm == 0.0:             # <<<<<<<<<<<<<<
+ *             v_norm = 0.000001
+ * 
+ */
+                }
+
+                /* "Djumble/djumble/voperators/cy.pyx":270
+ *         # Calculating the cosine similarity.
+ *         # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
+ *         for i2 in prange(mr_I, schedule='guided'):             # <<<<<<<<<<<<<<
+ * 
+ *             for j2 in range(v_I):
+ */
+                __pyx_t_9 = __pyx_v_mr_I;
                 if (1 == 0) abort();
                 {
-                    __pyx_t_7 = (__pyx_t_11 - 0) / 1;
-                    if (__pyx_t_7 > 0)
+                    __pyx_t_5 = (__pyx_t_9 - 0) / 1;
+                    if (__pyx_t_5 > 0)
                     {
                         #ifdef _OPENMP
-                        #pragma omp for firstprivate(__pyx_v_i2) lastprivate(__pyx_v_i2) lastprivate(__pyx_v_j2) schedule(guided)
+                        #pragma omp for lastprivate(__pyx_v_j2) firstprivate(__pyx_v_i2) lastprivate(__pyx_v_i2) schedule(guided)
                         #endif /* _OPENMP */
-                        for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8++){
+                        for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6++){
                             {
-                                __pyx_v_i2 = 0 + 1 * __pyx_t_8;
+                                __pyx_v_i2 = 0 + 1 * __pyx_t_6;
                                 /* Initialize private variables to invalid values */
                                 __pyx_v_j2 = ((Py_ssize_t)0xbad0bad0);
 
-                                /* "Djumble/djumble/voperators/cy.pyx":178
+                                /* "Djumble/djumble/voperators/cy.pyx":272
+ *         for i2 in prange(mr_I, schedule='guided'):
  * 
- *             # Calculating Sum.
- *             for j2 in range(m2_J):             # <<<<<<<<<<<<<<
- *                 m2_norms[i2] += m2[i2, j2] * m2[i2, j2] * A[j2]
+ *             for j2 in range(v_I):             # <<<<<<<<<<<<<<
+ *                 csdis_vect[i2] += m[mr[i2], j2] * v[j2] * A[j2]
  * 
  */
-                                __pyx_t_12 = __pyx_v_m2_J;
-                                for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_12; __pyx_t_15+=1) {
-                                  __pyx_v_j2 = __pyx_t_15;
+                                __pyx_t_10 = __pyx_v_v_I;
+                                for (__pyx_t_11 = 0; __pyx_t_11 < __pyx_t_10; __pyx_t_11+=1) {
+                                  __pyx_v_j2 = __pyx_t_11;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":179
- *             # Calculating Sum.
- *             for j2 in range(m2_J):
- *                 m2_norms[i2] += m2[i2, j2] * m2[i2, j2] * A[j2]             # <<<<<<<<<<<<<<
+                                  /* "Djumble/djumble/voperators/cy.pyx":273
  * 
- *             # Calculating the Square root of the sum
+ *             for j2 in range(v_I):
+ *                 csdis_vect[i2] += m[mr[i2], j2] * v[j2] * A[j2]             # <<<<<<<<<<<<<<
+ * 
+ *             # Normalizing with the products of the respective vector norms.
  */
-                                  __pyx_t_27 = __pyx_v_i2;
-                                  __pyx_t_28 = __pyx_v_j2;
-                                  if (__pyx_t_27 < 0) __pyx_t_27 += __pyx_v_m2.shape[0];
-                                  if (__pyx_t_28 < 0) __pyx_t_28 += __pyx_v_m2.shape[1];
-                                  __pyx_t_29 = __pyx_v_i2;
+                                  __pyx_t_28 = __pyx_v_i2;
+                                  if (__pyx_t_28 < 0) __pyx_t_28 += __pyx_v_mr.shape[0];
+                                  __pyx_t_29 = (*((__pyx_t_5numpy_intp_t *) ( /* dim=0 */ ((char *) (((__pyx_t_5numpy_intp_t *) __pyx_v_mr.data) + __pyx_t_28)) )));
                                   __pyx_t_30 = __pyx_v_j2;
-                                  if (__pyx_t_29 < 0) __pyx_t_29 += __pyx_v_m2.shape[0];
-                                  if (__pyx_t_30 < 0) __pyx_t_30 += __pyx_v_m2.shape[1];
+                                  if (__pyx_t_29 < 0) __pyx_t_29 += __pyx_v_m.shape[0];
+                                  if (__pyx_t_30 < 0) __pyx_t_30 += __pyx_v_m.shape[1];
                                   __pyx_t_31 = __pyx_v_j2;
-                                  if (__pyx_t_31 < 0) __pyx_t_31 += __pyx_v_A.shape[0];
-                                  __pyx_t_32 = __pyx_v_i2;
-                                  if (__pyx_t_32 < 0) __pyx_t_32 += __pyx_v_m2_norms.shape[0];
-                                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_32)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_27 * __pyx_v_m2.strides[0]) )) + __pyx_t_28)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_29 * __pyx_v_m2.strides[0]) )) + __pyx_t_30)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_31)) ))));
+                                  if (__pyx_t_31 < 0) __pyx_t_31 += __pyx_v_v.shape[0];
+                                  __pyx_t_32 = __pyx_v_j2;
+                                  if (__pyx_t_32 < 0) __pyx_t_32 += __pyx_v_A.shape[0];
+                                  __pyx_t_33 = __pyx_v_i2;
+                                  if (__pyx_t_33 < 0) __pyx_t_33 += __pyx_v_csdis_vect.shape[0];
+                                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_csdis_vect.data) + __pyx_t_33)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m.data + __pyx_t_29 * __pyx_v_m.strides[0]) )) + __pyx_t_30)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v.data) + __pyx_t_31)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_32)) ))));
                                 }
 
-                                /* "Djumble/djumble/voperators/cy.pyx":182
+                                /* "Djumble/djumble/voperators/cy.pyx":276
  * 
- *             # Calculating the Square root of the sum
- *             m2_norms[i2] = sqrt(m2_norms[i2])             # <<<<<<<<<<<<<<
+ *             # Normalizing with the products of the respective vector norms.
+ *             csdis_vect[i2] = csdis_vect[i2] / (m_norms[i2] * v_norm)             # <<<<<<<<<<<<<<
  * 
- *             # Preventing Division by Zero.
+ *             # Getting Cosine Distance.
  */
-                                __pyx_t_33 = __pyx_v_i2;
-                                if (__pyx_t_33 < 0) __pyx_t_33 += __pyx_v_m2_norms.shape[0];
                                 __pyx_t_34 = __pyx_v_i2;
-                                if (__pyx_t_34 < 0) __pyx_t_34 += __pyx_v_m2_norms.shape[0];
-                                *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_34)) )) = sqrt((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_33)) ))));
-
-                                /* "Djumble/djumble/voperators/cy.pyx":185
- * 
- *             # Preventing Division by Zero.
- *             if m2_norms[i2] == 0.0:             # <<<<<<<<<<<<<<
- *                 m2_norms[i2] = 0.000001
- * 
- */
+                                if (__pyx_t_34 < 0) __pyx_t_34 += __pyx_v_csdis_vect.shape[0];
                                 __pyx_t_35 = __pyx_v_i2;
-                                if (__pyx_t_35 < 0) __pyx_t_35 += __pyx_v_m2_norms.shape[0];
-                                __pyx_t_25 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_35)) ))) == 0.0) != 0);
-                                if (__pyx_t_25) {
+                                if (__pyx_t_35 < 0) __pyx_t_35 += __pyx_v_m_norms.shape[0];
+                                __pyx_t_36 = __pyx_v_i2;
+                                if (__pyx_t_36 < 0) __pyx_t_36 += __pyx_v_csdis_vect.shape[0];
+                                *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_csdis_vect.data) + __pyx_t_36)) )) = ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_csdis_vect.data) + __pyx_t_34)) ))) / ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m_norms.data) + __pyx_t_35)) ))) * __pyx_v_v_norm));
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":186
- *             # Preventing Division by Zero.
- *             if m2_norms[i2] == 0.0:
- *                 m2_norms[i2] = 0.000001             # <<<<<<<<<<<<<<
+                                /* "Djumble/djumble/voperators/cy.pyx":279
  * 
- * 
- */
-                                  __pyx_t_36 = __pyx_v_i2;
-                                  if (__pyx_t_36 < 0) __pyx_t_36 += __pyx_v_m2_norms.shape[0];
-                                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_36)) )) = 0.000001;
-
-                                  /* "Djumble/djumble/voperators/cy.pyx":185
- * 
- *             # Preventing Division by Zero.
- *             if m2_norms[i2] == 0.0:             # <<<<<<<<<<<<<<
- *                 m2_norms[i2] = 0.000001
- * 
- */
-                                }
-                            }
-                        }
-                    }
-                }
-
-                /* "Djumble/djumble/voperators/cy.pyx":191
- *         # Calculating the cosine similarity.
- *         # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
- *         for i3 in prange(m1_I, schedule='guided'):             # <<<<<<<<<<<<<<
- * 
- *             for j3 in range(m2_I):
- */
-                __pyx_t_7 = __pyx_v_m1_I;
-                if (1 == 0) abort();
-                {
-                    __pyx_t_11 = (__pyx_t_7 - 0) / 1;
-                    if (__pyx_t_11 > 0)
-                    {
-                        #ifdef _OPENMP
-                        #pragma omp for lastprivate(__pyx_v_j3) lastprivate(__pyx_v_k) firstprivate(__pyx_v_i3) lastprivate(__pyx_v_i3) schedule(guided)
-                        #endif /* _OPENMP */
-                        for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_11; __pyx_t_8++){
-                            {
-                                __pyx_v_i3 = 0 + 1 * __pyx_t_8;
-                                /* Initialize private variables to invalid values */
-                                __pyx_v_j3 = ((Py_ssize_t)0xbad0bad0);
-                                __pyx_v_k = ((Py_ssize_t)0xbad0bad0);
-
-                                /* "Djumble/djumble/voperators/cy.pyx":193
- *         for i3 in prange(m1_I, schedule='guided'):
- * 
- *             for j3 in range(m2_I):             # <<<<<<<<<<<<<<
- * 
- *                 # Calculating the elemnt-wise sum of products distorted by A.
- */
-                                __pyx_t_12 = __pyx_v_m2_I;
-                                for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_12; __pyx_t_15+=1) {
-                                  __pyx_v_j3 = __pyx_t_15;
-
-                                  /* "Djumble/djumble/voperators/cy.pyx":196
- * 
- *                 # Calculating the elemnt-wise sum of products distorted by A.
- *                 for k in range(m1_J):             # <<<<<<<<<<<<<<
- *                     csdis_vect[i3, j3] += m1[i3, k] * m2[j3, k] * A[k]
- * 
- */
-                                  __pyx_t_37 = __pyx_v_m1_J;
-                                  for (__pyx_t_38 = 0; __pyx_t_38 < __pyx_t_37; __pyx_t_38+=1) {
-                                    __pyx_v_k = __pyx_t_38;
-
-                                    /* "Djumble/djumble/voperators/cy.pyx":197
- *                 # Calculating the elemnt-wise sum of products distorted by A.
- *                 for k in range(m1_J):
- *                     csdis_vect[i3, j3] += m1[i3, k] * m2[j3, k] * A[k]             # <<<<<<<<<<<<<<
- * 
- *                 # Normalizing with the products of the respective vector norms.
- */
-                                    __pyx_t_39 = __pyx_v_i3;
-                                    __pyx_t_40 = __pyx_v_k;
-                                    if (__pyx_t_39 < 0) __pyx_t_39 += __pyx_v_m1.shape[0];
-                                    if (__pyx_t_40 < 0) __pyx_t_40 += __pyx_v_m1.shape[1];
-                                    __pyx_t_41 = __pyx_v_j3;
-                                    __pyx_t_42 = __pyx_v_k;
-                                    if (__pyx_t_41 < 0) __pyx_t_41 += __pyx_v_m2.shape[0];
-                                    if (__pyx_t_42 < 0) __pyx_t_42 += __pyx_v_m2.shape[1];
-                                    __pyx_t_43 = __pyx_v_k;
-                                    if (__pyx_t_43 < 0) __pyx_t_43 += __pyx_v_A.shape[0];
-                                    __pyx_t_44 = __pyx_v_i3;
-                                    __pyx_t_45 = __pyx_v_j3;
-                                    if (__pyx_t_44 < 0) __pyx_t_44 += __pyx_v_csdis_vect.shape[0];
-                                    if (__pyx_t_45 < 0) __pyx_t_45 += __pyx_v_csdis_vect.shape[1];
-                                    *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_44 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_45)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_39 * __pyx_v_m1.strides[0]) )) + __pyx_t_40)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_41 * __pyx_v_m2.strides[0]) )) + __pyx_t_42)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_43)) ))));
-                                  }
-
-                                  /* "Djumble/djumble/voperators/cy.pyx":200
- * 
- *                 # Normalizing with the products of the respective vector norms.
- *                 csdis_vect[i3, j3] = csdis_vect[i3, j3] / (m1_norms[i3] * m2_norms[j3])             # <<<<<<<<<<<<<<
- * 
- *                 # Getting Cosine Distance.
- */
-                                  __pyx_t_46 = __pyx_v_i3;
-                                  __pyx_t_47 = __pyx_v_j3;
-                                  if (__pyx_t_46 < 0) __pyx_t_46 += __pyx_v_csdis_vect.shape[0];
-                                  if (__pyx_t_47 < 0) __pyx_t_47 += __pyx_v_csdis_vect.shape[1];
-                                  __pyx_t_48 = __pyx_v_i3;
-                                  if (__pyx_t_48 < 0) __pyx_t_48 += __pyx_v_m1_norms.shape[0];
-                                  __pyx_t_49 = __pyx_v_j3;
-                                  if (__pyx_t_49 < 0) __pyx_t_49 += __pyx_v_m2_norms.shape[0];
-                                  __pyx_t_50 = __pyx_v_i3;
-                                  __pyx_t_51 = __pyx_v_j3;
-                                  if (__pyx_t_50 < 0) __pyx_t_50 += __pyx_v_csdis_vect.shape[0];
-                                  if (__pyx_t_51 < 0) __pyx_t_51 += __pyx_v_csdis_vect.shape[1];
-                                  *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_50 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_51)) )) = ((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_46 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_47)) ))) / ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_48)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_49)) )))));
-
-                                  /* "Djumble/djumble/voperators/cy.pyx":203
- * 
- *                 # Getting Cosine Distance.
- *                 csdis_vect[i3, j3] =  acos(csdis_vect[i3, j3]) / pi             # <<<<<<<<<<<<<<
+ *             # Getting Cosine Distance.
+ *             csdis_vect[i2] =  acos(csdis_vect[i2]) / pi             # <<<<<<<<<<<<<<
  * 
  *     return csdis_vect
  */
-                                  __pyx_t_52 = __pyx_v_i3;
-                                  __pyx_t_53 = __pyx_v_j3;
-                                  if (__pyx_t_52 < 0) __pyx_t_52 += __pyx_v_csdis_vect.shape[0];
-                                  if (__pyx_t_53 < 0) __pyx_t_53 += __pyx_v_csdis_vect.shape[1];
-                                  __pyx_t_54 = __pyx_v_i3;
-                                  __pyx_t_55 = __pyx_v_j3;
-                                  if (__pyx_t_54 < 0) __pyx_t_54 += __pyx_v_csdis_vect.shape[0];
-                                  if (__pyx_t_55 < 0) __pyx_t_55 += __pyx_v_csdis_vect.shape[1];
-                                  *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_54 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_55)) )) = (acos((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_52 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_53)) )))) / __pyx_v_pi);
-                                }
+                                __pyx_t_37 = __pyx_v_i2;
+                                if (__pyx_t_37 < 0) __pyx_t_37 += __pyx_v_csdis_vect.shape[0];
+                                __pyx_t_38 = __pyx_v_i2;
+                                if (__pyx_t_38 < 0) __pyx_t_38 += __pyx_v_csdis_vect.shape[0];
+                                *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_csdis_vect.data) + __pyx_t_38)) )) = (acos((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_csdis_vect.data) + __pyx_t_37)) )))) / __pyx_v_pi);
                             }
                         }
                     }
@@ -3405,7 +4079,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da(__Py
         #endif
       }
 
-      /* "Djumble/djumble/voperators/cy.pyx":144
+      /* "Djumble/djumble/voperators/cy.pyx":235
  *     # The following operatsion taking place in the non-gil and parallel...
  *     # ...openmp emviroment.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -3423,8 +4097,8 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da(__Py
       }
   }
 
-  /* "Djumble/djumble/voperators/cy.pyx":205
- *                 csdis_vect[i3, j3] =  acos(csdis_vect[i3, j3]) / pi
+  /* "Djumble/djumble/voperators/cy.pyx":281
+ *             csdis_vect[i2] =  acos(csdis_vect[i2]) / pi
  * 
  *     return csdis_vect             # <<<<<<<<<<<<<<
  * 
@@ -3434,12 +4108,12 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da(__Py
   __pyx_r = __pyx_v_csdis_vect;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":116
+  /* "Djumble/djumble/voperators/cy.pyx":207
  * 
  * 
- * cpdef double [:, ::1] cos2Da(double [:, ::1] m1, double [:, ::1] m2, double[::1] A):             # <<<<<<<<<<<<<<
- * 
- *     cdef:
+ * cpdef double [::1] cosDa_v2r(double [::1] v,             # <<<<<<<<<<<<<<
+ *                                 double [:, ::1] m,
+ *                                 double[::1] A,
  */
 
   /* function exit code */
@@ -3448,11 +4122,9 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da(__Py
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __PYX_XDEC_MEMVIEW(&__pyx_t_4, 1);
-  __Pyx_XDECREF(__pyx_t_5);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
   __pyx_r.data = NULL;
   __pyx_r.memview = NULL;
-  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cos2Da", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosDa_v2r", __pyx_clineno, __pyx_lineno, __pyx_filename);
 
   goto __pyx_L2;
   __pyx_L0:;
@@ -3460,27 +4132,426 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da(__Py
     PyErr_SetString(PyExc_TypeError,"Memoryview return value is not initialized");
   }
   __pyx_L2:;
-  __PYX_XDEC_MEMVIEW(&__pyx_v_m1_norms, 1);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_m2_norms, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_m_norms, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_v_csdis_vect, 1);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_3cos2Da(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_3cos2Da(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
-  __Pyx_memviewslice __pyx_v_m1 = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __Pyx_memviewslice __pyx_v_m2 = { 0, 0, { 0 }, { 0 }, { 0 } };
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_5cosDa_v2r(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_5cosDa_v2r(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  __Pyx_memviewslice __pyx_v_v = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v_m = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v_A = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v_mr = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("cosDa_v2r (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_v,&__pyx_n_s_m,&__pyx_n_s_A,&__pyx_n_s_mr,0};
+    PyObject* values[4] = {0,0,0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_v)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        case  1:
+        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("cosDa_v2r", 1, 4, 4, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+        case  2:
+        if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_A)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("cosDa_v2r", 1, 4, 4, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+        case  3:
+        if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_mr)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("cosDa_v2r", 1, 4, 4, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cosDa_v2r") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+      values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+      values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+    }
+    __pyx_v_v = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0]); if (unlikely(!__pyx_v_v.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1]); if (unlikely(!__pyx_v_m.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_A = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2]); if (unlikely(!__pyx_v_A.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_mr = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_5numpy_intp_t(values[3]); if (unlikely(!__pyx_v_mr.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 210; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("cosDa_v2r", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosDa_v2r", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_4cosDa_v2r(__pyx_self, __pyx_v_v, __pyx_v_m, __pyx_v_A, __pyx_v_mr);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_4cosDa_v2r(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_v, __Pyx_memviewslice __pyx_v_m, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_mr) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  PyObject *__pyx_t_2 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("cosDa_v2r", 0);
+  __Pyx_XDECREF(__pyx_r);
+  if (unlikely(!__pyx_v_v.memview)) { __Pyx_RaiseUnboundLocalError("v"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_m.memview)) { __Pyx_RaiseUnboundLocalError("m"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_A.memview)) { __Pyx_RaiseUnboundLocalError("A"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_mr.memview)) { __Pyx_RaiseUnboundLocalError("mr"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_v2r(__pyx_v_v, __pyx_v_m, __pyx_v_A, __pyx_v_mr, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+  __pyx_r = __pyx_t_2;
+  __pyx_t_2 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosDa_v2r", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v_v, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_m, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_A, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_mr, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Djumble/djumble/voperators/cy.pyx":284
+ * 
+ * 
+ * cpdef double cosDa_vect(double [::1] v1, double [::1] v2, double[::1] A):             # <<<<<<<<<<<<<<
+ * 
+ *     cdef:
+ */
+
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_7cosDa_vect(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static double __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_vect(__Pyx_memviewslice __pyx_v_v1, __Pyx_memviewslice __pyx_v_v2, __Pyx_memviewslice __pyx_v_A, CYTHON_UNUSED int __pyx_skip_dispatch) {
+  Py_ssize_t __pyx_v_i;
+  Py_ssize_t __pyx_v_v_I;
+  double __pyx_v_v1_norm;
+  double __pyx_v_v2_norm;
+  double __pyx_v_csdis;
+  double __pyx_v_pi;
+  double __pyx_r;
+  __Pyx_RefNannyDeclarations
+  Py_ssize_t __pyx_t_1;
+  Py_ssize_t __pyx_t_2;
+  Py_ssize_t __pyx_t_3;
+  Py_ssize_t __pyx_t_4;
+  Py_ssize_t __pyx_t_5;
+  Py_ssize_t __pyx_t_6;
+  Py_ssize_t __pyx_t_7;
+  Py_ssize_t __pyx_t_8;
+  Py_ssize_t __pyx_t_9;
+  Py_ssize_t __pyx_t_10;
+  Py_ssize_t __pyx_t_11;
+  int __pyx_t_12;
+  __Pyx_RefNannySetupContext("cosDa_vect", 0);
+
+  /* "Djumble/djumble/voperators/cy.pyx":291
+ * 
+ *         # Matrices dimentions intilized variables.
+ *         Py_ssize_t v_I = v1.shape[0]             # <<<<<<<<<<<<<<
+ * 
+ *         # MemoryViews for the cython arrays used for sotring the temporary and...
+ */
+  __pyx_v_v_I = (__pyx_v_v1.shape[0]);
+
+  /* "Djumble/djumble/voperators/cy.pyx":295
+ *         # MemoryViews for the cython arrays used for sotring the temporary and...
+ *         # ...to be retured results.
+ *         double v1_norm = 0.0             # <<<<<<<<<<<<<<
+ *         double v2_norm = 0.0
+ *         double csdis = 0.0
+ */
+  __pyx_v_v1_norm = 0.0;
+
+  /* "Djumble/djumble/voperators/cy.pyx":296
+ *         # ...to be retured results.
+ *         double v1_norm = 0.0
+ *         double v2_norm = 0.0             # <<<<<<<<<<<<<<
+ *         double csdis = 0.0
+ * 
+ */
+  __pyx_v_v2_norm = 0.0;
+
+  /* "Djumble/djumble/voperators/cy.pyx":297
+ *         double v1_norm = 0.0
+ *         double v2_norm = 0.0
+ *         double csdis = 0.0             # <<<<<<<<<<<<<<
+ * 
+ *         # Definding Pi constant.
+ */
+  __pyx_v_csdis = 0.0;
+
+  /* "Djumble/djumble/voperators/cy.pyx":300
+ * 
+ *         # Definding Pi constant.
+ *         double pi = 3.14159265             # <<<<<<<<<<<<<<
+ * 
+ *     # The following operatsion taking place in the non-gil.
+ */
+  __pyx_v_pi = 3.14159265;
+
+  /* "Djumble/djumble/voperators/cy.pyx":303
+ * 
+ *     # The following operatsion taking place in the non-gil.
+ *     with nogil:             # <<<<<<<<<<<<<<
+ * 
+ *         # Calculating the cosine similarity.
+ */
+  {
+      #ifdef WITH_THREAD
+      PyThreadState *_save;
+      Py_UNBLOCK_THREADS
+      #endif
+      /*try:*/ {
+
+        /* "Djumble/djumble/voperators/cy.pyx":307
+ *         # Calculating the cosine similarity.
+ *         # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
+ *         for i in range(v_I):             # <<<<<<<<<<<<<<
+ * 
+ *             # Calculating the elemnt-wise sum of products distorted by A.
+ */
+        __pyx_t_1 = __pyx_v_v_I;
+        for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
+          __pyx_v_i = __pyx_t_2;
+
+          /* "Djumble/djumble/voperators/cy.pyx":310
+ * 
+ *             # Calculating the elemnt-wise sum of products distorted by A.
+ *             csdis = csdis + v1[i] * v2[i] * A[i]             # <<<<<<<<<<<<<<
+ * 
+ *             # Calculating the Norms for the v1 and v2 vectors.
+ */
+          __pyx_t_3 = __pyx_v_i;
+          if (__pyx_t_3 < 0) __pyx_t_3 += __pyx_v_v1.shape[0];
+          __pyx_t_4 = __pyx_v_i;
+          if (__pyx_t_4 < 0) __pyx_t_4 += __pyx_v_v2.shape[0];
+          __pyx_t_5 = __pyx_v_i;
+          if (__pyx_t_5 < 0) __pyx_t_5 += __pyx_v_A.shape[0];
+          __pyx_v_csdis = (__pyx_v_csdis + (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v1.data) + __pyx_t_3)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v2.data) + __pyx_t_4)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_5)) )))));
+
+          /* "Djumble/djumble/voperators/cy.pyx":313
+ * 
+ *             # Calculating the Norms for the v1 and v2 vectors.
+ *             v1_norm = v1_norm + v1[i] * v1[i] * A[i]             # <<<<<<<<<<<<<<
+ *             v1_norm = sqrt(v1_norm)
+ * 
+ */
+          __pyx_t_6 = __pyx_v_i;
+          if (__pyx_t_6 < 0) __pyx_t_6 += __pyx_v_v1.shape[0];
+          __pyx_t_7 = __pyx_v_i;
+          if (__pyx_t_7 < 0) __pyx_t_7 += __pyx_v_v1.shape[0];
+          __pyx_t_8 = __pyx_v_i;
+          if (__pyx_t_8 < 0) __pyx_t_8 += __pyx_v_A.shape[0];
+          __pyx_v_v1_norm = (__pyx_v_v1_norm + (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v1.data) + __pyx_t_6)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v1.data) + __pyx_t_7)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_8)) )))));
+
+          /* "Djumble/djumble/voperators/cy.pyx":314
+ *             # Calculating the Norms for the v1 and v2 vectors.
+ *             v1_norm = v1_norm + v1[i] * v1[i] * A[i]
+ *             v1_norm = sqrt(v1_norm)             # <<<<<<<<<<<<<<
+ * 
+ *             v2_norm = v2_norm + v2[i] * v2[i] * A[i]
+ */
+          __pyx_v_v1_norm = sqrt(__pyx_v_v1_norm);
+
+          /* "Djumble/djumble/voperators/cy.pyx":316
+ *             v1_norm = sqrt(v1_norm)
+ * 
+ *             v2_norm = v2_norm + v2[i] * v2[i] * A[i]             # <<<<<<<<<<<<<<
+ *             v2_norm = sqrt(v2_norm)
+ * 
+ */
+          __pyx_t_9 = __pyx_v_i;
+          if (__pyx_t_9 < 0) __pyx_t_9 += __pyx_v_v2.shape[0];
+          __pyx_t_10 = __pyx_v_i;
+          if (__pyx_t_10 < 0) __pyx_t_10 += __pyx_v_v2.shape[0];
+          __pyx_t_11 = __pyx_v_i;
+          if (__pyx_t_11 < 0) __pyx_t_11 += __pyx_v_A.shape[0];
+          __pyx_v_v2_norm = (__pyx_v_v2_norm + (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v2.data) + __pyx_t_9)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v2.data) + __pyx_t_10)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_11)) )))));
+
+          /* "Djumble/djumble/voperators/cy.pyx":317
+ * 
+ *             v2_norm = v2_norm + v2[i] * v2[i] * A[i]
+ *             v2_norm = sqrt(v2_norm)             # <<<<<<<<<<<<<<
+ * 
+ *         # Preventing Division by Zero.
+ */
+          __pyx_v_v2_norm = sqrt(__pyx_v_v2_norm);
+        }
+
+        /* "Djumble/djumble/voperators/cy.pyx":320
+ * 
+ *         # Preventing Division by Zero.
+ *         if v1_norm == 0.0:             # <<<<<<<<<<<<<<
+ *             v1_norm = 0.000001
+ * 
+ */
+        __pyx_t_12 = ((__pyx_v_v1_norm == 0.0) != 0);
+        if (__pyx_t_12) {
+
+          /* "Djumble/djumble/voperators/cy.pyx":321
+ *         # Preventing Division by Zero.
+ *         if v1_norm == 0.0:
+ *             v1_norm = 0.000001             # <<<<<<<<<<<<<<
+ * 
+ *         if v2_norm == 0.0:
+ */
+          __pyx_v_v1_norm = 0.000001;
+
+          /* "Djumble/djumble/voperators/cy.pyx":320
+ * 
+ *         # Preventing Division by Zero.
+ *         if v1_norm == 0.0:             # <<<<<<<<<<<<<<
+ *             v1_norm = 0.000001
+ * 
+ */
+        }
+
+        /* "Djumble/djumble/voperators/cy.pyx":323
+ *             v1_norm = 0.000001
+ * 
+ *         if v2_norm == 0.0:             # <<<<<<<<<<<<<<
+ *             v2_norm = 0.000001
+ * 
+ */
+        __pyx_t_12 = ((__pyx_v_v2_norm == 0.0) != 0);
+        if (__pyx_t_12) {
+
+          /* "Djumble/djumble/voperators/cy.pyx":324
+ * 
+ *         if v2_norm == 0.0:
+ *             v2_norm = 0.000001             # <<<<<<<<<<<<<<
+ * 
+ *         # Normalizing with the products of the respective vector norms.
+ */
+          __pyx_v_v2_norm = 0.000001;
+
+          /* "Djumble/djumble/voperators/cy.pyx":323
+ *             v1_norm = 0.000001
+ * 
+ *         if v2_norm == 0.0:             # <<<<<<<<<<<<<<
+ *             v2_norm = 0.000001
+ * 
+ */
+        }
+
+        /* "Djumble/djumble/voperators/cy.pyx":327
+ * 
+ *         # Normalizing with the products of the respective vector norms.
+ *         csdis = csdis / (v1_norm * v2_norm)             # <<<<<<<<<<<<<<
+ * 
+ *         # Getting Cosine Distance.
+ */
+        __pyx_v_csdis = (__pyx_v_csdis / (__pyx_v_v1_norm * __pyx_v_v2_norm));
+
+        /* "Djumble/djumble/voperators/cy.pyx":330
+ * 
+ *         # Getting Cosine Distance.
+ *         csdis =  acos(csdis) / pi             # <<<<<<<<<<<<<<
+ * 
+ *     return csdis
+ */
+        __pyx_v_csdis = (acos(__pyx_v_csdis) / __pyx_v_pi);
+      }
+
+      /* "Djumble/djumble/voperators/cy.pyx":303
+ * 
+ *     # The following operatsion taking place in the non-gil.
+ *     with nogil:             # <<<<<<<<<<<<<<
+ * 
+ *         # Calculating the cosine similarity.
+ */
+      /*finally:*/ {
+        /*normal exit:*/{
+          #ifdef WITH_THREAD
+          Py_BLOCK_THREADS
+          #endif
+          goto __pyx_L5;
+        }
+        __pyx_L5:;
+      }
+  }
+
+  /* "Djumble/djumble/voperators/cy.pyx":332
+ *         csdis =  acos(csdis) / pi
+ * 
+ *     return csdis             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_r = __pyx_v_csdis;
+  goto __pyx_L0;
+
+  /* "Djumble/djumble/voperators/cy.pyx":284
+ * 
+ * 
+ * cpdef double cosDa_vect(double [::1] v1, double [::1] v2, double[::1] A):             # <<<<<<<<<<<<<<
+ * 
+ *     cdef:
+ */
+
+  /* function exit code */
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_7cosDa_vect(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_7cosDa_vect(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  __Pyx_memviewslice __pyx_v_v1 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v_v2 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_A = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("cos2Da (wrapper)", 0);
+  __Pyx_RefNannySetupContext("cosDa_vect (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_m1,&__pyx_n_s_m2,&__pyx_n_s_A,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_v1,&__pyx_n_s_v2,&__pyx_n_s_A,0};
     PyObject* values[3] = {0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
@@ -3495,21 +4566,21 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_3cos2Da(PyObject *_
       kw_args = PyDict_Size(__pyx_kwds);
       switch (pos_args) {
         case  0:
-        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m1)) != 0)) kw_args--;
+        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_v1)) != 0)) kw_args--;
         else goto __pyx_L5_argtuple_error;
         case  1:
-        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m2)) != 0)) kw_args--;
+        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_v2)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cos2Da", 1, 3, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cosDa_vect", 1, 3, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_A)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cos2Da", 1, 3, 3, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cosDa_vect", 1, 3, 3, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cos2Da") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cosDa_vect") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -3518,71 +4589,67 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_3cos2Da(PyObject *_
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
       values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
     }
-    __pyx_v_m1 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0]); if (unlikely(!__pyx_v_m1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_m2 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1]); if (unlikely(!__pyx_v_m2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_A = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2]); if (unlikely(!__pyx_v_A.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_v1 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0]); if (unlikely(!__pyx_v_v1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_v2 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[1]); if (unlikely(!__pyx_v_v2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_A = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2]); if (unlikely(!__pyx_v_A.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cos2Da", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("cosDa_vect", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
-  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cos2Da", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosDa_vect", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_2cos2Da(__pyx_self, __pyx_v_m1, __pyx_v_m2, __pyx_v_A);
+  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_6cosDa_vect(__pyx_self, __pyx_v_v1, __pyx_v_v2, __pyx_v_A);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_2cos2Da(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_A) {
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_6cosDa_vect(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_v1, __Pyx_memviewslice __pyx_v_v2, __Pyx_memviewslice __pyx_v_A) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
-  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_1 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("cos2Da", 0);
+  __Pyx_RefNannySetupContext("cosDa_vect", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_m1.memview)) { __Pyx_RaiseUnboundLocalError("m1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_m2.memview)) { __Pyx_RaiseUnboundLocalError("m2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_A.memview)) { __Pyx_RaiseUnboundLocalError("A"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_cos2Da(__pyx_v_m1, __pyx_v_m2, __pyx_v_A, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
-  __pyx_r = __pyx_t_2;
-  __pyx_t_2 = 0;
+  if (unlikely(!__pyx_v_v1.memview)) { __Pyx_RaiseUnboundLocalError("v1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_v2.memview)) { __Pyx_RaiseUnboundLocalError("v2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_A.memview)) { __Pyx_RaiseUnboundLocalError("A"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_vect(__pyx_v_v1, __pyx_v_v2, __pyx_v_A, 0)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
   goto __pyx_L0;
 
   /* function exit code */
   __pyx_L1_error:;
-  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cos2Da", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosDa_vect", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
-  __PYX_XDEC_MEMVIEW(&__pyx_v_m1, 1);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_m2, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_v1, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_v2, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_v_A, 1);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":208
+/* "Djumble/djumble/voperators/cy.pyx":335
  * 
  * 
- * cpdef double [:, ::1] cosdis_2d(double [:, ::1] m1, double [:, ::1] m2):             # <<<<<<<<<<<<<<
+ * cpdef double [:, ::1] cosD(double [:, ::1] m1, double [:, ::1] m2):             # <<<<<<<<<<<<<<
  * 
  *     cdef:
  */
 
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_5cosdis_2d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(__Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, CYTHON_UNUSED int __pyx_skip_dispatch) {
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_9cosD(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosD(__Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, CYTHON_UNUSED int __pyx_skip_dispatch) {
   Py_ssize_t __pyx_v_i;
   Py_ssize_t __pyx_v_j;
   Py_ssize_t __pyx_v_k;
@@ -3653,9 +4720,9 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("cosdis_2d", 0);
+  __Pyx_RefNannySetupContext("cosD", 0);
 
-  /* "Djumble/djumble/voperators/cy.pyx":215
+  /* "Djumble/djumble/voperators/cy.pyx":342
  * 
  *         # Matrices dimentions intilized variables.
  *         Py_ssize_t m1_I = m1.shape[0]             # <<<<<<<<<<<<<<
@@ -3664,7 +4731,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
  */
   __pyx_v_m1_I = (__pyx_v_m1.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":216
+  /* "Djumble/djumble/voperators/cy.pyx":343
  *         # Matrices dimentions intilized variables.
  *         Py_ssize_t m1_I = m1.shape[0]
  *         Py_ssize_t m1_J = m1.shape[1]             # <<<<<<<<<<<<<<
@@ -3673,7 +4740,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
  */
   __pyx_v_m1_J = (__pyx_v_m1.shape[1]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":217
+  /* "Djumble/djumble/voperators/cy.pyx":344
  *         Py_ssize_t m1_I = m1.shape[0]
  *         Py_ssize_t m1_J = m1.shape[1]
  *         Py_ssize_t m2_I = m2.shape[0]             # <<<<<<<<<<<<<<
@@ -3682,7 +4749,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
  */
   __pyx_v_m2_I = (__pyx_v_m2.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":218
+  /* "Djumble/djumble/voperators/cy.pyx":345
  *         Py_ssize_t m1_J = m1.shape[1]
  *         Py_ssize_t m2_I = m2.shape[0]
  *         Py_ssize_t m2_J = m2.shape[1]             # <<<<<<<<<<<<<<
@@ -3691,7 +4758,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
  */
   __pyx_v_m2_J = (__pyx_v_m2.shape[1]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":227
+  /* "Djumble/djumble/voperators/cy.pyx":354
  * 
  *         # Definding Pi constant.
  *         double pi = 3.14159265             # <<<<<<<<<<<<<<
@@ -3700,86 +4767,86 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
  */
   __pyx_v_pi = 3.14159265;
 
-  /* "Djumble/djumble/voperators/cy.pyx":230
+  /* "Djumble/djumble/voperators/cy.pyx":357
  * 
  *     # Creating the temporary cython arrays.
  *     m1_norms = cvarray(shape=(m1_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  *     m2_norms = cvarray(shape=(m2_I,), itemsize=sizeof(double), format="d")
  *     csdis_vect = cvarray(shape=(m1_I, m2_I), itemsize=sizeof(double), format="d")
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 357; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_m1_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_m1_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 357; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 357; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 357; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 357; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 357; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 357; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 357; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_3);
-  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 357; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_m1_norms = __pyx_t_4;
   __pyx_t_4.memview = NULL;
   __pyx_t_4.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":231
+  /* "Djumble/djumble/voperators/cy.pyx":358
  *     # Creating the temporary cython arrays.
  *     m1_norms = cvarray(shape=(m1_I,), itemsize=sizeof(double), format="d")
  *     m2_norms = cvarray(shape=(m2_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  *     csdis_vect = cvarray(shape=(m1_I, m2_I), itemsize=sizeof(double), format="d")
  * 
  */
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m2_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m2_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_shape, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_shape, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_itemsize, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_itemsize, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_2);
-  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_m2_norms = __pyx_t_4;
   __pyx_t_4.memview = NULL;
   __pyx_t_4.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":232
+  /* "Djumble/djumble/voperators/cy.pyx":359
  *     m1_norms = cvarray(shape=(m1_I,), itemsize=sizeof(double), format="d")
  *     m2_norms = cvarray(shape=(m2_I,), itemsize=sizeof(double), format="d")
  *     csdis_vect = cvarray(shape=(m1_I, m2_I), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  * 
  *     # The following operatsion taking place in the non-gil and parallel...
  */
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_m1_I); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_m1_I); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m2_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m2_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3);
@@ -3787,24 +4854,24 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
   PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_1);
   __pyx_t_3 = 0;
   __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_shape, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_shape, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_itemsize, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_itemsize, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_5);
-  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_v_csdis_vect = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":236
+  /* "Djumble/djumble/voperators/cy.pyx":363
  *     # The following operatsion taking place in the non-gil and parallel...
  *     # ...openmp emviroment.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -3825,14 +4892,14 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                 #define unlikely(x) (x)
             #endif
             #ifdef _OPENMP
-            #pragma omp parallel private(__pyx_v_iz, __pyx_v_jz) private(__pyx_t_42, __pyx_t_27, __pyx_t_37, __pyx_t_16, __pyx_t_8, __pyx_t_47, __pyx_t_34, __pyx_t_31, __pyx_t_43, __pyx_t_28, __pyx_t_13, __pyx_t_48, __pyx_t_7, __pyx_t_44, __pyx_t_25, __pyx_t_52, __pyx_t_39, __pyx_t_14, __pyx_t_24, __pyx_t_22, __pyx_t_51, __pyx_t_30, __pyx_t_29, __pyx_t_11, __pyx_t_20, __pyx_t_49, __pyx_t_33, __pyx_t_45, __pyx_t_35, __pyx_t_9, __pyx_t_36, __pyx_t_38, __pyx_t_12, __pyx_t_18, __pyx_t_23, __pyx_t_26, __pyx_t_50, __pyx_t_46, __pyx_t_15, __pyx_t_17, __pyx_t_21, __pyx_t_32, __pyx_t_41, __pyx_t_10, __pyx_t_19, __pyx_t_40)
+            #pragma omp parallel private(__pyx_v_iz, __pyx_v_jz) private(__pyx_t_42, __pyx_t_27, __pyx_t_46, __pyx_t_37, __pyx_t_16, __pyx_t_8, __pyx_t_47, __pyx_t_34, __pyx_t_31, __pyx_t_43, __pyx_t_15, __pyx_t_13, __pyx_t_48, __pyx_t_7, __pyx_t_44, __pyx_t_25, __pyx_t_52, __pyx_t_39, __pyx_t_14, __pyx_t_24, __pyx_t_22, __pyx_t_51, __pyx_t_30, __pyx_t_29, __pyx_t_11, __pyx_t_20, __pyx_t_49, __pyx_t_33, __pyx_t_45, __pyx_t_35, __pyx_t_9, __pyx_t_36, __pyx_t_38, __pyx_t_12, __pyx_t_18, __pyx_t_23, __pyx_t_26, __pyx_t_50, __pyx_t_28, __pyx_t_17, __pyx_t_21, __pyx_t_32, __pyx_t_41, __pyx_t_10, __pyx_t_19, __pyx_t_40)
             #endif /* _OPENMP */
             {
                 /* Initialize private variables to invalid values */
                 __pyx_v_iz = ((Py_ssize_t)0xbad0bad0);
                 __pyx_v_jz = ((Py_ssize_t)0xbad0bad0);
 
-                /* "Djumble/djumble/voperators/cy.pyx":241
+                /* "Djumble/djumble/voperators/cy.pyx":368
  *         # ...in C garbage values can case floating point overflow, thus, peculiar results...
  *         # ...like NaN or incorrect calculatons.
  *         for iz in range(m1_I):             # <<<<<<<<<<<<<<
@@ -3843,7 +4910,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                 for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
                   __pyx_v_iz = __pyx_t_8;
 
-                  /* "Djumble/djumble/voperators/cy.pyx":242
+                  /* "Djumble/djumble/voperators/cy.pyx":369
  *         # ...like NaN or incorrect calculatons.
  *         for iz in range(m1_I):
  *             m1_norms[iz] = 0.0             # <<<<<<<<<<<<<<
@@ -3855,7 +4922,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_9)) )) = 0.0;
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":244
+                /* "Djumble/djumble/voperators/cy.pyx":371
  *             m1_norms[iz] = 0.0
  * 
  *         for iz in range(m2_I):             # <<<<<<<<<<<<<<
@@ -3866,7 +4933,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                 for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
                   __pyx_v_iz = __pyx_t_8;
 
-                  /* "Djumble/djumble/voperators/cy.pyx":245
+                  /* "Djumble/djumble/voperators/cy.pyx":372
  * 
  *         for iz in range(m2_I):
  *             m2_norms[iz] = 0.0             # <<<<<<<<<<<<<<
@@ -3878,7 +4945,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_10)) )) = 0.0;
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":247
+                /* "Djumble/djumble/voperators/cy.pyx":374
  *             m2_norms[iz] = 0.0
  * 
  *         for iz in range(m1_I):             # <<<<<<<<<<<<<<
@@ -3889,7 +4956,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                 for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
                   __pyx_v_iz = __pyx_t_8;
 
-                  /* "Djumble/djumble/voperators/cy.pyx":248
+                  /* "Djumble/djumble/voperators/cy.pyx":375
  * 
  *         for iz in range(m1_I):
  *             for jz in range(m2_I):             # <<<<<<<<<<<<<<
@@ -3900,7 +4967,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                   for (__pyx_t_12 = 0; __pyx_t_12 < __pyx_t_11; __pyx_t_12+=1) {
                     __pyx_v_jz = __pyx_t_12;
 
-                    /* "Djumble/djumble/voperators/cy.pyx":249
+                    /* "Djumble/djumble/voperators/cy.pyx":376
  *         for iz in range(m1_I):
  *             for jz in range(m2_I):
  *                 csdis_vect[iz, jz] = 0.0             # <<<<<<<<<<<<<<
@@ -3915,7 +4982,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                   }
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":252
+                /* "Djumble/djumble/voperators/cy.pyx":379
  * 
  *         # Calculating the Norms for the first matrix.
  *         for i in prange(m1_I, schedule='guided'):             # <<<<<<<<<<<<<<
@@ -3929,7 +4996,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                     if (__pyx_t_11 > 0)
                     {
                         #ifdef _OPENMP
-                        #pragma omp for firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) lastprivate(__pyx_v_j) schedule(guided)
+                        #pragma omp for lastprivate(__pyx_v_j) firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) schedule(guided)
                         #endif /* _OPENMP */
                         for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_11; __pyx_t_8++){
                             {
@@ -3937,7 +5004,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                 /* Initialize private variables to invalid values */
                                 __pyx_v_j = ((Py_ssize_t)0xbad0bad0);
 
-                                /* "Djumble/djumble/voperators/cy.pyx":255
+                                /* "Djumble/djumble/voperators/cy.pyx":382
  * 
  *             # Calculating Sum.
  *             for j in range(m1_J):             # <<<<<<<<<<<<<<
@@ -3948,7 +5015,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                 for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_12; __pyx_t_15+=1) {
                                   __pyx_v_j = __pyx_t_15;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":256
+                                  /* "Djumble/djumble/voperators/cy.pyx":383
  *             # Calculating Sum.
  *             for j in range(m1_J):
  *                 m1_norms[i] += m1[i, j] * m1[i, j]             # <<<<<<<<<<<<<<
@@ -3968,7 +5035,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_20)) )) += ((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_16 * __pyx_v_m1.strides[0]) )) + __pyx_t_17)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_18 * __pyx_v_m1.strides[0]) )) + __pyx_t_19)) ))));
                                 }
 
-                                /* "Djumble/djumble/voperators/cy.pyx":259
+                                /* "Djumble/djumble/voperators/cy.pyx":386
  * 
  *             # Calculating the Square root of the sum
  *             m1_norms[i] = sqrt(m1_norms[i])             # <<<<<<<<<<<<<<
@@ -3981,7 +5048,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                 if (__pyx_t_22 < 0) __pyx_t_22 += __pyx_v_m1_norms.shape[0];
                                 *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_22)) )) = sqrt((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_21)) ))));
 
-                                /* "Djumble/djumble/voperators/cy.pyx":262
+                                /* "Djumble/djumble/voperators/cy.pyx":389
  * 
  *             # Preventing Division by Zero.
  *             if m1_norms[i] == 0.0:             # <<<<<<<<<<<<<<
@@ -3993,7 +5060,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                 __pyx_t_24 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_23)) ))) == 0.0) != 0);
                                 if (__pyx_t_24) {
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":263
+                                  /* "Djumble/djumble/voperators/cy.pyx":390
  *             # Preventing Division by Zero.
  *             if m1_norms[i] == 0.0:
  *                 m1_norms[i] = 0.000001             # <<<<<<<<<<<<<<
@@ -4004,7 +5071,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                   if (__pyx_t_25 < 0) __pyx_t_25 += __pyx_v_m1_norms.shape[0];
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_25)) )) = 0.000001;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":262
+                                  /* "Djumble/djumble/voperators/cy.pyx":389
  * 
  *             # Preventing Division by Zero.
  *             if m1_norms[i] == 0.0:             # <<<<<<<<<<<<<<
@@ -4017,7 +5084,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                     }
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":267
+                /* "Djumble/djumble/voperators/cy.pyx":394
  * 
  *         # Calculating the Norms for the second matrix.
  *         for i in prange(m2_I, schedule='guided'):             # <<<<<<<<<<<<<<
@@ -4031,7 +5098,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                     if (__pyx_t_7 > 0)
                     {
                         #ifdef _OPENMP
-                        #pragma omp for firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) lastprivate(__pyx_v_j) schedule(guided)
+                        #pragma omp for lastprivate(__pyx_v_j) firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) schedule(guided)
                         #endif /* _OPENMP */
                         for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8++){
                             {
@@ -4039,7 +5106,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                 /* Initialize private variables to invalid values */
                                 __pyx_v_j = ((Py_ssize_t)0xbad0bad0);
 
-                                /* "Djumble/djumble/voperators/cy.pyx":270
+                                /* "Djumble/djumble/voperators/cy.pyx":397
  * 
  *             # Calculating Sum.
  *             for j in range(m2_J):             # <<<<<<<<<<<<<<
@@ -4050,7 +5117,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                 for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_12; __pyx_t_15+=1) {
                                   __pyx_v_j = __pyx_t_15;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":271
+                                  /* "Djumble/djumble/voperators/cy.pyx":398
  *             # Calculating Sum.
  *             for j in range(m2_J):
  *                 m2_norms[i] += m2[i, j] * m2[i, j]             # <<<<<<<<<<<<<<
@@ -4070,7 +5137,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_30)) )) += ((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_26 * __pyx_v_m2.strides[0]) )) + __pyx_t_27)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_28 * __pyx_v_m2.strides[0]) )) + __pyx_t_29)) ))));
                                 }
 
-                                /* "Djumble/djumble/voperators/cy.pyx":274
+                                /* "Djumble/djumble/voperators/cy.pyx":401
  * 
  *             # Calculating the Square root of the sum
  *             m2_norms[i] = sqrt(m2_norms[i])             # <<<<<<<<<<<<<<
@@ -4083,7 +5150,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                 if (__pyx_t_32 < 0) __pyx_t_32 += __pyx_v_m2_norms.shape[0];
                                 *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_32)) )) = sqrt((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_31)) ))));
 
-                                /* "Djumble/djumble/voperators/cy.pyx":277
+                                /* "Djumble/djumble/voperators/cy.pyx":404
  * 
  *             # Preventing Division by Zero.
  *             if m2_norms[i] == 0.0:             # <<<<<<<<<<<<<<
@@ -4095,7 +5162,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                 __pyx_t_24 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_33)) ))) == 0.0) != 0);
                                 if (__pyx_t_24) {
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":278
+                                  /* "Djumble/djumble/voperators/cy.pyx":405
  *             # Preventing Division by Zero.
  *             if m2_norms[i] == 0.0:
  *                 m2_norms[i] = 0.000001             # <<<<<<<<<<<<<<
@@ -4106,7 +5173,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                   if (__pyx_t_34 < 0) __pyx_t_34 += __pyx_v_m2_norms.shape[0];
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_34)) )) = 0.000001;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":277
+                                  /* "Djumble/djumble/voperators/cy.pyx":404
  * 
  *             # Preventing Division by Zero.
  *             if m2_norms[i] == 0.0:             # <<<<<<<<<<<<<<
@@ -4119,7 +5186,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                     }
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":282
+                /* "Djumble/djumble/voperators/cy.pyx":409
  *         # Calculating the cosine distances product.
  *         # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
  *         for i in prange(m1_I, schedule='guided'):             # <<<<<<<<<<<<<<
@@ -4133,7 +5200,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                     if (__pyx_t_11 > 0)
                     {
                         #ifdef _OPENMP
-                        #pragma omp for firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) lastprivate(__pyx_v_j) lastprivate(__pyx_v_k) schedule(guided)
+                        #pragma omp for lastprivate(__pyx_v_j) lastprivate(__pyx_v_k) firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) schedule(guided)
                         #endif /* _OPENMP */
                         for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_11; __pyx_t_8++){
                             {
@@ -4142,7 +5209,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                 __pyx_v_j = ((Py_ssize_t)0xbad0bad0);
                                 __pyx_v_k = ((Py_ssize_t)0xbad0bad0);
 
-                                /* "Djumble/djumble/voperators/cy.pyx":284
+                                /* "Djumble/djumble/voperators/cy.pyx":411
  *         for i in prange(m1_I, schedule='guided'):
  * 
  *             for j in range(m2_I):             # <<<<<<<<<<<<<<
@@ -4153,7 +5220,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                 for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_12; __pyx_t_15+=1) {
                                   __pyx_v_j = __pyx_t_15;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":287
+                                  /* "Djumble/djumble/voperators/cy.pyx":414
  * 
  *                 # Calculating the elemnt-wise sum of products.
  *                 for k in range(m1_J):             # <<<<<<<<<<<<<<
@@ -4164,7 +5231,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                   for (__pyx_t_36 = 0; __pyx_t_36 < __pyx_t_35; __pyx_t_36+=1) {
                                     __pyx_v_k = __pyx_t_36;
 
-                                    /* "Djumble/djumble/voperators/cy.pyx":288
+                                    /* "Djumble/djumble/voperators/cy.pyx":415
  *                 # Calculating the elemnt-wise sum of products.
  *                 for k in range(m1_J):
  *                     csdis_vect[i, j] += m1[i, k] * m2[j, k]             # <<<<<<<<<<<<<<
@@ -4186,7 +5253,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_41 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_42)) )) += ((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_37 * __pyx_v_m1.strides[0]) )) + __pyx_t_38)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_39 * __pyx_v_m2.strides[0]) )) + __pyx_t_40)) ))));
                                   }
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":291
+                                  /* "Djumble/djumble/voperators/cy.pyx":418
  * 
  *                 # Normalizing with the products of the respective vector norms.
  *                 csdis_vect[i, j] = csdis_vect[i, j] / (m1_norms[i] * m2_norms[j])             # <<<<<<<<<<<<<<
@@ -4207,7 +5274,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
                                   if (__pyx_t_48 < 0) __pyx_t_48 += __pyx_v_csdis_vect.shape[1];
                                   *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_47 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_48)) )) = ((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_43 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_44)) ))) / ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_45)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_46)) )))));
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":294
+                                  /* "Djumble/djumble/voperators/cy.pyx":421
  * 
  *                 # Getting Cosine Distance.
  *                 csdis_vect[i, j] =  acos(csdis_vect[i, j]) / pi             # <<<<<<<<<<<<<<
@@ -4238,7 +5305,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
         #endif
       }
 
-      /* "Djumble/djumble/voperators/cy.pyx":236
+      /* "Djumble/djumble/voperators/cy.pyx":363
  *     # The following operatsion taking place in the non-gil and parallel...
  *     # ...openmp emviroment.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -4256,7 +5323,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
       }
   }
 
-  /* "Djumble/djumble/voperators/cy.pyx":296
+  /* "Djumble/djumble/voperators/cy.pyx":423
  *                 csdis_vect[i, j] =  acos(csdis_vect[i, j]) / pi
  * 
  *     return csdis_vect             # <<<<<<<<<<<<<<
@@ -4267,10 +5334,10 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
   __pyx_r = __pyx_v_csdis_vect;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":208
+  /* "Djumble/djumble/voperators/cy.pyx":335
  * 
  * 
- * cpdef double [:, ::1] cosdis_2d(double [:, ::1] m1, double [:, ::1] m2):             # <<<<<<<<<<<<<<
+ * cpdef double [:, ::1] cosD(double [:, ::1] m1, double [:, ::1] m2):             # <<<<<<<<<<<<<<
  * 
  *     cdef:
  */
@@ -4285,7 +5352,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
   __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
   __pyx_r.data = NULL;
   __pyx_r.memview = NULL;
-  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosdis_2d", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosD", __pyx_clineno, __pyx_lineno, __pyx_filename);
 
   goto __pyx_L2;
   __pyx_L0:;
@@ -4301,8 +5368,8 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(_
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_5cosdis_2d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_5cosdis_2d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_9cosD(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_9cosD(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_m1 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_m2 = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
@@ -4310,7 +5377,7 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_5cosdis_2d(PyObject
   int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("cosdis_2d (wrapper)", 0);
+  __Pyx_RefNannySetupContext("cosD (wrapper)", 0);
   {
     static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_m1,&__pyx_n_s_m2,0};
     PyObject* values[2] = {0,0};
@@ -4331,11 +5398,11 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_5cosdis_2d(PyObject
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m2)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cosdis_2d", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cosD", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 335; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cosdis_2d") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cosD") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 335; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -4343,25 +5410,25 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_5cosdis_2d(PyObject
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
-    __pyx_v_m1 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0]); if (unlikely(!__pyx_v_m1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_m2 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1]); if (unlikely(!__pyx_v_m2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m1 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0]); if (unlikely(!__pyx_v_m1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 335; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m2 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1]); if (unlikely(!__pyx_v_m2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 335; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cosdis_2d", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("cosD", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 335; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
-  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosdis_2d", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosD", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_4cosdis_2d(__pyx_self, __pyx_v_m1, __pyx_v_m2);
+  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_8cosD(__pyx_self, __pyx_v_m1, __pyx_v_m2);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_4cosdis_2d(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2) {
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_8cosD(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -4369,12 +5436,12 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_4cosdis_2d(CYTHON_U
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("cosdis_2d", 0);
+  __Pyx_RefNannySetupContext("cosD", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_m1.memview)) { __Pyx_RaiseUnboundLocalError("m1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_m2.memview)) { __Pyx_RaiseUnboundLocalError("m2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_cosdis_2d(__pyx_v_m1, __pyx_v_m2, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_v_m1.memview)) { __Pyx_RaiseUnboundLocalError("m1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 335; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_m2.memview)) { __Pyx_RaiseUnboundLocalError("m2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 335; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_cosD(__pyx_v_m1, __pyx_v_m2, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 335; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 335; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
   __pyx_r = __pyx_t_2;
@@ -4385,7 +5452,7 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_4cosdis_2d(CYTHON_U
   __pyx_L1_error:;
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosdis_2d", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("Djumble.djumble.voperators.cy.cosD", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __PYX_XDEC_MEMVIEW(&__pyx_v_m1, 1);
@@ -4395,7 +5462,7 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_4cosdis_2d(CYTHON_U
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":299
+/* "Djumble/djumble/voperators/cy.pyx":426
  * 
  * 
  * cpdef double [:, ::1] eudis_2d(double [:, ::1] m1, double [:, ::1] m2):             # <<<<<<<<<<<<<<
@@ -4403,7 +5470,7 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_4cosdis_2d(CYTHON_U
  *     cdef:
  */
 
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_7eudis_2d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_11eudis_2d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, CYTHON_UNUSED int __pyx_skip_dispatch) {
   Py_ssize_t __pyx_v_i;
   Py_ssize_t __pyx_v_j;
@@ -4449,7 +5516,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("eudis_2d", 0);
 
-  /* "Djumble/djumble/voperators/cy.pyx":306
+  /* "Djumble/djumble/voperators/cy.pyx":433
  * 
  *         # Matrices dimentions intilized variables.
  *         Py_ssize_t m1_I = m1.shape[0]             # <<<<<<<<<<<<<<
@@ -4458,7 +5525,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
  */
   __pyx_v_m1_I = (__pyx_v_m1.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":307
+  /* "Djumble/djumble/voperators/cy.pyx":434
  *         # Matrices dimentions intilized variables.
  *         Py_ssize_t m1_I = m1.shape[0]
  *         Py_ssize_t m1_J = m1.shape[1]             # <<<<<<<<<<<<<<
@@ -4467,7 +5534,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
  */
   __pyx_v_m1_J = (__pyx_v_m1.shape[1]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":308
+  /* "Djumble/djumble/voperators/cy.pyx":435
  *         Py_ssize_t m1_I = m1.shape[0]
  *         Py_ssize_t m1_J = m1.shape[1]
  *         Py_ssize_t m2_I = m2.shape[0]             # <<<<<<<<<<<<<<
@@ -4476,20 +5543,20 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
  */
   __pyx_v_m2_I = (__pyx_v_m2.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":315
+  /* "Djumble/djumble/voperators/cy.pyx":442
  * 
  *     # Creating the temporary cython arrays.
  *     eudis_vect = cvarray(shape=(m1_I, m2_I), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  * 
  *     # The following operatsion taking place in the non-gil and parallel...
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_m1_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_m1_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_m2_I); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_m2_I); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2);
@@ -4497,24 +5564,24 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
   PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3);
   __pyx_t_2 = 0;
   __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_4);
-  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_eudis_vect = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":319
+  /* "Djumble/djumble/voperators/cy.pyx":446
  *     # The following operatsion taking place in the non-gil and parallel...
  *     # ...openmp emviroment.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -4535,14 +5602,14 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
                 #define unlikely(x) (x)
             #endif
             #ifdef _OPENMP
-            #pragma omp parallel private(__pyx_v_iz, __pyx_v_jz) private(__pyx_t_27, __pyx_t_17, __pyx_t_16, __pyx_t_14, __pyx_t_24, __pyx_t_8, __pyx_t_28, __pyx_t_7, __pyx_t_25, __pyx_t_6, __pyx_t_19, __pyx_t_22, __pyx_t_20, __pyx_t_11, __pyx_t_12, __pyx_t_18, __pyx_t_23, __pyx_t_26, __pyx_t_13, __pyx_t_21, __pyx_t_10, __pyx_t_15, __pyx_t_9)
+            #pragma omp parallel private(__pyx_v_jz, __pyx_v_iz) private(__pyx_t_27, __pyx_t_17, __pyx_t_16, __pyx_t_14, __pyx_t_24, __pyx_t_8, __pyx_t_28, __pyx_t_7, __pyx_t_25, __pyx_t_6, __pyx_t_19, __pyx_t_22, __pyx_t_20, __pyx_t_11, __pyx_t_12, __pyx_t_18, __pyx_t_23, __pyx_t_26, __pyx_t_13, __pyx_t_21, __pyx_t_10, __pyx_t_15, __pyx_t_9)
             #endif /* _OPENMP */
             {
                 /* Initialize private variables to invalid values */
-                __pyx_v_iz = ((Py_ssize_t)0xbad0bad0);
                 __pyx_v_jz = ((Py_ssize_t)0xbad0bad0);
+                __pyx_v_iz = ((Py_ssize_t)0xbad0bad0);
 
-                /* "Djumble/djumble/voperators/cy.pyx":324
+                /* "Djumble/djumble/voperators/cy.pyx":451
  *         # ...in C garbage values can case floating point overflow, thus, peculiar results...
  *         # ...like NaN or incorrect calculatons.
  *         for iz in range(m1_I):             # <<<<<<<<<<<<<<
@@ -4553,7 +5620,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
                 for (__pyx_t_7 = 0; __pyx_t_7 < __pyx_t_6; __pyx_t_7+=1) {
                   __pyx_v_iz = __pyx_t_7;
 
-                  /* "Djumble/djumble/voperators/cy.pyx":325
+                  /* "Djumble/djumble/voperators/cy.pyx":452
  *         # ...like NaN or incorrect calculatons.
  *         for iz in range(m1_I):
  *             for jz in range(m2_I):             # <<<<<<<<<<<<<<
@@ -4564,7 +5631,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
                   for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
                     __pyx_v_jz = __pyx_t_9;
 
-                    /* "Djumble/djumble/voperators/cy.pyx":326
+                    /* "Djumble/djumble/voperators/cy.pyx":453
  *         for iz in range(m1_I):
  *             for jz in range(m2_I):
  *                 eudis_vect[iz, jz] = 0.0             # <<<<<<<<<<<<<<
@@ -4579,7 +5646,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
                   }
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":330
+                /* "Djumble/djumble/voperators/cy.pyx":457
  *         # Calculating the euclidian distances amogst all vectros of both matrices.
  *         # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
  *         for i in prange(m1_I, schedule='guided'):             # <<<<<<<<<<<<<<
@@ -4593,16 +5660,16 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
                     if (__pyx_t_8 > 0)
                     {
                         #ifdef _OPENMP
-                        #pragma omp for firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) lastprivate(__pyx_v_j) lastprivate(__pyx_v_k) schedule(guided)
+                        #pragma omp for lastprivate(__pyx_v_k) lastprivate(__pyx_v_j) firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) schedule(guided)
                         #endif /* _OPENMP */
                         for (__pyx_t_7 = 0; __pyx_t_7 < __pyx_t_8; __pyx_t_7++){
                             {
                                 __pyx_v_i = 0 + 1 * __pyx_t_7;
                                 /* Initialize private variables to invalid values */
-                                __pyx_v_j = ((Py_ssize_t)0xbad0bad0);
                                 __pyx_v_k = ((Py_ssize_t)0xbad0bad0);
+                                __pyx_v_j = ((Py_ssize_t)0xbad0bad0);
 
-                                /* "Djumble/djumble/voperators/cy.pyx":332
+                                /* "Djumble/djumble/voperators/cy.pyx":459
  *         for i in prange(m1_I, schedule='guided'):
  * 
  *             for j in range(m2_I):             # <<<<<<<<<<<<<<
@@ -4613,7 +5680,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
                                 for (__pyx_t_12 = 0; __pyx_t_12 < __pyx_t_9; __pyx_t_12+=1) {
                                   __pyx_v_j = __pyx_t_12;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":335
+                                  /* "Djumble/djumble/voperators/cy.pyx":462
  * 
  *                 # Calculating the elemnt-wise sum of products.
  *                 for k in range(m1_J):             # <<<<<<<<<<<<<<
@@ -4624,7 +5691,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
                                   for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_13; __pyx_t_14+=1) {
                                     __pyx_v_k = __pyx_t_14;
 
-                                    /* "Djumble/djumble/voperators/cy.pyx":336
+                                    /* "Djumble/djumble/voperators/cy.pyx":463
  *                 # Calculating the elemnt-wise sum of products.
  *                 for k in range(m1_J):
  *                     eudis_vect[i, j] += (m1[i, k] - m2[j, k]) * (m1[i, k] - m2[j, k])             # <<<<<<<<<<<<<<
@@ -4654,7 +5721,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
                                     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_eudis_vect.data + __pyx_t_23 * __pyx_v_eudis_vect.strides[0]) )) + __pyx_t_24)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_15 * __pyx_v_m1.strides[0]) )) + __pyx_t_16)) ))) - (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_17 * __pyx_v_m2.strides[0]) )) + __pyx_t_18)) )))) * ((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_19 * __pyx_v_m1.strides[0]) )) + __pyx_t_20)) ))) - (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_21 * __pyx_v_m2.strides[0]) )) + __pyx_t_22)) )))));
                                   }
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":339
+                                  /* "Djumble/djumble/voperators/cy.pyx":466
  * 
  *                 # Normalizing with the products of the respective vector norms.
  *                 eudis_vect[i, j] = sqrt(eudis_vect[i, j])             # <<<<<<<<<<<<<<
@@ -4685,7 +5752,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
         #endif
       }
 
-      /* "Djumble/djumble/voperators/cy.pyx":319
+      /* "Djumble/djumble/voperators/cy.pyx":446
  *     # The following operatsion taking place in the non-gil and parallel...
  *     # ...openmp emviroment.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -4703,7 +5770,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
       }
   }
 
-  /* "Djumble/djumble/voperators/cy.pyx":341
+  /* "Djumble/djumble/voperators/cy.pyx":468
  *                 eudis_vect[i, j] = sqrt(eudis_vect[i, j])
  * 
  *     return eudis_vect             # <<<<<<<<<<<<<<
@@ -4714,7 +5781,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
   __pyx_r = __pyx_v_eudis_vect;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":299
+  /* "Djumble/djumble/voperators/cy.pyx":426
  * 
  * 
  * cpdef double [:, ::1] eudis_2d(double [:, ::1] m1, double [:, ::1] m2):             # <<<<<<<<<<<<<<
@@ -4745,8 +5812,8 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_7eudis_2d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_7eudis_2d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_11eudis_2d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_11eudis_2d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_m1 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_m2 = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
@@ -4775,11 +5842,11 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_7eudis_2d(PyObject 
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m2)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("eudis_2d", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 299; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("eudis_2d", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 426; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "eudis_2d") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 299; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "eudis_2d") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 426; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -4787,25 +5854,25 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_7eudis_2d(PyObject 
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
-    __pyx_v_m1 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0]); if (unlikely(!__pyx_v_m1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 299; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_m2 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1]); if (unlikely(!__pyx_v_m2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 299; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m1 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0]); if (unlikely(!__pyx_v_m1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 426; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m2 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1]); if (unlikely(!__pyx_v_m2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 426; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("eudis_2d", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 299; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("eudis_2d", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 426; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Djumble.djumble.voperators.cy.eudis_2d", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_6eudis_2d(__pyx_self, __pyx_v_m1, __pyx_v_m2);
+  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_10eudis_2d(__pyx_self, __pyx_v_m1, __pyx_v_m2);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_6eudis_2d(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2) {
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_10eudis_2d(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -4815,10 +5882,10 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_6eudis_2d(CYTHON_UN
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("eudis_2d", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_m1.memview)) { __Pyx_RaiseUnboundLocalError("m1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 299; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_m2.memview)) { __Pyx_RaiseUnboundLocalError("m2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 299; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__pyx_v_m1, __pyx_v_m2, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 299; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 299; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_v_m1.memview)) { __Pyx_RaiseUnboundLocalError("m1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 426; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_m2.memview)) { __Pyx_RaiseUnboundLocalError("m2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 426; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_eudis_2d(__pyx_v_m1, __pyx_v_m2, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 426; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 426; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
   __pyx_r = __pyx_t_2;
@@ -4839,7 +5906,7 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_6eudis_2d(CYTHON_UN
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":345
+/* "Djumble/djumble/voperators/cy.pyx":472
  * 
  * # Note: For interal usage in cython.
  * cdef inline double vdot(double [::1] v1, double [::1] v2):             # <<<<<<<<<<<<<<
@@ -4859,7 +5926,7 @@ static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_vdot(__Py
   size_t __pyx_t_4;
   __Pyx_RefNannySetupContext("vdot", 0);
 
-  /* "Djumble/djumble/voperators/cy.pyx":350
+  /* "Djumble/djumble/voperators/cy.pyx":477
  *     cdef:
  *         unsigned int i
  *         unsigned int I = v1.shape[0]             # <<<<<<<<<<<<<<
@@ -4868,7 +5935,7 @@ static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_vdot(__Py
  */
   __pyx_v_I = (__pyx_v_v1.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":353
+  /* "Djumble/djumble/voperators/cy.pyx":480
  * 
  *         # Initializing the result variable.
  *         double res = 0.0             # <<<<<<<<<<<<<<
@@ -4877,7 +5944,7 @@ static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_vdot(__Py
  */
   __pyx_v_res = 0.0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":356
+  /* "Djumble/djumble/voperators/cy.pyx":483
  * 
  *     # Calculating the dot product.
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -4891,7 +5958,7 @@ static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_vdot(__Py
       #endif
       /*try:*/ {
 
-        /* "Djumble/djumble/voperators/cy.pyx":357
+        /* "Djumble/djumble/voperators/cy.pyx":484
  *     # Calculating the dot product.
  *     with nogil:
  *         for i in range(I):             # <<<<<<<<<<<<<<
@@ -4902,7 +5969,7 @@ static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_vdot(__Py
         for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
           __pyx_v_i = __pyx_t_2;
 
-          /* "Djumble/djumble/voperators/cy.pyx":358
+          /* "Djumble/djumble/voperators/cy.pyx":485
  *     with nogil:
  *         for i in range(I):
  *             res += v1[i] * v2[i]             # <<<<<<<<<<<<<<
@@ -4915,7 +5982,7 @@ static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_vdot(__Py
         }
       }
 
-      /* "Djumble/djumble/voperators/cy.pyx":356
+      /* "Djumble/djumble/voperators/cy.pyx":483
  * 
  *     # Calculating the dot product.
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -4933,7 +6000,7 @@ static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_vdot(__Py
       }
   }
 
-  /* "Djumble/djumble/voperators/cy.pyx":360
+  /* "Djumble/djumble/voperators/cy.pyx":487
  *             res += v1[i] * v2[i]
  * 
  *     return res             # <<<<<<<<<<<<<<
@@ -4943,7 +6010,7 @@ static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_vdot(__Py
   __pyx_r = __pyx_v_res;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":345
+  /* "Djumble/djumble/voperators/cy.pyx":472
  * 
  * # Note: For interal usage in cython.
  * cdef inline double vdot(double [::1] v1, double [::1] v2):             # <<<<<<<<<<<<<<
@@ -4957,7 +6024,7 @@ static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_vdot(__Py
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":363
+/* "Djumble/djumble/voperators/cy.pyx":490
  * 
  * # Note: For interal usage in cython.
  * cdef inline double [::1] dot1d_ds(double [::1] v, double [::1] m):             # <<<<<<<<<<<<<<
@@ -4985,7 +6052,7 @@ static CYTHON_INLINE __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("dot1d_ds", 0);
 
-  /* "Djumble/djumble/voperators/cy.pyx":368
+  /* "Djumble/djumble/voperators/cy.pyx":495
  *     cdef:
  *         unsigned int i
  *         unsigned int I = v.shape[0]             # <<<<<<<<<<<<<<
@@ -4994,40 +6061,40 @@ static CYTHON_INLINE __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2
  */
   __pyx_v_I = (__pyx_v_v.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":375
+  /* "Djumble/djumble/voperators/cy.pyx":502
  * 
  *     # Creating the numpy.array for results and its memory view
  *     res = cvarray(shape=(I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  * 
  *     # Calculating the dot product.
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 375; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 502; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyInt_From_unsigned_int(__pyx_v_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 375; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyInt_From_unsigned_int(__pyx_v_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 502; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 375; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 502; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 375; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 502; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 375; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 502; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 375; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 502; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 375; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 375; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 502; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 502; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_3);
-  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 375; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 502; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_res = __pyx_t_4;
   __pyx_t_4.memview = NULL;
   __pyx_t_4.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":378
+  /* "Djumble/djumble/voperators/cy.pyx":505
  * 
  *     # Calculating the dot product.
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -5041,7 +6108,7 @@ static CYTHON_INLINE __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2
       #endif
       /*try:*/ {
 
-        /* "Djumble/djumble/voperators/cy.pyx":379
+        /* "Djumble/djumble/voperators/cy.pyx":506
  *     # Calculating the dot product.
  *     with nogil:
  *         for i in range(I):             # <<<<<<<<<<<<<<
@@ -5052,7 +6119,7 @@ static CYTHON_INLINE __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2
         for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
           __pyx_v_i = __pyx_t_6;
 
-          /* "Djumble/djumble/voperators/cy.pyx":380
+          /* "Djumble/djumble/voperators/cy.pyx":507
  *     with nogil:
  *         for i in range(I):
  *             res[i] = v[i] * m[i]             # <<<<<<<<<<<<<<
@@ -5066,7 +6133,7 @@ static CYTHON_INLINE __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2
         }
       }
 
-      /* "Djumble/djumble/voperators/cy.pyx":378
+      /* "Djumble/djumble/voperators/cy.pyx":505
  * 
  *     # Calculating the dot product.
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -5084,7 +6151,7 @@ static CYTHON_INLINE __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2
       }
   }
 
-  /* "Djumble/djumble/voperators/cy.pyx":382
+  /* "Djumble/djumble/voperators/cy.pyx":509
  *             res[i] = v[i] * m[i]
  * 
  *     return res             # <<<<<<<<<<<<<<
@@ -5095,7 +6162,7 @@ static CYTHON_INLINE __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2
   __pyx_r = __pyx_v_res;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":363
+  /* "Djumble/djumble/voperators/cy.pyx":490
  * 
  * # Note: For interal usage in cython.
  * cdef inline double [::1] dot1d_ds(double [::1] v, double [::1] m):             # <<<<<<<<<<<<<<
@@ -5124,7 +6191,7 @@ static CYTHON_INLINE __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":412
+/* "Djumble/djumble/voperators/cy.pyx":539
  * 
  * # Note: For interal usage in cython.
  * cdef double [:, ::1] dot2d_2d(double [:, ::1] m1, double [:, ::1] m2, cnp.intp_t [::1] m2r):             # <<<<<<<<<<<<<<
@@ -5166,7 +6233,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_2d(__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("dot2d_2d", 0);
 
-  /* "Djumble/djumble/voperators/cy.pyx":417
+  /* "Djumble/djumble/voperators/cy.pyx":544
  *     cdef:
  *         Py_ssize_t i, j, ir
  *         Py_ssize_t I = m1.shape[0]             # <<<<<<<<<<<<<<
@@ -5175,7 +6242,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_2d(__
  */
   __pyx_v_I = (__pyx_v_m1.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":418
+  /* "Djumble/djumble/voperators/cy.pyx":545
  *         Py_ssize_t i, j, ir
  *         Py_ssize_t I = m1.shape[0]
  *         Py_ssize_t J = m2.shape[1]             # <<<<<<<<<<<<<<
@@ -5184,7 +6251,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_2d(__
  */
   __pyx_v_J = (__pyx_v_m2.shape[1]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":420
+  /* "Djumble/djumble/voperators/cy.pyx":547
  *         Py_ssize_t J = m2.shape[1]
  *         # Py_ssize_t K = m1.shape[1]
  *         Py_ssize_t IR = m2r.shape[0]             # <<<<<<<<<<<<<<
@@ -5193,20 +6260,20 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_2d(__
  */
   __pyx_v_IR = (__pyx_v_m2r.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":427
+  /* "Djumble/djumble/voperators/cy.pyx":554
  * 
  *     # Creating the numpy.array for results and its memory view
  *     res = cvarray(shape=(I, J), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  * 
  *     # Calculating the dot product.
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_J); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_J); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2);
@@ -5214,24 +6281,24 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_2d(__
   PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3);
   __pyx_t_2 = 0;
   __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_4);
-  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_res = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":430
+  /* "Djumble/djumble/voperators/cy.pyx":557
  * 
  *     # Calculating the dot product.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -5256,7 +6323,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_2d(__
             #endif /* _OPENMP */
             {
 
-                /* "Djumble/djumble/voperators/cy.pyx":431
+                /* "Djumble/djumble/voperators/cy.pyx":558
  *     # Calculating the dot product.
  *     with nogil, parallel():
  *         for i in prange(I, schedule='guided'):             # <<<<<<<<<<<<<<
@@ -5270,16 +6337,16 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_2d(__
                     if (__pyx_t_8 > 0)
                     {
                         #ifdef _OPENMP
-                        #pragma omp for lastprivate(__pyx_v_ir) lastprivate(__pyx_v_j) firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) schedule(guided)
+                        #pragma omp for lastprivate(__pyx_v_j) firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) lastprivate(__pyx_v_ir) schedule(guided)
                         #endif /* _OPENMP */
                         for (__pyx_t_7 = 0; __pyx_t_7 < __pyx_t_8; __pyx_t_7++){
                             {
                                 __pyx_v_i = 0 + 1 * __pyx_t_7;
                                 /* Initialize private variables to invalid values */
-                                __pyx_v_ir = ((Py_ssize_t)0xbad0bad0);
                                 __pyx_v_j = ((Py_ssize_t)0xbad0bad0);
+                                __pyx_v_ir = ((Py_ssize_t)0xbad0bad0);
 
-                                /* "Djumble/djumble/voperators/cy.pyx":432
+                                /* "Djumble/djumble/voperators/cy.pyx":559
  *     with nogil, parallel():
  *         for i in prange(I, schedule='guided'):
  *             for j in range(J):             # <<<<<<<<<<<<<<
@@ -5290,7 +6357,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_2d(__
                                 for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
                                   __pyx_v_j = __pyx_t_10;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":433
+                                  /* "Djumble/djumble/voperators/cy.pyx":560
  *         for i in prange(I, schedule='guided'):
  *             for j in range(J):
  *                 for ir in range(IR):             # <<<<<<<<<<<<<<
@@ -5301,7 +6368,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_2d(__
                                   for (__pyx_t_12 = 0; __pyx_t_12 < __pyx_t_11; __pyx_t_12+=1) {
                                     __pyx_v_ir = __pyx_t_12;
 
-                                    /* "Djumble/djumble/voperators/cy.pyx":434
+                                    /* "Djumble/djumble/voperators/cy.pyx":561
  *             for j in range(J):
  *                 for ir in range(IR):
  *                     res[i, j] += m1[i, ir] * m2[m2r[ir], j]             # <<<<<<<<<<<<<<
@@ -5339,7 +6406,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_2d(__
         #endif
       }
 
-      /* "Djumble/djumble/voperators/cy.pyx":430
+      /* "Djumble/djumble/voperators/cy.pyx":557
  * 
  *     # Calculating the dot product.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -5357,7 +6424,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_2d(__
       }
   }
 
-  /* "Djumble/djumble/voperators/cy.pyx":436
+  /* "Djumble/djumble/voperators/cy.pyx":563
  *                     res[i, j] += m1[i, ir] * m2[m2r[ir], j]
  * 
  *     return res             # <<<<<<<<<<<<<<
@@ -5368,7 +6435,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_2d(__
   __pyx_r = __pyx_v_res;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":412
+  /* "Djumble/djumble/voperators/cy.pyx":539
  * 
  * # Note: For interal usage in cython.
  * cdef double [:, ::1] dot2d_2d(double [:, ::1] m1, double [:, ::1] m2, cnp.intp_t [::1] m2r):             # <<<<<<<<<<<<<<
@@ -5398,7 +6465,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_2d(__
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":440
+/* "Djumble/djumble/voperators/cy.pyx":567
  * 
  * # Note: For interal usage in cython.
  * cdef double [:, ::1] dot2d_ds(double [:, ::1] m1, double [::1] m2):             # <<<<<<<<<<<<<<
@@ -5434,7 +6501,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_ds(__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("dot2d_ds", 0);
 
-  /* "Djumble/djumble/voperators/cy.pyx":448
+  /* "Djumble/djumble/voperators/cy.pyx":575
  *     cdef:
  *         Py_ssize_t i, j
  *         Py_ssize_t I = m1.shape[0]             # <<<<<<<<<<<<<<
@@ -5443,7 +6510,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_ds(__
  */
   __pyx_v_I = (__pyx_v_m1.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":449
+  /* "Djumble/djumble/voperators/cy.pyx":576
  *         Py_ssize_t i, j
  *         Py_ssize_t I = m1.shape[0]
  *         Py_ssize_t J = m2.shape[0]             # <<<<<<<<<<<<<<
@@ -5452,20 +6519,20 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_ds(__
  */
   __pyx_v_J = (__pyx_v_m2.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":456
+  /* "Djumble/djumble/voperators/cy.pyx":583
  * 
  *     # Creating the array for results and its memory view
  *     res = cvarray(shape=(I, J), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  * 
  *     # Calculating the dot product.
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 583; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 583; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_J); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_J); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 583; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 583; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2);
@@ -5473,24 +6540,24 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_ds(__
   PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3);
   __pyx_t_2 = 0;
   __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 583; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 583; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 583; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 583; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 583; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_4);
-  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 583; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_res = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":459
+  /* "Djumble/djumble/voperators/cy.pyx":586
  * 
  *     # Calculating the dot product.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -5515,7 +6582,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_ds(__
             #endif /* _OPENMP */
             {
 
-                /* "Djumble/djumble/voperators/cy.pyx":460
+                /* "Djumble/djumble/voperators/cy.pyx":587
  *     # Calculating the dot product.
  *     with nogil, parallel():
  *         for i in prange(I, schedule='guided'):             # <<<<<<<<<<<<<<
@@ -5537,7 +6604,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_ds(__
                                 /* Initialize private variables to invalid values */
                                 __pyx_v_j = ((Py_ssize_t)0xbad0bad0);
 
-                                /* "Djumble/djumble/voperators/cy.pyx":461
+                                /* "Djumble/djumble/voperators/cy.pyx":588
  *     with nogil, parallel():
  *         for i in prange(I, schedule='guided'):
  *             for j in range(J):             # <<<<<<<<<<<<<<
@@ -5548,7 +6615,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_ds(__
                                 for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
                                   __pyx_v_j = __pyx_t_10;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":462
+                                  /* "Djumble/djumble/voperators/cy.pyx":589
  *         for i in prange(I, schedule='guided'):
  *             for j in range(J):
  *                 res[i, j] = m1[i, j] * m2[j]             # <<<<<<<<<<<<<<
@@ -5581,7 +6648,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_ds(__
         #endif
       }
 
-      /* "Djumble/djumble/voperators/cy.pyx":459
+      /* "Djumble/djumble/voperators/cy.pyx":586
  * 
  *     # Calculating the dot product.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -5599,7 +6666,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_ds(__
       }
   }
 
-  /* "Djumble/djumble/voperators/cy.pyx":464
+  /* "Djumble/djumble/voperators/cy.pyx":591
  *                 res[i, j] = m1[i, j] * m2[j]
  * 
  *     return res             # <<<<<<<<<<<<<<
@@ -5610,7 +6677,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_ds(__
   __pyx_r = __pyx_v_res;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":440
+  /* "Djumble/djumble/voperators/cy.pyx":567
  * 
  * # Note: For interal usage in cython.
  * cdef double [:, ::1] dot2d_ds(double [:, ::1] m1, double [::1] m2):             # <<<<<<<<<<<<<<
@@ -5640,7 +6707,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_ds(__
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":468
+/* "Djumble/djumble/voperators/cy.pyx":595
  * 
  * # Note: Make it cdef if only for interal usage in cython.
  * cpdef double [::1] get_diag(double [:, ::1] m):             # <<<<<<<<<<<<<<
@@ -5648,7 +6715,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_dot2d_ds(__
  *     # Matrix index variables.
  */
 
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_9get_diag(PyObject *__pyx_self, PyObject *__pyx_arg_m); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_13get_diag(PyObject *__pyx_self, PyObject *__pyx_arg_m); /*proto*/
 static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_get_diag(__Pyx_memviewslice __pyx_v_m, CYTHON_UNUSED int __pyx_skip_dispatch) {
   unsigned int __pyx_v_i;
   unsigned int __pyx_v_I;
@@ -5671,7 +6738,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_get_diag(__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get_diag", 0);
 
-  /* "Djumble/djumble/voperators/cy.pyx":473
+  /* "Djumble/djumble/voperators/cy.pyx":600
  *     cdef:
  *         unsigned int i
  *         unsigned int I = m.shape[0]             # <<<<<<<<<<<<<<
@@ -5680,47 +6747,47 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_get_diag(__
  */
   __pyx_v_I = (__pyx_v_m.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":476
+  /* "Djumble/djumble/voperators/cy.pyx":603
  * 
  *         # Creating the numpy.array for results and its memory view
  *         double [::1] res = np.zeros((I), dtype=np.float)             # <<<<<<<<<<<<<<
  * 
  *     # Calculating the dot product.
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 476; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 476; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_unsigned_int(__pyx_v_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 476; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_unsigned_int(__pyx_v_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 476; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 476; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 476; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_float); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 476; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_float); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 476; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 476; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_5);
-  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 476; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_v_res = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":479
+  /* "Djumble/djumble/voperators/cy.pyx":606
  * 
  *     # Calculating the dot product.
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -5734,7 +6801,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_get_diag(__
       #endif
       /*try:*/ {
 
-        /* "Djumble/djumble/voperators/cy.pyx":480
+        /* "Djumble/djumble/voperators/cy.pyx":607
  *     # Calculating the dot product.
  *     with nogil:
  *         for i in range(I):             # <<<<<<<<<<<<<<
@@ -5745,7 +6812,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_get_diag(__
         for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
           __pyx_v_i = __pyx_t_8;
 
-          /* "Djumble/djumble/voperators/cy.pyx":483
+          /* "Djumble/djumble/voperators/cy.pyx":610
  *             # The idxs array is giving the actual row index of the data matrix...
  *             # ...to be summed up.
  *             res[i] += m[i, i]             # <<<<<<<<<<<<<<
@@ -5759,7 +6826,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_get_diag(__
         }
       }
 
-      /* "Djumble/djumble/voperators/cy.pyx":479
+      /* "Djumble/djumble/voperators/cy.pyx":606
  * 
  *     # Calculating the dot product.
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -5777,7 +6844,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_get_diag(__
       }
   }
 
-  /* "Djumble/djumble/voperators/cy.pyx":485
+  /* "Djumble/djumble/voperators/cy.pyx":612
  *             res[i] += m[i, i]
  * 
  *     return res             # <<<<<<<<<<<<<<
@@ -5788,7 +6855,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_get_diag(__
   __pyx_r = __pyx_v_res;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":468
+  /* "Djumble/djumble/voperators/cy.pyx":595
  * 
  * # Note: Make it cdef if only for interal usage in cython.
  * cpdef double [::1] get_diag(double [:, ::1] m):             # <<<<<<<<<<<<<<
@@ -5820,8 +6887,8 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_get_diag(__
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_9get_diag(PyObject *__pyx_self, PyObject *__pyx_arg_m); /*proto*/
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_9get_diag(PyObject *__pyx_self, PyObject *__pyx_arg_m) {
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_13get_diag(PyObject *__pyx_self, PyObject *__pyx_arg_m); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_13get_diag(PyObject *__pyx_self, PyObject *__pyx_arg_m) {
   __Pyx_memviewslice __pyx_v_m = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -5830,7 +6897,7 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_9get_diag(PyObject 
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("get_diag (wrapper)", 0);
   assert(__pyx_arg_m); {
-    __pyx_v_m = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_arg_m); if (unlikely(!__pyx_v_m.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_arg_m); if (unlikely(!__pyx_v_m.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 595; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -5838,14 +6905,14 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_9get_diag(PyObject 
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_8get_diag(__pyx_self, __pyx_v_m);
+  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_12get_diag(__pyx_self, __pyx_v_m);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_8get_diag(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m) {
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_12get_diag(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_m) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -5855,9 +6922,9 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_8get_diag(CYTHON_UN
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get_diag", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_m.memview)) { __Pyx_RaiseUnboundLocalError("m"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_get_diag(__pyx_v_m, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_v_m.memview)) { __Pyx_RaiseUnboundLocalError("m"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 595; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_get_diag(__pyx_v_m, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 595; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 595; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
   __pyx_r = __pyx_t_2;
@@ -5877,7 +6944,7 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_8get_diag(CYTHON_UN
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":516
+/* "Djumble/djumble/voperators/cy.pyx":643
  * 
  * # Note: Make it cdef if only for interal usage in cython.
  * cpdef double [::1] vdiv_num(double [::1] v, double num):             # <<<<<<<<<<<<<<
@@ -5885,7 +6952,7 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_8get_diag(CYTHON_UN
  *     # Matrix index variables.
  */
 
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_11vdiv_num(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_15vdiv_num(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vdiv_num(__Pyx_memviewslice __pyx_v_v, double __pyx_v_num, CYTHON_UNUSED int __pyx_skip_dispatch) {
   unsigned int __pyx_v_i;
   unsigned int __pyx_v_I;
@@ -5907,7 +6974,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vdiv_num(__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("vdiv_num", 0);
 
-  /* "Djumble/djumble/voperators/cy.pyx":521
+  /* "Djumble/djumble/voperators/cy.pyx":648
  *     cdef:
  *         unsigned int i
  *         unsigned int I = v.shape[0]             # <<<<<<<<<<<<<<
@@ -5916,47 +6983,47 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vdiv_num(__
  */
   __pyx_v_I = (__pyx_v_v.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":524
+  /* "Djumble/djumble/voperators/cy.pyx":651
  * 
  *         # Creating the numpy.array for results and its memory view
  *         double [::1] res = np.zeros((I), dtype=np.float)             # <<<<<<<<<<<<<<
  * 
  *     #
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 524; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 651; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 524; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 651; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_unsigned_int(__pyx_v_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 524; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_unsigned_int(__pyx_v_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 651; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 524; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 651; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 524; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 651; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 524; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 651; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_float); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 524; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_float); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 651; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 524; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 651; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 524; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 651; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_5);
-  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 524; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 651; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_v_res = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":527
+  /* "Djumble/djumble/voperators/cy.pyx":654
  * 
  *     #
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -5970,7 +7037,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vdiv_num(__
       #endif
       /*try:*/ {
 
-        /* "Djumble/djumble/voperators/cy.pyx":528
+        /* "Djumble/djumble/voperators/cy.pyx":655
  *     #
  *     with nogil:
  *         for i in range(I):             # <<<<<<<<<<<<<<
@@ -5981,7 +7048,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vdiv_num(__
         for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
           __pyx_v_i = __pyx_t_8;
 
-          /* "Djumble/djumble/voperators/cy.pyx":529
+          /* "Djumble/djumble/voperators/cy.pyx":656
  *     with nogil:
  *         for i in range(I):
  *             res[i] = v[i] / num             # <<<<<<<<<<<<<<
@@ -5994,7 +7061,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vdiv_num(__
         }
       }
 
-      /* "Djumble/djumble/voperators/cy.pyx":527
+      /* "Djumble/djumble/voperators/cy.pyx":654
  * 
  *     #
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -6012,7 +7079,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vdiv_num(__
       }
   }
 
-  /* "Djumble/djumble/voperators/cy.pyx":531
+  /* "Djumble/djumble/voperators/cy.pyx":658
  *             res[i] = v[i] / num
  * 
  *     return res             # <<<<<<<<<<<<<<
@@ -6023,7 +7090,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vdiv_num(__
   __pyx_r = __pyx_v_res;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":516
+  /* "Djumble/djumble/voperators/cy.pyx":643
  * 
  * # Note: Make it cdef if only for interal usage in cython.
  * cpdef double [::1] vdiv_num(double [::1] v, double num):             # <<<<<<<<<<<<<<
@@ -6055,8 +7122,8 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vdiv_num(__
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_11vdiv_num(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_11vdiv_num(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_15vdiv_num(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_15vdiv_num(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_v = { 0, 0, { 0 }, { 0 }, { 0 } };
   double __pyx_v_num;
   int __pyx_lineno = 0;
@@ -6085,11 +7152,11 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_11vdiv_num(PyObject
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_num)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("vdiv_num", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 516; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("vdiv_num", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "vdiv_num") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 516; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "vdiv_num") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -6097,25 +7164,25 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_11vdiv_num(PyObject
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
-    __pyx_v_v = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0]); if (unlikely(!__pyx_v_v.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 516; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_num = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_num == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 516; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_v = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0]); if (unlikely(!__pyx_v_v.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_num = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_num == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("vdiv_num", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 516; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("vdiv_num", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Djumble.djumble.voperators.cy.vdiv_num", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_10vdiv_num(__pyx_self, __pyx_v_v, __pyx_v_num);
+  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_14vdiv_num(__pyx_self, __pyx_v_v, __pyx_v_num);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_10vdiv_num(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_v, double __pyx_v_num) {
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_14vdiv_num(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_v, double __pyx_v_num) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -6125,9 +7192,9 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_10vdiv_num(CYTHON_U
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("vdiv_num", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_v.memview)) { __Pyx_RaiseUnboundLocalError("v"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 516; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_vdiv_num(__pyx_v_v, __pyx_v_num, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 516; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 516; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_v_v.memview)) { __Pyx_RaiseUnboundLocalError("v"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_vdiv_num(__pyx_v_v, __pyx_v_num, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
   __pyx_r = __pyx_t_2;
@@ -6147,7 +7214,7 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_10vdiv_num(CYTHON_U
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":535
+/* "Djumble/djumble/voperators/cy.pyx":662
  * 
  * # Note: Make it cdef if only for interal usage in cython.
  * cpdef double [::1] vsqrt(double [::1] v):             # <<<<<<<<<<<<<<
@@ -6155,7 +7222,7 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_10vdiv_num(CYTHON_U
  *     # Matrix index variables.
  */
 
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_13vsqrt(PyObject *__pyx_self, PyObject *__pyx_arg_v); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_17vsqrt(PyObject *__pyx_self, PyObject *__pyx_arg_v); /*proto*/
 static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vsqrt(__Pyx_memviewslice __pyx_v_v, CYTHON_UNUSED int __pyx_skip_dispatch) {
   unsigned int __pyx_v_i;
   unsigned int __pyx_v_I;
@@ -6177,7 +7244,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vsqrt(__Pyx
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("vsqrt", 0);
 
-  /* "Djumble/djumble/voperators/cy.pyx":540
+  /* "Djumble/djumble/voperators/cy.pyx":667
  *     cdef:
  *         unsigned int i
  *         unsigned int I = v.shape[0]             # <<<<<<<<<<<<<<
@@ -6186,47 +7253,47 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vsqrt(__Pyx
  */
   __pyx_v_I = (__pyx_v_v.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":543
+  /* "Djumble/djumble/voperators/cy.pyx":670
  * 
  *         # Creating the numpy.array for results and its memory view
  *         double [::1] res = np.zeros((I), dtype=np.float)             # <<<<<<<<<<<<<<
  * 
  *     #
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 670; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 670; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_unsigned_int(__pyx_v_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_unsigned_int(__pyx_v_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 670; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 670; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 670; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 670; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_float); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_float); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 670; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 670; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 670; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_5);
-  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 670; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_v_res = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":546
+  /* "Djumble/djumble/voperators/cy.pyx":673
  * 
  *     #
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -6240,7 +7307,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vsqrt(__Pyx
       #endif
       /*try:*/ {
 
-        /* "Djumble/djumble/voperators/cy.pyx":547
+        /* "Djumble/djumble/voperators/cy.pyx":674
  *     #
  *     with nogil:
  *         for i in range(I):             # <<<<<<<<<<<<<<
@@ -6251,7 +7318,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vsqrt(__Pyx
         for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
           __pyx_v_i = __pyx_t_8;
 
-          /* "Djumble/djumble/voperators/cy.pyx":548
+          /* "Djumble/djumble/voperators/cy.pyx":675
  *     with nogil:
  *         for i in range(I):
  *             res[i] = sqrt(v[i])             # <<<<<<<<<<<<<<
@@ -6264,7 +7331,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vsqrt(__Pyx
         }
       }
 
-      /* "Djumble/djumble/voperators/cy.pyx":546
+      /* "Djumble/djumble/voperators/cy.pyx":673
  * 
  *     #
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -6282,7 +7349,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vsqrt(__Pyx
       }
   }
 
-  /* "Djumble/djumble/voperators/cy.pyx":550
+  /* "Djumble/djumble/voperators/cy.pyx":677
  *             res[i] = sqrt(v[i])
  * 
  *     return res             # <<<<<<<<<<<<<<
@@ -6293,7 +7360,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vsqrt(__Pyx
   __pyx_r = __pyx_v_res;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":535
+  /* "Djumble/djumble/voperators/cy.pyx":662
  * 
  * # Note: Make it cdef if only for interal usage in cython.
  * cpdef double [::1] vsqrt(double [::1] v):             # <<<<<<<<<<<<<<
@@ -6325,8 +7392,8 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_vsqrt(__Pyx
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_13vsqrt(PyObject *__pyx_self, PyObject *__pyx_arg_v); /*proto*/
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_13vsqrt(PyObject *__pyx_self, PyObject *__pyx_arg_v) {
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_17vsqrt(PyObject *__pyx_self, PyObject *__pyx_arg_v); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_17vsqrt(PyObject *__pyx_self, PyObject *__pyx_arg_v) {
   __Pyx_memviewslice __pyx_v_v = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -6335,7 +7402,7 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_13vsqrt(PyObject *_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("vsqrt (wrapper)", 0);
   assert(__pyx_arg_v); {
-    __pyx_v_v = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_arg_v); if (unlikely(!__pyx_v_v.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 535; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_v = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_arg_v); if (unlikely(!__pyx_v_v.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 662; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -6343,14 +7410,14 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_13vsqrt(PyObject *_
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_12vsqrt(__pyx_self, __pyx_v_v);
+  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_16vsqrt(__pyx_self, __pyx_v_v);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_12vsqrt(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_v) {
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_16vsqrt(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_v) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -6360,9 +7427,9 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_12vsqrt(CYTHON_UNUS
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("vsqrt", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_v.memview)) { __Pyx_RaiseUnboundLocalError("v"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 535; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_vsqrt(__pyx_v_v, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 535; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 535; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_v_v.memview)) { __Pyx_RaiseUnboundLocalError("v"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 662; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_vsqrt(__pyx_v_v, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 662; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 662; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
   __pyx_r = __pyx_t_2;
@@ -6382,7 +7449,7 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_12vsqrt(CYTHON_UNUS
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":553
+/* "Djumble/djumble/voperators/cy.pyx":680
  * 
  * 
  * cpdef double partial_derivative(cnp.intp_t a_idx, double [::1] x1, double [::1] x2, double [::1] A):             # <<<<<<<<<<<<<<
@@ -6390,7 +7457,7 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_12vsqrt(CYTHON_UNUS
  *         parameter given the proper vectors. That is, for the cosine distance is a x_i with the
  */
 
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_15partial_derivative(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_19partial_derivative(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static double __pyx_f_7Djumble_7djumble_10voperators_2cy_partial_derivative(__pyx_t_5numpy_intp_t __pyx_v_a_idx, __Pyx_memviewslice __pyx_v_x1, __Pyx_memviewslice __pyx_v_x2, __Pyx_memviewslice __pyx_v_A, CYTHON_UNUSED int __pyx_skip_dispatch) {
   double __pyx_v_x1_pnorm;
   double __pyx_v_x2_pnorm;
@@ -6405,40 +7472,40 @@ static double __pyx_f_7Djumble_7djumble_10voperators_2cy_partial_derivative(__py
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("partial_derivative", 0);
 
-  /* "Djumble/djumble/voperators/cy.pyx":578
+  /* "Djumble/djumble/voperators/cy.pyx":705
  * 
  *     # Calculating parametrized Norms || xi||(A)
  *     x1_pnorm = sqrt(vdot(dot1d_ds(x1, A), x1))             # <<<<<<<<<<<<<<
  *     x2_pnorm = sqrt(vdot(dot1d_ds(x2, A), x2))
  * 
  */
-  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_dot1d_ds(__pyx_v_x1, __pyx_v_A); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 578; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_dot1d_ds(__pyx_v_x1, __pyx_v_A); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 705; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_x1_pnorm = sqrt(__pyx_f_7Djumble_7djumble_10voperators_2cy_vdot(__pyx_t_1, __pyx_v_x1));
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
 
-  /* "Djumble/djumble/voperators/cy.pyx":579
+  /* "Djumble/djumble/voperators/cy.pyx":706
  *     # Calculating parametrized Norms || xi||(A)
  *     x1_pnorm = sqrt(vdot(dot1d_ds(x1, A), x1))
  *     x2_pnorm = sqrt(vdot(dot1d_ds(x2, A), x2))             # <<<<<<<<<<<<<<
  * 
  *     # Claculating dot_A product of x1 and x2.
  */
-  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_dot1d_ds(__pyx_v_x2, __pyx_v_A); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 579; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_dot1d_ds(__pyx_v_x2, __pyx_v_A); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 706; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_x2_pnorm = sqrt(__pyx_f_7Djumble_7djumble_10voperators_2cy_vdot(__pyx_t_1, __pyx_v_x2));
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
 
-  /* "Djumble/djumble/voperators/cy.pyx":582
+  /* "Djumble/djumble/voperators/cy.pyx":709
  * 
  *     # Claculating dot_A product of x1 and x2.
  *     x1x2dota = vdot(dot1d_ds(x1, A), x2)             # <<<<<<<<<<<<<<
  * 
  *     return pDerivative(x1[a_idx], x2[a_idx], x1_pnorm, x2_pnorm, x1x2dota)
  */
-  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_dot1d_ds(__pyx_v_x1, __pyx_v_A); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 582; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_dot1d_ds(__pyx_v_x1, __pyx_v_A); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 709; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_x1x2dota = __pyx_f_7Djumble_7djumble_10voperators_2cy_vdot(__pyx_t_1, __pyx_v_x2);
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
 
-  /* "Djumble/djumble/voperators/cy.pyx":584
+  /* "Djumble/djumble/voperators/cy.pyx":711
  *     x1x2dota = vdot(dot1d_ds(x1, A), x2)
  * 
  *     return pDerivative(x1[a_idx], x2[a_idx], x1_pnorm, x2_pnorm, x1x2dota)             # <<<<<<<<<<<<<<
@@ -6452,7 +7519,7 @@ static double __pyx_f_7Djumble_7djumble_10voperators_2cy_partial_derivative(__py
   __pyx_r = __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_x1.data) + __pyx_t_2)) ))), (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_x2.data) + __pyx_t_3)) ))), __pyx_v_x1_pnorm, __pyx_v_x2_pnorm, __pyx_v_x1x2dota);
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":553
+  /* "Djumble/djumble/voperators/cy.pyx":680
  * 
  * 
  * cpdef double partial_derivative(cnp.intp_t a_idx, double [::1] x1, double [::1] x2, double [::1] A):             # <<<<<<<<<<<<<<
@@ -6471,9 +7538,9 @@ static double __pyx_f_7Djumble_7djumble_10voperators_2cy_partial_derivative(__py
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_15partial_derivative(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_7Djumble_7djumble_10voperators_2cy_14partial_derivative[] = " Partial Derivative: This method is calculating the partial derivative of a specific\n        parameter given the proper vectors. That is, for the cosine distance is a x_i with the\n        centroid vector (mu) of the cluster where x_i is belonging into. As for the constraint\n        violations is the x_1 and x_2 of a specific pair of constraints each time this method\n        is called.\n        **for detail see documentation.\n\n        Arguments\n        ---------\n            a_idx: The index of the parameter on the diagonal of the A diagonal sparse\n                parameters matrix.\n            x1, x2: The vectors will be used for the partial derivative calculation.\n\n        Output\n        ------\n            res_a: The partial derivative's value.\n\n    ";
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_15partial_derivative(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_19partial_derivative(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_7Djumble_7djumble_10voperators_2cy_18partial_derivative[] = " Partial Derivative: This method is calculating the partial derivative of a specific\n        parameter given the proper vectors. That is, for the cosine distance is a x_i with the\n        centroid vector (mu) of the cluster where x_i is belonging into. As for the constraint\n        violations is the x_1 and x_2 of a specific pair of constraints each time this method\n        is called.\n        **for detail see documentation.\n\n        Arguments\n        ---------\n            a_idx: The index of the parameter on the diagonal of the A diagonal sparse\n                parameters matrix.\n            x1, x2: The vectors will be used for the partial derivative calculation.\n\n        Output\n        ------\n            res_a: The partial derivative's value.\n\n    ";
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_19partial_derivative(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __pyx_t_5numpy_intp_t __pyx_v_a_idx;
   __Pyx_memviewslice __pyx_v_x1 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_x2 = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -6506,21 +7573,21 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_15partial_derivativ
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_x1)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("partial_derivative", 1, 4, 4, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("partial_derivative", 1, 4, 4, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 680; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_x2)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("partial_derivative", 1, 4, 4, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("partial_derivative", 1, 4, 4, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 680; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_A)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("partial_derivative", 1, 4, 4, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("partial_derivative", 1, 4, 4, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 680; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "partial_derivative") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "partial_derivative") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 680; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -6530,27 +7597,27 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_15partial_derivativ
       values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
     }
-    __pyx_v_a_idx = __Pyx_PyInt_As_Py_intptr_t(values[0]); if (unlikely((__pyx_v_a_idx == (npy_intp)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_x1 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[1]); if (unlikely(!__pyx_v_x1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_x2 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2]); if (unlikely(!__pyx_v_x2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_A = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[3]); if (unlikely(!__pyx_v_A.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_a_idx = __Pyx_PyInt_As_Py_intptr_t(values[0]); if (unlikely((__pyx_v_a_idx == (npy_intp)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 680; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_x1 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[1]); if (unlikely(!__pyx_v_x1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 680; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_x2 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2]); if (unlikely(!__pyx_v_x2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 680; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_A = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[3]); if (unlikely(!__pyx_v_A.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 680; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("partial_derivative", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("partial_derivative", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 680; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Djumble.djumble.voperators.cy.partial_derivative", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_14partial_derivative(__pyx_self, __pyx_v_a_idx, __pyx_v_x1, __pyx_v_x2, __pyx_v_A);
+  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_18partial_derivative(__pyx_self, __pyx_v_a_idx, __pyx_v_x1, __pyx_v_x2, __pyx_v_A);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_14partial_derivative(CYTHON_UNUSED PyObject *__pyx_self, __pyx_t_5numpy_intp_t __pyx_v_a_idx, __Pyx_memviewslice __pyx_v_x1, __Pyx_memviewslice __pyx_v_x2, __Pyx_memviewslice __pyx_v_A) {
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_18partial_derivative(CYTHON_UNUSED PyObject *__pyx_self, __pyx_t_5numpy_intp_t __pyx_v_a_idx, __Pyx_memviewslice __pyx_v_x1, __Pyx_memviewslice __pyx_v_x2, __Pyx_memviewslice __pyx_v_A) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -6559,10 +7626,10 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_14partial_derivativ
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("partial_derivative", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_x1.memview)) { __Pyx_RaiseUnboundLocalError("x1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_x2.memview)) { __Pyx_RaiseUnboundLocalError("x2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_A.memview)) { __Pyx_RaiseUnboundLocalError("A"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_7Djumble_7djumble_10voperators_2cy_partial_derivative(__pyx_v_a_idx, __pyx_v_x1, __pyx_v_x2, __pyx_v_A, 0)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_v_x1.memview)) { __Pyx_RaiseUnboundLocalError("x1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 680; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_x2.memview)) { __Pyx_RaiseUnboundLocalError("x2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 680; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_A.memview)) { __Pyx_RaiseUnboundLocalError("A"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 680; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_7Djumble_7djumble_10voperators_2cy_partial_derivative(__pyx_v_a_idx, __pyx_v_x1, __pyx_v_x2, __pyx_v_A, 0)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 680; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -6582,7 +7649,7 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_14partial_derivativ
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":587
+/* "Djumble/djumble/voperators/cy.pyx":714
  * 
  * 
  * cdef inline double pDerivative(double x1_ai,             # <<<<<<<<<<<<<<
@@ -6594,7 +7661,7 @@ static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivati
   double __pyx_v_res_a;
   double __pyx_r;
 
-  /* "Djumble/djumble/voperators/cy.pyx":599
+  /* "Djumble/djumble/voperators/cy.pyx":726
  *         **for detail see documentation.
  *     """
  *     cdef double res_a = 0.0             # <<<<<<<<<<<<<<
@@ -6603,7 +7670,7 @@ static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivati
  */
   __pyx_v_res_a = 0.0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":613
+  /* "Djumble/djumble/voperators/cy.pyx":740
  *                     )
  *                 )
  *             ) / (pow(x1_aipn, 2.0) * pow(x2_aipn, 2.0))             # <<<<<<<<<<<<<<
@@ -6612,7 +7679,7 @@ static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivati
  */
   __pyx_v_res_a = (((((__pyx_v_x1_ai * __pyx_v_x2_ai) * __pyx_v_x1_aipn) * __pyx_v_x2_aipn) - (__pyx_v_x1x2dota * (((pow(__pyx_v_x1_ai, 2.0) * pow(__pyx_v_x2_aipn, 2.0)) + (pow(__pyx_v_x2_ai, 2.0) * pow(__pyx_v_x1_aipn, 2.0))) / ((2.0 * __pyx_v_x1_aipn) * __pyx_v_x2_aipn)))) / (pow(__pyx_v_x1_aipn, 2.0) * pow(__pyx_v_x2_aipn, 2.0)));
 
-  /* "Djumble/djumble/voperators/cy.pyx":615
+  /* "Djumble/djumble/voperators/cy.pyx":742
  *             ) / (pow(x1_aipn, 2.0) * pow(x2_aipn, 2.0))
  * 
  *     return res_a             # <<<<<<<<<<<<<<
@@ -6622,7 +7689,7 @@ static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivati
   __pyx_r = __pyx_v_res_a;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":587
+  /* "Djumble/djumble/voperators/cy.pyx":714
  * 
  * 
  * cdef inline double pDerivative(double x1_ai,             # <<<<<<<<<<<<<<
@@ -6635,7 +7702,7 @@ static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivati
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":618
+/* "Djumble/djumble/voperators/cy.pyx":745
  * 
  * 
  * cpdef double [::1] pDerivative_seq_rows(double[::1] A,             # <<<<<<<<<<<<<<
@@ -6643,7 +7710,7 @@ static CYTHON_INLINE double __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivati
  *                                         double [:, ::1] m2,
  */
 
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_17pDerivative_seq_rows(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_21pDerivative_seq_rows(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative_seq_rows(__Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r, CYTHON_UNUSED int __pyx_skip_dispatch) {
   Py_ssize_t __pyx_v_a_I;
   Py_ssize_t __pyx_v_m1r_I;
@@ -6665,7 +7732,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("pDerivative_seq_rows", 0);
 
-  /* "Djumble/djumble/voperators/cy.pyx":625
+  /* "Djumble/djumble/voperators/cy.pyx":752
  *     cdef:
  *         # Matrices dimentions intilized variables.
  *         Py_ssize_t a_I = A.shape[0]             # <<<<<<<<<<<<<<
@@ -6674,7 +7741,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  */
   __pyx_v_a_I = (__pyx_v_A.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":626
+  /* "Djumble/djumble/voperators/cy.pyx":753
  *         # Matrices dimentions intilized variables.
  *         Py_ssize_t a_I = A.shape[0]
  *         Py_ssize_t m1r_I = m1r.shape[0]             # <<<<<<<<<<<<<<
@@ -6683,7 +7750,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  */
   __pyx_v_m1r_I = (__pyx_v_m1r.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":627
+  /* "Djumble/djumble/voperators/cy.pyx":754
  *         Py_ssize_t a_I = A.shape[0]
  *         Py_ssize_t m1r_I = m1r.shape[0]
  *         Py_ssize_t m2r_I = m2r.shape[0]             # <<<<<<<<<<<<<<
@@ -6692,94 +7759,94 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  */
   __pyx_v_m2r_I = (__pyx_v_m2r.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":630
+  /* "Djumble/djumble/voperators/cy.pyx":757
  * 
  *     # Creating the temporary cython arrays.
  *     m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  *     m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
  *     a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_m1r_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_m1r_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_m1_norms = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":631
+  /* "Djumble/djumble/voperators/cy.pyx":758
  *     # Creating the temporary cython arrays.
  *     m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")
  *     m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  *     a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
  * 
  */
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 631; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 758; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m2r_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 631; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m2r_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 758; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 631; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 758; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_shape, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 631; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_shape, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 758; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 631; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 758; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_itemsize, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 631; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_itemsize, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 758; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 631; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 631; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 758; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 758; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_m2_norms = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":632
+  /* "Djumble/djumble/voperators/cy.pyx":759
  *     m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")
  *     m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
  *     a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  * 
  *     return _pDerivative_seq_rows(A, m1, m2, m1r, m2r, m1_norms, m2_norms, a_pDz_vect)
  */
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 632; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 759; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_a_I); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 632; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_a_I); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 759; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 632; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 759; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_shape, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 632; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_shape, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 759; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 632; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 759; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_itemsize, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 632; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_itemsize, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 759; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 632; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 632; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 759; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 759; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_a_pDz_vect = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":634
+  /* "Djumble/djumble/voperators/cy.pyx":761
  *     a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
  * 
  *     return _pDerivative_seq_rows(A, m1, m2, m1r, m2r, m1_norms, m2_norms, a_pDz_vect)             # <<<<<<<<<<<<<<
@@ -6787,12 +7854,12 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  * 
  */
   __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_v_m1_norms);
-  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 634; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 761; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_v_m2_norms);
-  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 634; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 761; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_v_a_pDz_vect);
-  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 634; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_7 = __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivative_seq_rows(__pyx_v_A, __pyx_v_m1, __pyx_v_m2, __pyx_v_m1r, __pyx_v_m2r, __pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_7.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 634; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 761; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_7 = __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivative_seq_rows(__pyx_v_A, __pyx_v_m1, __pyx_v_m2, __pyx_v_m1r, __pyx_v_m2r, __pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_7.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 761; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __PYX_XDEC_MEMVIEW(&__pyx_t_4, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_t_5, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
@@ -6801,7 +7868,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
   __pyx_t_7.data = NULL;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":618
+  /* "Djumble/djumble/voperators/cy.pyx":745
  * 
  * 
  * cpdef double [::1] pDerivative_seq_rows(double[::1] A,             # <<<<<<<<<<<<<<
@@ -6836,8 +7903,8 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_17pDerivative_seq_rows(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_17pDerivative_seq_rows(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_21pDerivative_seq_rows(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_21pDerivative_seq_rows(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_A = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_m1 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_m2 = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -6872,26 +7939,26 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_17pDerivative_seq_r
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m1)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_rows", 1, 5, 5, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 618; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_rows", 1, 5, 5, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 745; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m2)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_rows", 1, 5, 5, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 618; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_rows", 1, 5, 5, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 745; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m1r)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_rows", 1, 5, 5, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 618; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_rows", 1, 5, 5, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 745; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m2r)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_rows", 1, 5, 5, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 618; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_rows", 1, 5, 5, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 745; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "pDerivative_seq_rows") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 618; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "pDerivative_seq_rows") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 745; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 5) {
       goto __pyx_L5_argtuple_error;
@@ -6902,28 +7969,28 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_17pDerivative_seq_r
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
       values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
     }
-    __pyx_v_A = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0]); if (unlikely(!__pyx_v_A.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 618; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_m1 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1]); if (unlikely(!__pyx_v_m1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 619; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_m2 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[2]); if (unlikely(!__pyx_v_m2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 620; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_m1r = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_5numpy_intp_t(values[3]); if (unlikely(!__pyx_v_m1r.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 621; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_m2r = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_5numpy_intp_t(values[4]); if (unlikely(!__pyx_v_m2r.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 622; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_A = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0]); if (unlikely(!__pyx_v_A.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 745; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m1 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1]); if (unlikely(!__pyx_v_m1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 746; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m2 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[2]); if (unlikely(!__pyx_v_m2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 747; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m1r = __Pyx_PyObject_to_MemoryviewSlice_dc_int(values[3]); if (unlikely(!__pyx_v_m1r.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 748; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m2r = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_5numpy_intp_t(values[4]); if (unlikely(!__pyx_v_m2r.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 749; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("pDerivative_seq_rows", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 618; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("pDerivative_seq_rows", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 745; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Djumble.djumble.voperators.cy.pDerivative_seq_rows", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_16pDerivative_seq_rows(__pyx_self, __pyx_v_A, __pyx_v_m1, __pyx_v_m2, __pyx_v_m1r, __pyx_v_m2r);
+  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_20pDerivative_seq_rows(__pyx_self, __pyx_v_A, __pyx_v_m1, __pyx_v_m2, __pyx_v_m1r, __pyx_v_m2r);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_16pDerivative_seq_rows(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r) {
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_20pDerivative_seq_rows(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -6933,13 +8000,13 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_16pDerivative_seq_r
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("pDerivative_seq_rows", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_A.memview)) { __Pyx_RaiseUnboundLocalError("A"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 618; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_m1.memview)) { __Pyx_RaiseUnboundLocalError("m1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 618; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_m2.memview)) { __Pyx_RaiseUnboundLocalError("m2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 618; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_m1r.memview)) { __Pyx_RaiseUnboundLocalError("m1r"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 618; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_m2r.memview)) { __Pyx_RaiseUnboundLocalError("m2r"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 618; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative_seq_rows(__pyx_v_A, __pyx_v_m1, __pyx_v_m2, __pyx_v_m1r, __pyx_v_m2r, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 618; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 618; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_v_A.memview)) { __Pyx_RaiseUnboundLocalError("A"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 745; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_m1.memview)) { __Pyx_RaiseUnboundLocalError("m1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 745; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_m2.memview)) { __Pyx_RaiseUnboundLocalError("m2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 745; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_m1r.memview)) { __Pyx_RaiseUnboundLocalError("m1r"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 745; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_m2r.memview)) { __Pyx_RaiseUnboundLocalError("m2r"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 745; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative_seq_rows(__pyx_v_A, __pyx_v_m1, __pyx_v_m2, __pyx_v_m1r, __pyx_v_m2r, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 745; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 745; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
   __pyx_r = __pyx_t_2;
@@ -6963,7 +8030,7 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_16pDerivative_seq_r
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":637
+/* "Djumble/djumble/voperators/cy.pyx":764
  * 
  * 
  * cdef double [::1] _pDerivative_seq_rows(double[::1] A,             # <<<<<<<<<<<<<<
@@ -7042,7 +8109,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
   Py_ssize_t __pyx_t_50;
   Py_ssize_t __pyx_t_51;
 
-  /* "Djumble/djumble/voperators/cy.pyx":651
+  /* "Djumble/djumble/voperators/cy.pyx":778
  * 
  *         # Matrices dimentions intilized variables.
  *         Py_ssize_t a_I = A.shape[0]             # <<<<<<<<<<<<<<
@@ -7051,7 +8118,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
  */
   __pyx_v_a_I = (__pyx_v_A.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":652
+  /* "Djumble/djumble/voperators/cy.pyx":779
  *         # Matrices dimentions intilized variables.
  *         Py_ssize_t a_I = A.shape[0]
  *         Py_ssize_t m1r_I = m1r.shape[0]             # <<<<<<<<<<<<<<
@@ -7060,7 +8127,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
  */
   __pyx_v_m1r_I = (__pyx_v_m1r.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":653
+  /* "Djumble/djumble/voperators/cy.pyx":780
  *         Py_ssize_t a_I = A.shape[0]
  *         Py_ssize_t m1r_I = m1r.shape[0]
  *         Py_ssize_t m1_J = m1.shape[1]             # <<<<<<<<<<<<<<
@@ -7069,7 +8136,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
  */
   __pyx_v_m1_J = (__pyx_v_m1.shape[1]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":654
+  /* "Djumble/djumble/voperators/cy.pyx":781
  *         Py_ssize_t m1r_I = m1r.shape[0]
  *         Py_ssize_t m1_J = m1.shape[1]
  *         Py_ssize_t m2r_I = m2r.shape[0]             # <<<<<<<<<<<<<<
@@ -7078,7 +8145,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
  */
   __pyx_v_m2r_I = (__pyx_v_m2r.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":655
+  /* "Djumble/djumble/voperators/cy.pyx":782
  *         Py_ssize_t m1_J = m1.shape[1]
  *         Py_ssize_t m2r_I = m2r.shape[0]
  *         Py_ssize_t m2_J = m2.shape[1]             # <<<<<<<<<<<<<<
@@ -7087,7 +8154,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
  */
   __pyx_v_m2_J = (__pyx_v_m2.shape[1]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":666
+  /* "Djumble/djumble/voperators/cy.pyx":793
  *     # The following operatsion taking place in the non-gil and parallel...
  *     # ...openmp emviroment.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -7108,7 +8175,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                 #define unlikely(x) (x)
             #endif
             #ifdef _OPENMP
-            #pragma omp parallel private(__pyx_v_a1, __pyx_v_im1, __pyx_v_im2) private(__pyx_t_42, __pyx_t_27, __pyx_t_16, __pyx_t_24, __pyx_t_7, __pyx_t_8, __pyx_t_47, __pyx_t_31, __pyx_t_43, __pyx_t_28, __pyx_t_13, __pyx_t_48, __pyx_t_3, __pyx_t_44, __pyx_t_25, __pyx_t_6, __pyx_t_39, __pyx_t_14, __pyx_t_19, __pyx_t_22, __pyx_t_51, __pyx_t_5, __pyx_t_30, __pyx_t_29, __pyx_t_12, __pyx_t_49, __pyx_t_41, __pyx_t_33, __pyx_t_45, __pyx_t_35, __pyx_t_11, __pyx_t_9, __pyx_t_36, __pyx_t_38, __pyx_t_18, __pyx_t_20, __pyx_t_23, __pyx_t_26, __pyx_t_50, __pyx_t_46, __pyx_t_4, __pyx_t_17, __pyx_t_21, __pyx_t_37, __pyx_t_1, __pyx_t_32, __pyx_t_34, __pyx_t_10, __pyx_t_15, __pyx_t_2, __pyx_t_40)
+            #pragma omp parallel private(__pyx_v_a1, __pyx_v_im1, __pyx_v_im2) private(__pyx_t_42, __pyx_t_27, __pyx_t_46, __pyx_t_16, __pyx_t_24, __pyx_t_7, __pyx_t_8, __pyx_t_47, __pyx_t_31, __pyx_t_43, __pyx_t_28, __pyx_t_13, __pyx_t_48, __pyx_t_3, __pyx_t_44, __pyx_t_25, __pyx_t_6, __pyx_t_39, __pyx_t_14, __pyx_t_19, __pyx_t_22, __pyx_t_51, __pyx_t_5, __pyx_t_30, __pyx_t_29, __pyx_t_12, __pyx_t_49, __pyx_t_41, __pyx_t_33, __pyx_t_45, __pyx_t_35, __pyx_t_11, __pyx_t_9, __pyx_t_36, __pyx_t_38, __pyx_t_18, __pyx_t_20, __pyx_t_23, __pyx_t_26, __pyx_t_50, __pyx_t_4, __pyx_t_17, __pyx_t_21, __pyx_t_37, __pyx_t_1, __pyx_t_32, __pyx_t_34, __pyx_t_10, __pyx_t_15, __pyx_t_2, __pyx_t_40)
             #endif /* _OPENMP */
             {
                 /* Initialize private variables to invalid values */
@@ -7116,7 +8183,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                 __pyx_v_im1 = ((Py_ssize_t)0xbad0bad0);
                 __pyx_v_im2 = ((Py_ssize_t)0xbad0bad0);
 
-                /* "Djumble/djumble/voperators/cy.pyx":671
+                /* "Djumble/djumble/voperators/cy.pyx":798
  *         # ...in C garbage values can case floating point overflow, thus, peculiar results...
  *         # ...like NaN or incorrect calculatons.
  *         for im1 in range(m1r_I):             # <<<<<<<<<<<<<<
@@ -7127,7 +8194,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                 for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
                   __pyx_v_im1 = __pyx_t_2;
 
-                  /* "Djumble/djumble/voperators/cy.pyx":672
+                  /* "Djumble/djumble/voperators/cy.pyx":799
  *         # ...like NaN or incorrect calculatons.
  *         for im1 in range(m1r_I):
  *             m1_norms[im1] = 0.0             # <<<<<<<<<<<<<<
@@ -7139,7 +8206,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_3)) )) = 0.0;
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":674
+                /* "Djumble/djumble/voperators/cy.pyx":801
  *             m1_norms[im1] = 0.0
  * 
  *         for im2 in range(m2r_I):             # <<<<<<<<<<<<<<
@@ -7150,7 +8217,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                 for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
                   __pyx_v_im2 = __pyx_t_2;
 
-                  /* "Djumble/djumble/voperators/cy.pyx":675
+                  /* "Djumble/djumble/voperators/cy.pyx":802
  * 
  *         for im2 in range(m2r_I):
  *             m2_norms[im2] = 0.0             # <<<<<<<<<<<<<<
@@ -7162,7 +8229,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_4)) )) = 0.0;
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":677
+                /* "Djumble/djumble/voperators/cy.pyx":804
  *             m2_norms[im2] = 0.0
  * 
  *         for a1 in range(m1r_I):             # <<<<<<<<<<<<<<
@@ -7173,7 +8240,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                 for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
                   __pyx_v_a1 = __pyx_t_2;
 
-                  /* "Djumble/djumble/voperators/cy.pyx":678
+                  /* "Djumble/djumble/voperators/cy.pyx":805
  * 
  *         for a1 in range(m1r_I):
  *             a_pDz_vect[a1] = 0.0             # <<<<<<<<<<<<<<
@@ -7185,7 +8252,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a_pDz_vect.data) + __pyx_t_5)) )) = 0.0;
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":681
+                /* "Djumble/djumble/voperators/cy.pyx":808
  * 
  *         # Calculating the Norms for the first matrix.
  *         for i in prange(m1r_I, schedule='guided'):             # <<<<<<<<<<<<<<
@@ -7207,7 +8274,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                 /* Initialize private variables to invalid values */
                                 __pyx_v_j = ((Py_ssize_t)0xbad0bad0);
 
-                                /* "Djumble/djumble/voperators/cy.pyx":684
+                                /* "Djumble/djumble/voperators/cy.pyx":811
  * 
  *             # Calculating Sum.
  *             for j in range(m1_J):             # <<<<<<<<<<<<<<
@@ -7218,7 +8285,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                 for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
                                   __pyx_v_j = __pyx_t_8;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":685
+                                  /* "Djumble/djumble/voperators/cy.pyx":812
  *             # Calculating Sum.
  *             for j in range(m1_J):
  *                 m1_norms[i] += m1[m1r[i], j] * m1[m1r[i], j] * A[j]             # <<<<<<<<<<<<<<
@@ -7227,13 +8294,13 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
  */
                                   __pyx_t_9 = __pyx_v_i;
                                   if (__pyx_t_9 < 0) __pyx_t_9 += __pyx_v_m1r.shape[0];
-                                  __pyx_t_10 = (*((__pyx_t_5numpy_intp_t *) ( /* dim=0 */ ((char *) (((__pyx_t_5numpy_intp_t *) __pyx_v_m1r.data) + __pyx_t_9)) )));
+                                  __pyx_t_10 = (*((int *) ( /* dim=0 */ ((char *) (((int *) __pyx_v_m1r.data) + __pyx_t_9)) )));
                                   __pyx_t_11 = __pyx_v_j;
                                   if (__pyx_t_10 < 0) __pyx_t_10 += __pyx_v_m1.shape[0];
                                   if (__pyx_t_11 < 0) __pyx_t_11 += __pyx_v_m1.shape[1];
                                   __pyx_t_12 = __pyx_v_i;
                                   if (__pyx_t_12 < 0) __pyx_t_12 += __pyx_v_m1r.shape[0];
-                                  __pyx_t_13 = (*((__pyx_t_5numpy_intp_t *) ( /* dim=0 */ ((char *) (((__pyx_t_5numpy_intp_t *) __pyx_v_m1r.data) + __pyx_t_12)) )));
+                                  __pyx_t_13 = (*((int *) ( /* dim=0 */ ((char *) (((int *) __pyx_v_m1r.data) + __pyx_t_12)) )));
                                   __pyx_t_14 = __pyx_v_j;
                                   if (__pyx_t_13 < 0) __pyx_t_13 += __pyx_v_m1.shape[0];
                                   if (__pyx_t_14 < 0) __pyx_t_14 += __pyx_v_m1.shape[1];
@@ -7244,7 +8311,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_16)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_10 * __pyx_v_m1.strides[0]) )) + __pyx_t_11)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_13 * __pyx_v_m1.strides[0]) )) + __pyx_t_14)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_15)) ))));
                                 }
 
-                                /* "Djumble/djumble/voperators/cy.pyx":688
+                                /* "Djumble/djumble/voperators/cy.pyx":815
  * 
  *             # Calculating the Square root of the sum
  *             m1_norms[i] = sqrt(m1_norms[i])             # <<<<<<<<<<<<<<
@@ -7257,7 +8324,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                 if (__pyx_t_18 < 0) __pyx_t_18 += __pyx_v_m1_norms.shape[0];
                                 *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_18)) )) = sqrt((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_17)) ))));
 
-                                /* "Djumble/djumble/voperators/cy.pyx":691
+                                /* "Djumble/djumble/voperators/cy.pyx":818
  * 
  *             # Preventing Division by Zero.
  *             if m1_norms[i] == 0.0:             # <<<<<<<<<<<<<<
@@ -7269,7 +8336,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                 __pyx_t_20 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_19)) ))) == 0.0) != 0);
                                 if (__pyx_t_20) {
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":692
+                                  /* "Djumble/djumble/voperators/cy.pyx":819
  *             # Preventing Division by Zero.
  *             if m1_norms[i] == 0.0:
  *                 m1_norms[i] = 0.000001             # <<<<<<<<<<<<<<
@@ -7280,7 +8347,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                   if (__pyx_t_21 < 0) __pyx_t_21 += __pyx_v_m1_norms.shape[0];
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m1_norms.data) + __pyx_t_21)) )) = 0.000001;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":691
+                                  /* "Djumble/djumble/voperators/cy.pyx":818
  * 
  *             # Preventing Division by Zero.
  *             if m1_norms[i] == 0.0:             # <<<<<<<<<<<<<<
@@ -7293,7 +8360,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                     }
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":696
+                /* "Djumble/djumble/voperators/cy.pyx":823
  * 
  *         # Calculating the Norms for the second matrix.
  *         for i2 in prange(m2r_I, schedule='guided'):             # <<<<<<<<<<<<<<
@@ -7307,7 +8374,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                     if (__pyx_t_1 > 0)
                     {
                         #ifdef _OPENMP
-                        #pragma omp for lastprivate(__pyx_v_j2) firstprivate(__pyx_v_i2) lastprivate(__pyx_v_i2) schedule(guided)
+                        #pragma omp for firstprivate(__pyx_v_i2) lastprivate(__pyx_v_i2) lastprivate(__pyx_v_j2) schedule(guided)
                         #endif /* _OPENMP */
                         for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2++){
                             {
@@ -7315,7 +8382,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                 /* Initialize private variables to invalid values */
                                 __pyx_v_j2 = ((Py_ssize_t)0xbad0bad0);
 
-                                /* "Djumble/djumble/voperators/cy.pyx":699
+                                /* "Djumble/djumble/voperators/cy.pyx":826
  * 
  *             # Calculating distorted dot product.
  *             for j2 in range(m2_J):             # <<<<<<<<<<<<<<
@@ -7326,7 +8393,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                 for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
                                   __pyx_v_j2 = __pyx_t_8;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":700
+                                  /* "Djumble/djumble/voperators/cy.pyx":827
  *             # Calculating distorted dot product.
  *             for j2 in range(m2_J):
  *                 m2_norms[i2] += m2[m2r[i2], j2] * m2[m2r[i2], j2] * A[j2]             # <<<<<<<<<<<<<<
@@ -7352,7 +8419,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_29)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_23 * __pyx_v_m2.strides[0]) )) + __pyx_t_24)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_26 * __pyx_v_m2.strides[0]) )) + __pyx_t_27)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_28)) ))));
                                 }
 
-                                /* "Djumble/djumble/voperators/cy.pyx":703
+                                /* "Djumble/djumble/voperators/cy.pyx":830
  * 
  *             # Calculating the Square root of the sum
  *             m2_norms[i2] = sqrt(m2_norms[i2])             # <<<<<<<<<<<<<<
@@ -7365,7 +8432,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                 if (__pyx_t_31 < 0) __pyx_t_31 += __pyx_v_m2_norms.shape[0];
                                 *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_31)) )) = sqrt((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_30)) ))));
 
-                                /* "Djumble/djumble/voperators/cy.pyx":706
+                                /* "Djumble/djumble/voperators/cy.pyx":833
  * 
  *             # Preventing Division by Zero.
  *             if m2_norms[i2] == 0.0:             # <<<<<<<<<<<<<<
@@ -7377,7 +8444,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                 __pyx_t_20 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_32)) ))) == 0.0) != 0);
                                 if (__pyx_t_20) {
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":707
+                                  /* "Djumble/djumble/voperators/cy.pyx":834
  *             # Preventing Division by Zero.
  *             if m2_norms[i2] == 0.0:
  *                 m2_norms[i2] = 0.000001             # <<<<<<<<<<<<<<
@@ -7388,7 +8455,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                   if (__pyx_t_33 < 0) __pyx_t_33 += __pyx_v_m2_norms.shape[0];
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_m2_norms.data) + __pyx_t_33)) )) = 0.000001;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":706
+                                  /* "Djumble/djumble/voperators/cy.pyx":833
  * 
  *             # Preventing Division by Zero.
  *             if m2_norms[i2] == 0.0:             # <<<<<<<<<<<<<<
@@ -7401,7 +8468,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                     }
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":712
+                /* "Djumble/djumble/voperators/cy.pyx":839
  *         # Calculating the Sequence of partial derivatives for every A array elements.
  *         # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
  *         for j3 in prange(a_I, schedule='guided'):             # <<<<<<<<<<<<<<
@@ -7415,18 +8482,18 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                     if (__pyx_t_6 > 0)
                     {
                         #ifdef _OPENMP
-                        #pragma omp for lastprivate(__pyx_v_k) lastprivate(__pyx_v_x1x2dota) lastprivate(__pyx_v_i3) firstprivate(__pyx_v_j3) lastprivate(__pyx_v_j3) lastprivate(__pyx_v_k2) schedule(guided)
+                        #pragma omp for firstprivate(__pyx_v_j3) lastprivate(__pyx_v_j3) lastprivate(__pyx_v_x1x2dota) lastprivate(__pyx_v_k) lastprivate(__pyx_v_k2) lastprivate(__pyx_v_i3) schedule(guided)
                         #endif /* _OPENMP */
                         for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_6; __pyx_t_2++){
                             {
                                 __pyx_v_j3 = 0 + 1 * __pyx_t_2;
                                 /* Initialize private variables to invalid values */
-                                __pyx_v_k = ((Py_ssize_t)0xbad0bad0);
                                 __pyx_v_x1x2dota = ((double)__PYX_NAN());
-                                __pyx_v_i3 = ((Py_ssize_t)0xbad0bad0);
+                                __pyx_v_k = ((Py_ssize_t)0xbad0bad0);
                                 __pyx_v_k2 = ((Py_ssize_t)0xbad0bad0);
+                                __pyx_v_i3 = ((Py_ssize_t)0xbad0bad0);
 
-                                /* "Djumble/djumble/voperators/cy.pyx":714
+                                /* "Djumble/djumble/voperators/cy.pyx":841
  *         for j3 in prange(a_I, schedule='guided'):
  * 
  *             for i3 in range(m1r_I):             # <<<<<<<<<<<<<<
@@ -7437,7 +8504,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                 for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
                                   __pyx_v_i3 = __pyx_t_8;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":716
+                                  /* "Djumble/djumble/voperators/cy.pyx":843
  *             for i3 in range(m1r_I):
  * 
  *                 for k in range(m2r_I):             # <<<<<<<<<<<<<<
@@ -7448,7 +8515,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                   for (__pyx_t_35 = 0; __pyx_t_35 < __pyx_t_34; __pyx_t_35+=1) {
                                     __pyx_v_k = __pyx_t_35;
 
-                                    /* "Djumble/djumble/voperators/cy.pyx":720
+                                    /* "Djumble/djumble/voperators/cy.pyx":847
  *                     # Calculating the elemnt-wise sum of products distorted by A.
  *                     # Note: x1x2dota = vdot(dot1d_ds(x1, A), x2)
  *                     x1x2dota = 0.0             # <<<<<<<<<<<<<<
@@ -7457,7 +8524,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
  */
                                     __pyx_v_x1x2dota = 0.0;
 
-                                    /* "Djumble/djumble/voperators/cy.pyx":721
+                                    /* "Djumble/djumble/voperators/cy.pyx":848
  *                     # Note: x1x2dota = vdot(dot1d_ds(x1, A), x2)
  *                     x1x2dota = 0.0
  *                     for k2 in range(m1_J):             # <<<<<<<<<<<<<<
@@ -7468,7 +8535,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                     for (__pyx_t_37 = 0; __pyx_t_37 < __pyx_t_36; __pyx_t_37+=1) {
                                       __pyx_v_k2 = __pyx_t_37;
 
-                                      /* "Djumble/djumble/voperators/cy.pyx":722
+                                      /* "Djumble/djumble/voperators/cy.pyx":849
  *                     x1x2dota = 0.0
  *                     for k2 in range(m1_J):
  *                         x1x2dota = x1x2dota + m1[m1r[i3], k2] * A[k2] * m2[m2r[k], k2]             # <<<<<<<<<<<<<<
@@ -7477,7 +8544,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
  */
                                       __pyx_t_38 = __pyx_v_i3;
                                       if (__pyx_t_38 < 0) __pyx_t_38 += __pyx_v_m1r.shape[0];
-                                      __pyx_t_39 = (*((__pyx_t_5numpy_intp_t *) ( /* dim=0 */ ((char *) (((__pyx_t_5numpy_intp_t *) __pyx_v_m1r.data) + __pyx_t_38)) )));
+                                      __pyx_t_39 = (*((int *) ( /* dim=0 */ ((char *) (((int *) __pyx_v_m1r.data) + __pyx_t_38)) )));
                                       __pyx_t_40 = __pyx_v_k2;
                                       if (__pyx_t_39 < 0) __pyx_t_39 += __pyx_v_m1.shape[0];
                                       if (__pyx_t_40 < 0) __pyx_t_40 += __pyx_v_m1.shape[1];
@@ -7492,7 +8559,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                       __pyx_v_x1x2dota = (__pyx_v_x1x2dota + (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_39 * __pyx_v_m1.strides[0]) )) + __pyx_t_40)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_41)) )))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_43 * __pyx_v_m2.strides[0]) )) + __pyx_t_44)) )))));
                                     }
 
-                                    /* "Djumble/djumble/voperators/cy.pyx":726
+                                    /* "Djumble/djumble/voperators/cy.pyx":853
  *                     # Calulating partial derivative for elemnt a_i of A array.
  *                     a_pDz_vect[j3] = pDerivative(
  *                         m1[i3, j3], m2[k, j3], m1_norms[i3], m2_norms[k], x1x2dota             # <<<<<<<<<<<<<<
@@ -7512,7 +8579,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
                                     __pyx_t_50 = __pyx_v_k;
                                     if (__pyx_t_50 < 0) __pyx_t_50 += __pyx_v_m2_norms.shape[0];
 
-                                    /* "Djumble/djumble/voperators/cy.pyx":725
+                                    /* "Djumble/djumble/voperators/cy.pyx":852
  * 
  *                     # Calulating partial derivative for elemnt a_i of A array.
  *                     a_pDz_vect[j3] = pDerivative(             # <<<<<<<<<<<<<<
@@ -7538,7 +8605,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
         #endif
       }
 
-      /* "Djumble/djumble/voperators/cy.pyx":666
+      /* "Djumble/djumble/voperators/cy.pyx":793
  *     # The following operatsion taking place in the non-gil and parallel...
  *     # ...openmp emviroment.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -7556,7 +8623,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
       }
   }
 
-  /* "Djumble/djumble/voperators/cy.pyx":729
+  /* "Djumble/djumble/voperators/cy.pyx":856
  *                     )
  * 
  *     return a_pDz_vect             # <<<<<<<<<<<<<<
@@ -7567,7 +8634,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
   __pyx_r = __pyx_v_a_pDz_vect;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":637
+  /* "Djumble/djumble/voperators/cy.pyx":764
  * 
  * 
  * cdef double [::1] _pDerivative_seq_rows(double[::1] A,             # <<<<<<<<<<<<<<
@@ -7583,7 +8650,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":731
+/* "Djumble/djumble/voperators/cy.pyx":858
  *     return a_pDz_vect
  * 
  * cpdef double [::1] pDerivative_seq_one2many(double[::1] A,             # <<<<<<<<<<<<<<
@@ -7591,7 +8658,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivativ
  *                                         double [:, ::1] m2,
  */
 
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_19pDerivative_seq_one2many(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_23pDerivative_seq_one2many(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative_seq_one2many(__Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r, CYTHON_UNUSED int __pyx_skip_dispatch) {
   Py_ssize_t __pyx_v_i1;
   Py_ssize_t __pyx_v_i2;
@@ -7612,11 +8679,11 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
   PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
   __Pyx_memviewslice __pyx_t_4 = { 0, 0, { 0 }, { 0 }, { 0 } };
-  Py_ssize_t __pyx_t_5;
+  __Pyx_memviewslice __pyx_t_5 = { 0, 0, { 0 }, { 0 }, { 0 } };
   Py_ssize_t __pyx_t_6;
   Py_ssize_t __pyx_t_7;
   Py_ssize_t __pyx_t_8;
-  __Pyx_memviewslice __pyx_t_9 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  Py_ssize_t __pyx_t_9;
   __Pyx_memviewslice __pyx_t_10 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_t_11 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_t_12 = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -7629,7 +8696,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("pDerivative_seq_one2many", 0);
 
-  /* "Djumble/djumble/voperators/cy.pyx":742
+  /* "Djumble/djumble/voperators/cy.pyx":870
  * 
  *             # Matrices dimentions intilized variables.
  *             Py_ssize_t a_I = A.shape[0]             # <<<<<<<<<<<<<<
@@ -7638,7 +8705,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  */
   __pyx_v_a_I = (__pyx_v_A.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":743
+  /* "Djumble/djumble/voperators/cy.pyx":871
  *             # Matrices dimentions intilized variables.
  *             Py_ssize_t a_I = A.shape[0]
  *             Py_ssize_t m1r_I = m1r.shape[0]             # <<<<<<<<<<<<<<
@@ -7647,7 +8714,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  */
   __pyx_v_m1r_I = (__pyx_v_m1r.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":744
+  /* "Djumble/djumble/voperators/cy.pyx":872
  *             Py_ssize_t a_I = A.shape[0]
  *             Py_ssize_t m1r_I = m1r.shape[0]
  *             Py_ssize_t m2r_I = m2r.shape[0]             # <<<<<<<<<<<<<<
@@ -7656,136 +8723,161 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  */
   __pyx_v_m2r_I = (__pyx_v_m2r.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":751
+  /* "Djumble/djumble/voperators/cy.pyx":879
  *             double [::1] tmp_vect
- *             cnp.intp_t [::1] one_elem_cp
+ *             int [::1] one_elem_cp
  *             double x1x2dota = 0.0             # <<<<<<<<<<<<<<
  * 
  *         # Creating the temporary cython arrays.
  */
   __pyx_v_x1x2dota = 0.0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":754
+  /* "Djumble/djumble/voperators/cy.pyx":882
  * 
  *         # Creating the temporary cython arrays.
  *         a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  *         m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")
  *         m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 754; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 882; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_a_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 754; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_a_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 882; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 754; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 882; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 754; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 882; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 754; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 882; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 754; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 882; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 754; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 754; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 882; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 882; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_3);
-  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 754; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 882; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_a_pDz_vect = __pyx_t_4;
   __pyx_t_4.memview = NULL;
   __pyx_t_4.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":755
+  /* "Djumble/djumble/voperators/cy.pyx":883
  *         # Creating the temporary cython arrays.
  *         a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
  *         m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  *         m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
  *         tmp_a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
  */
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 755; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 883; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m1r_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 755; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_m1r_I); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 883; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 755; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 883; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_shape, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 755; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_shape, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 883; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 755; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 883; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_itemsize, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 755; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_itemsize, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 883; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 755; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 755; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 883; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 883; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_m1_norms = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":756
+  /* "Djumble/djumble/voperators/cy.pyx":884
  *         a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
  *         m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")
  *         m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  *         tmp_a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
- * 
+ *         one_elem_cp = cvarray(shape=(1,), itemsize=sizeof(int), format="i")
  */
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 756; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 884; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_m2r_I); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 756; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_m2r_I); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 884; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 756; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 884; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_shape, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 756; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_shape, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 884; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 756; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 884; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_itemsize, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 756; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_itemsize, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 884; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 756; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 756; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 884; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 884; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_m2_norms = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":757
+  /* "Djumble/djumble/voperators/cy.pyx":885
  *         m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")
  *         m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
  *         tmp_a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
+ *         one_elem_cp = cvarray(shape=(1,), itemsize=sizeof(int), format="i")
  * 
- *         # The following operatsion taking place in the non-gil and parallel...
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 885; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_a_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_a_I); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 885; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 885; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 885; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 885; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 885; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 757; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 885; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 885; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_tmp_a_pDz_vect = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":761
+  /* "Djumble/djumble/voperators/cy.pyx":886
+ *         m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
+ *         tmp_a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
+ *         one_elem_cp = cvarray(shape=(1,), itemsize=sizeof(int), format="i")             # <<<<<<<<<<<<<<
+ * 
+ *         # The following operatsion taking place in the non-gil and parallel...
+ */
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 886; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_shape, __pyx_tuple_) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 886; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t((sizeof(int))); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 886; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_itemsize, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 886; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_format, __pyx_n_s_i) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 886; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_3); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 886; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dc_int(__pyx_t_1);
+  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 886; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_one_elem_cp = __pyx_t_5;
+  __pyx_t_5.memview = NULL;
+  __pyx_t_5.data = NULL;
+
+  /* "Djumble/djumble/voperators/cy.pyx":890
  *         # The following operatsion taking place in the non-gil and parallel...
  *         # ...openmp emviroment.
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -7799,85 +8891,83 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
       #endif
       /*try:*/ {
 
-        /* "Djumble/djumble/voperators/cy.pyx":766
+        /* "Djumble/djumble/voperators/cy.pyx":895
  *             # ...in C garbage values can case floating point overflow, thus, peculiar results...
  *             # ...like NaN or incorrect calculatons.
  *             for i in range(a_I):             # <<<<<<<<<<<<<<
  *                 a_pDz_vect[i] = 0.0
  * 
  */
-        __pyx_t_5 = __pyx_v_a_I;
-        for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
-          __pyx_v_i = __pyx_t_6;
+        __pyx_t_6 = __pyx_v_a_I;
+        for (__pyx_t_7 = 0; __pyx_t_7 < __pyx_t_6; __pyx_t_7+=1) {
+          __pyx_v_i = __pyx_t_7;
 
-          /* "Djumble/djumble/voperators/cy.pyx":767
+          /* "Djumble/djumble/voperators/cy.pyx":896
  *             # ...like NaN or incorrect calculatons.
  *             for i in range(a_I):
  *                 a_pDz_vect[i] = 0.0             # <<<<<<<<<<<<<<
  * 
  *             for i1 in range(m1r_I):
  */
-          __pyx_t_7 = __pyx_v_i;
-          if (__pyx_t_7 < 0) __pyx_t_7 += __pyx_v_a_pDz_vect.shape[0];
-          *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a_pDz_vect.data) + __pyx_t_7)) )) = 0.0;
+          __pyx_t_8 = __pyx_v_i;
+          if (__pyx_t_8 < 0) __pyx_t_8 += __pyx_v_a_pDz_vect.shape[0];
+          *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a_pDz_vect.data) + __pyx_t_8)) )) = 0.0;
         }
 
-        /* "Djumble/djumble/voperators/cy.pyx":769
+        /* "Djumble/djumble/voperators/cy.pyx":898
  *                 a_pDz_vect[i] = 0.0
  * 
  *             for i1 in range(m1r_I):             # <<<<<<<<<<<<<<
  * 
  *                 # Calculating the partial derivatives form each centroid.
  */
-        __pyx_t_5 = __pyx_v_m1r_I;
-        for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
-          __pyx_v_i1 = __pyx_t_6;
+        __pyx_t_6 = __pyx_v_m1r_I;
+        for (__pyx_t_7 = 0; __pyx_t_7 < __pyx_t_6; __pyx_t_7+=1) {
+          __pyx_v_i1 = __pyx_t_7;
 
-          /* "Djumble/djumble/voperators/cy.pyx":775
+          /* "Djumble/djumble/voperators/cy.pyx":904
  *                 # NOTE: For some reason this copy is required for passing one elemnt memory...
  *                 # ...view slice to the cython funtion.
  *                 one_elem_cp[:] = m1r[i1]             # <<<<<<<<<<<<<<
  * 
  *                 tmp_vect = _pDerivative_seq_rows(
  */
-          __pyx_t_8 = __pyx_v_i1;
-          if (__pyx_t_8 < 0) __pyx_t_8 += __pyx_v_m1r.shape[0];
-          if (unlikely(!__pyx_v_one_elem_cp.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("one_elem_cp"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 775; __pyx_clineno = __LINE__; goto __pyx_L4_error;} }
-          __pyx_t_9.data = __pyx_v_one_elem_cp.data;
-          __pyx_t_9.memview = __pyx_v_one_elem_cp.memview;
-          __PYX_INC_MEMVIEW(&__pyx_t_9, 0);
-          __pyx_t_9.shape[0] = __pyx_v_one_elem_cp.shape[0];
-__pyx_t_9.strides[0] = __pyx_v_one_elem_cp.strides[0];
-    __pyx_t_9.suboffsets[0] = -1;
+          __pyx_t_9 = __pyx_v_i1;
+          if (__pyx_t_9 < 0) __pyx_t_9 += __pyx_v_m1r.shape[0];
+          __pyx_t_5.data = __pyx_v_one_elem_cp.data;
+          __pyx_t_5.memview = __pyx_v_one_elem_cp.memview;
+          __PYX_INC_MEMVIEW(&__pyx_t_5, 0);
+          __pyx_t_5.shape[0] = __pyx_v_one_elem_cp.shape[0];
+__pyx_t_5.strides[0] = __pyx_v_one_elem_cp.strides[0];
+    __pyx_t_5.suboffsets[0] = -1;
 
 {
-              __pyx_t_5numpy_intp_t __pyx_temp_scalar = (*((__pyx_t_5numpy_intp_t *) ( /* dim=0 */ ((char *) (((__pyx_t_5numpy_intp_t *) __pyx_v_m1r.data) + __pyx_t_8)) )));
+              int __pyx_temp_scalar = (*((int *) ( /* dim=0 */ ((char *) (((int *) __pyx_v_m1r.data) + __pyx_t_9)) )));
               {
-                  Py_ssize_t __pyx_temp_extent = __pyx_t_9.shape[0];
+                  Py_ssize_t __pyx_temp_extent = __pyx_t_5.shape[0];
                   Py_ssize_t __pyx_temp_idx;
-                  __pyx_t_5numpy_intp_t *__pyx_temp_pointer = (__pyx_t_5numpy_intp_t *) __pyx_t_9.data;
+                  int *__pyx_temp_pointer = (int *) __pyx_t_5.data;
                   for (__pyx_temp_idx = 0; __pyx_temp_idx < __pyx_temp_extent; __pyx_temp_idx++) {
-                    *((__pyx_t_5numpy_intp_t *) __pyx_temp_pointer) = __pyx_temp_scalar;
+                    *((int *) __pyx_temp_pointer) = __pyx_temp_scalar;
                     __pyx_temp_pointer += 1;
                   }
               }
           }
-          __PYX_XDEC_MEMVIEW(&__pyx_t_9, 0);
+          __PYX_XDEC_MEMVIEW(&__pyx_t_5, 0);
 
-          /* "Djumble/djumble/voperators/cy.pyx":778
+          /* "Djumble/djumble/voperators/cy.pyx":907
  * 
  *                 tmp_vect = _pDerivative_seq_rows(
  *                     A, m1, m2, one_elem_cp, m2r, m1_norms, m2_norms, tmp_a_pDz_vect             # <<<<<<<<<<<<<<
  *                 )
  * 
  */
-          if (unlikely(!__pyx_v_one_elem_cp.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("one_elem_cp"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 778; __pyx_clineno = __LINE__; goto __pyx_L4_error;} }
           __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_v_m1_norms);
-          if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 778; __pyx_clineno = __LINE__; goto __pyx_L4_error;}
+          if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 907; __pyx_clineno = __LINE__; goto __pyx_L4_error;}
           __pyx_t_10 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_v_m2_norms);
-          if (unlikely(!__pyx_t_10.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 778; __pyx_clineno = __LINE__; goto __pyx_L4_error;}
+          if (unlikely(!__pyx_t_10.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 907; __pyx_clineno = __LINE__; goto __pyx_L4_error;}
 
-          /* "Djumble/djumble/voperators/cy.pyx":779
+          /* "Djumble/djumble/voperators/cy.pyx":908
  *                 tmp_vect = _pDerivative_seq_rows(
  *                     A, m1, m2, one_elem_cp, m2r, m1_norms, m2_norms, tmp_a_pDz_vect
  *                 )             # <<<<<<<<<<<<<<
@@ -7885,16 +8975,16 @@ __pyx_t_9.strides[0] = __pyx_v_one_elem_cp.strides[0];
  *                 # Summing up the.
  */
           __pyx_t_11 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_v_tmp_a_pDz_vect);
-          if (unlikely(!__pyx_t_11.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 779; __pyx_clineno = __LINE__; goto __pyx_L4_error;}
+          if (unlikely(!__pyx_t_11.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 908; __pyx_clineno = __LINE__; goto __pyx_L4_error;}
 
-          /* "Djumble/djumble/voperators/cy.pyx":777
+          /* "Djumble/djumble/voperators/cy.pyx":906
  *                 one_elem_cp[:] = m1r[i1]
  * 
  *                 tmp_vect = _pDerivative_seq_rows(             # <<<<<<<<<<<<<<
  *                     A, m1, m2, one_elem_cp, m2r, m1_norms, m2_norms, tmp_a_pDz_vect
  *                 )
  */
-          __pyx_t_12 = __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivative_seq_rows(__pyx_v_A, __pyx_v_m1, __pyx_v_m2, __pyx_v_one_elem_cp, __pyx_v_m2r, __pyx_t_4, __pyx_t_10, __pyx_t_11); if (unlikely(!__pyx_t_12.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 777; __pyx_clineno = __LINE__; goto __pyx_L4_error;}
+          __pyx_t_12 = __pyx_f_7Djumble_7djumble_10voperators_2cy__pDerivative_seq_rows(__pyx_v_A, __pyx_v_m1, __pyx_v_m2, __pyx_v_one_elem_cp, __pyx_v_m2r, __pyx_t_4, __pyx_t_10, __pyx_t_11); if (unlikely(!__pyx_t_12.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 906; __pyx_clineno = __LINE__; goto __pyx_L4_error;}
           __PYX_XDEC_MEMVIEW(&__pyx_t_4, 0);
           __PYX_XDEC_MEMVIEW(&__pyx_t_10, 0);
           __PYX_XDEC_MEMVIEW(&__pyx_t_11, 0);
@@ -7903,7 +8993,7 @@ __pyx_t_9.strides[0] = __pyx_v_one_elem_cp.strides[0];
           __pyx_t_12.memview = NULL;
           __pyx_t_12.data = NULL;
 
-          /* "Djumble/djumble/voperators/cy.pyx":782
+          /* "Djumble/djumble/voperators/cy.pyx":911
  * 
  *                 # Summing up the.
  *                 for i2 in range(a_I):             # <<<<<<<<<<<<<<
@@ -7914,7 +9004,7 @@ __pyx_t_9.strides[0] = __pyx_v_one_elem_cp.strides[0];
           for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_13; __pyx_t_14+=1) {
             __pyx_v_i2 = __pyx_t_14;
 
-            /* "Djumble/djumble/voperators/cy.pyx":783
+            /* "Djumble/djumble/voperators/cy.pyx":912
  *                 # Summing up the.
  *                 for i2 in range(a_I):
  *                     a_pDz_vect[i2] += tmp_vect[i2]             # <<<<<<<<<<<<<<
@@ -7930,7 +9020,7 @@ __pyx_t_9.strides[0] = __pyx_v_one_elem_cp.strides[0];
         }
       }
 
-      /* "Djumble/djumble/voperators/cy.pyx":761
+      /* "Djumble/djumble/voperators/cy.pyx":890
  *         # The following operatsion taking place in the non-gil and parallel...
  *         # ...openmp emviroment.
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -7954,7 +9044,7 @@ __pyx_t_9.strides[0] = __pyx_v_one_elem_cp.strides[0];
       }
   }
 
-  /* "Djumble/djumble/voperators/cy.pyx":785
+  /* "Djumble/djumble/voperators/cy.pyx":914
  *                     a_pDz_vect[i2] += tmp_vect[i2]
  * 
  *         return a_pDz_vect             # <<<<<<<<<<<<<<
@@ -7965,7 +9055,7 @@ __pyx_t_9.strides[0] = __pyx_v_one_elem_cp.strides[0];
   __pyx_r = __pyx_v_a_pDz_vect;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":731
+  /* "Djumble/djumble/voperators/cy.pyx":858
  *     return a_pDz_vect
  * 
  * cpdef double [::1] pDerivative_seq_one2many(double[::1] A,             # <<<<<<<<<<<<<<
@@ -7979,7 +9069,7 @@ __pyx_t_9.strides[0] = __pyx_v_one_elem_cp.strides[0];
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __PYX_XDEC_MEMVIEW(&__pyx_t_4, 1);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_9, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_5, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_t_10, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_t_11, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_t_12, 1);
@@ -8004,8 +9094,8 @@ __pyx_t_9.strides[0] = __pyx_v_one_elem_cp.strides[0];
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_19pDerivative_seq_one2many(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_19pDerivative_seq_one2many(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_23pDerivative_seq_one2many(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_23pDerivative_seq_one2many(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_A = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_m1 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_m2 = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -8040,26 +9130,26 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_19pDerivative_seq_o
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m1)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_one2many", 1, 5, 5, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 731; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_one2many", 1, 5, 5, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 858; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m2)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_one2many", 1, 5, 5, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 731; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_one2many", 1, 5, 5, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 858; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m1r)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_one2many", 1, 5, 5, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 731; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_one2many", 1, 5, 5, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 858; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_m2r)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_one2many", 1, 5, 5, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 731; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("pDerivative_seq_one2many", 1, 5, 5, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 858; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "pDerivative_seq_one2many") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 731; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "pDerivative_seq_one2many") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 858; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 5) {
       goto __pyx_L5_argtuple_error;
@@ -8070,28 +9160,28 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_19pDerivative_seq_o
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
       values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
     }
-    __pyx_v_A = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0]); if (unlikely(!__pyx_v_A.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 731; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_m1 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1]); if (unlikely(!__pyx_v_m1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 732; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_m2 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[2]); if (unlikely(!__pyx_v_m2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 733; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_m1r = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_5numpy_intp_t(values[3]); if (unlikely(!__pyx_v_m1r.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 734; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_m2r = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_5numpy_intp_t(values[4]); if (unlikely(!__pyx_v_m2r.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 735; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_A = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0]); if (unlikely(!__pyx_v_A.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 858; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m1 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1]); if (unlikely(!__pyx_v_m1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 859; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m2 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[2]); if (unlikely(!__pyx_v_m2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 860; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m1r = __Pyx_PyObject_to_MemoryviewSlice_dc_int(values[3]); if (unlikely(!__pyx_v_m1r.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 861; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_m2r = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_5numpy_intp_t(values[4]); if (unlikely(!__pyx_v_m2r.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 862; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("pDerivative_seq_one2many", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 731; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("pDerivative_seq_one2many", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 858; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Djumble.djumble.voperators.cy.pDerivative_seq_one2many", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_18pDerivative_seq_one2many(__pyx_self, __pyx_v_A, __pyx_v_m1, __pyx_v_m2, __pyx_v_m1r, __pyx_v_m2r);
+  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_22pDerivative_seq_one2many(__pyx_self, __pyx_v_A, __pyx_v_m1, __pyx_v_m2, __pyx_v_m1r, __pyx_v_m2r);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_18pDerivative_seq_one2many(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r) {
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_22pDerivative_seq_one2many(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_A, __Pyx_memviewslice __pyx_v_m1, __Pyx_memviewslice __pyx_v_m2, __Pyx_memviewslice __pyx_v_m1r, __Pyx_memviewslice __pyx_v_m2r) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -8101,13 +9191,13 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_18pDerivative_seq_o
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("pDerivative_seq_one2many", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_A.memview)) { __Pyx_RaiseUnboundLocalError("A"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 731; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_m1.memview)) { __Pyx_RaiseUnboundLocalError("m1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 731; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_m2.memview)) { __Pyx_RaiseUnboundLocalError("m2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 731; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_m1r.memview)) { __Pyx_RaiseUnboundLocalError("m1r"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 731; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_m2r.memview)) { __Pyx_RaiseUnboundLocalError("m2r"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 731; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative_seq_one2many(__pyx_v_A, __pyx_v_m1, __pyx_v_m2, __pyx_v_m1r, __pyx_v_m2r, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 731; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 731; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_v_A.memview)) { __Pyx_RaiseUnboundLocalError("A"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 858; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_m1.memview)) { __Pyx_RaiseUnboundLocalError("m1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 858; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_m2.memview)) { __Pyx_RaiseUnboundLocalError("m2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 858; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_m1r.memview)) { __Pyx_RaiseUnboundLocalError("m1r"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 858; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_m2r.memview)) { __Pyx_RaiseUnboundLocalError("m2r"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 858; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative_seq_one2many(__pyx_v_A, __pyx_v_m1, __pyx_v_m2, __pyx_v_m1r, __pyx_v_m2r, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 858; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 858; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
   __pyx_r = __pyx_t_2;
@@ -8131,7 +9221,7 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_18pDerivative_seq_o
   return __pyx_r;
 }
 
-/* "Djumble/djumble/voperators/cy.pyx":788
+/* "Djumble/djumble/voperators/cy.pyx":917
  * 
  * 
  * cpdef double [:, ::1] mean_cosA(double [:, ::1] X,             # <<<<<<<<<<<<<<
@@ -8139,9 +9229,9 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_18pDerivative_seq_o
  *                                 double [::1] A,
  */
 
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_21mean_cosA(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_25mean_cosA(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(__Pyx_memviewslice __pyx_v_X, __Pyx_memviewslice __pyx_v_clust_tags, __Pyx_memviewslice __pyx_v_A, int __pyx_v_k_clustz, CYTHON_UNUSED int __pyx_skip_dispatch) {
-  double __pyx_v_zero_val;
+  CYTHON_UNUSED double __pyx_v_zero_val;
   Py_ssize_t __pyx_v_k;
   Py_ssize_t __pyx_v_i;
   Py_ssize_t __pyx_v_j;
@@ -8153,7 +9243,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
   Py_ssize_t __pyx_v_ct_I;
   __Pyx_memviewslice __pyx_v_mu_arr = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_xk_sum = { 0, 0, { 0 }, { 0 }, { 0 } };
-  double __pyx_v_xk_pnorm;
+  __Pyx_memviewslice __pyx_v_xk_pnorms = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_r = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -8184,12 +9274,16 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
   Py_ssize_t __pyx_t_26;
   Py_ssize_t __pyx_t_27;
   Py_ssize_t __pyx_t_28;
+  Py_ssize_t __pyx_t_29;
+  Py_ssize_t __pyx_t_30;
+  Py_ssize_t __pyx_t_31;
+  Py_ssize_t __pyx_t_32;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("mean_cosA", 0);
 
-  /* "Djumble/djumble/voperators/cy.pyx":798
+  /* "Djumble/djumble/voperators/cy.pyx":927
  * 
  *     cdef:
  *         double zero_val = 1e-15             # <<<<<<<<<<<<<<
@@ -8198,7 +9292,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
  */
   __pyx_v_zero_val = 1e-15;
 
-  /* "Djumble/djumble/voperators/cy.pyx":800
+  /* "Djumble/djumble/voperators/cy.pyx":929
  *         double zero_val = 1e-15
  *         Py_ssize_t k, i, j, ip, jp, ip2, jp2
  *         Py_ssize_t X_J = X.shape[1]             # <<<<<<<<<<<<<<
@@ -8207,7 +9301,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
  */
   __pyx_v_X_J = (__pyx_v_X.shape[1]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":801
+  /* "Djumble/djumble/voperators/cy.pyx":930
  *         Py_ssize_t k, i, j, ip, jp, ip2, jp2
  *         Py_ssize_t X_J = X.shape[1]
  *         Py_ssize_t ct_I = clust_tags.shape[0]             # <<<<<<<<<<<<<<
@@ -8216,20 +9310,20 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
  */
   __pyx_v_ct_I = (__pyx_v_clust_tags.shape[0]);
 
-  /* "Djumble/djumble/voperators/cy.pyx":809
- *         double xk_pnorm
+  /* "Djumble/djumble/voperators/cy.pyx":938
+ *         double [::1] xk_pnorms
  * 
  *     mu_arr = cvarray(shape=(k_clustz, X_J), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  *     xk_sum = cvarray(shape=(X_J,), itemsize=sizeof(double), format="d")
- * 
+ *     xk_pnorms = cvarray(shape=(k_clustz,), itemsize=sizeof(double), format="d")
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 809; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 938; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_k_clustz); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 809; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_k_clustz); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 938; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_X_J); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 809; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_X_J); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 938; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 809; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 938; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2);
@@ -8237,57 +9331,90 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
   PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3);
   __pyx_t_2 = 0;
   __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 809; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_shape, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 938; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 809; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 938; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 809; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_itemsize, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 938; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 809; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 809; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 938; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 938; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_4);
-  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 809; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 938; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_mu_arr = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":810
+  /* "Djumble/djumble/voperators/cy.pyx":939
  * 
  *     mu_arr = cvarray(shape=(k_clustz, X_J), itemsize=sizeof(double), format="d")
  *     xk_sum = cvarray(shape=(X_J,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
+ *     xk_pnorms = cvarray(shape=(k_clustz,), itemsize=sizeof(double), format="d")
  * 
- *     # The following operatsion taking place in the non-gil and parallel...
  */
-  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 810; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 939; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_X_J); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 810; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_X_J); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 939; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 810; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 939; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 810; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_shape, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 939; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 810; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 939; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 810; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_itemsize, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 939; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 810; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_4); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 810; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 939; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_4); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 939; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_3);
-  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 810; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 939; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_xk_sum = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "Djumble/djumble/voperators/cy.pyx":814
+  /* "Djumble/djumble/voperators/cy.pyx":940
+ *     mu_arr = cvarray(shape=(k_clustz, X_J), itemsize=sizeof(double), format="d")
+ *     xk_sum = cvarray(shape=(X_J,), itemsize=sizeof(double), format="d")
+ *     xk_pnorms = cvarray(shape=(k_clustz,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
+ * 
+ *     # The following operatsion taking place in the non-gil and parallel...
+ */
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 940; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_k_clustz); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 940; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 940; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_4);
+  __pyx_t_4 = 0;
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_shape, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 940; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t((sizeof(double))); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 940; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_itemsize, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 940; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_format, __pyx_n_s_d) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 940; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_3); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 940; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_1);
+  if (unlikely(!__pyx_t_6.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 940; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_xk_pnorms = __pyx_t_6;
+  __pyx_t_6.memview = NULL;
+  __pyx_t_6.data = NULL;
+
+  /* "Djumble/djumble/voperators/cy.pyx":944
  *     # The following operatsion taking place in the non-gil and parallel...
  *     # ...openmp emviroment.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -8308,14 +9435,14 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
                 #define unlikely(x) (x)
             #endif
             #ifdef _OPENMP
-            #pragma omp parallel private(__pyx_v_i, __pyx_v_j) private(__pyx_t_8, __pyx_t_23, __pyx_t_25, __pyx_t_15, __pyx_t_27, __pyx_t_13, __pyx_t_28, __pyx_t_12, __pyx_t_14, __pyx_t_24, __pyx_t_10, __pyx_t_11, __pyx_t_7, __pyx_t_9, __pyx_t_26)
+            #pragma omp parallel private(__pyx_v_j, __pyx_v_i) private(__pyx_t_8, __pyx_t_23, __pyx_t_25, __pyx_t_31, __pyx_t_15, __pyx_t_27, __pyx_t_13, __pyx_t_29, __pyx_t_28, __pyx_t_12, __pyx_t_19, __pyx_t_32, __pyx_t_30, __pyx_t_14, __pyx_t_24, __pyx_t_10, __pyx_t_11, __pyx_t_7, __pyx_t_9, __pyx_t_26)
             #endif /* _OPENMP */
             {
                 /* Initialize private variables to invalid values */
-                __pyx_v_i = ((Py_ssize_t)0xbad0bad0);
                 __pyx_v_j = ((Py_ssize_t)0xbad0bad0);
+                __pyx_v_i = ((Py_ssize_t)0xbad0bad0);
 
-                /* "Djumble/djumble/voperators/cy.pyx":819
+                /* "Djumble/djumble/voperators/cy.pyx":949
  *         # ...in C garbage values can case floating point overflow, thus, peculiar results...
  *         # ...like NaN or incorrect calculatons.
  *         for i in range(k_clustz):             # <<<<<<<<<<<<<<
@@ -8326,7 +9453,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
                 for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
                   __pyx_v_i = __pyx_t_8;
 
-                  /* "Djumble/djumble/voperators/cy.pyx":820
+                  /* "Djumble/djumble/voperators/cy.pyx":950
  *         # ...like NaN or incorrect calculatons.
  *         for i in range(k_clustz):
  *             for j in range(X_J):             # <<<<<<<<<<<<<<
@@ -8337,7 +9464,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
                   for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
                     __pyx_v_j = __pyx_t_10;
 
-                    /* "Djumble/djumble/voperators/cy.pyx":821
+                    /* "Djumble/djumble/voperators/cy.pyx":951
  *         for i in range(k_clustz):
  *             for j in range(X_J):
  *                 mu_arr[i, j] = 0.0             # <<<<<<<<<<<<<<
@@ -8352,31 +9479,31 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
                   }
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":823
+                /* "Djumble/djumble/voperators/cy.pyx":953
  *                 mu_arr[i, j] = 0.0
  * 
  *         for i in range(X_J):             # <<<<<<<<<<<<<<
- *             xk_sum[i] = zero_val
+ *             xk_sum[i] = 0.0
  * 
  */
                 __pyx_t_8 = __pyx_v_X_J;
                 for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
                   __pyx_v_i = __pyx_t_9;
 
-                  /* "Djumble/djumble/voperators/cy.pyx":824
+                  /* "Djumble/djumble/voperators/cy.pyx":954
  * 
  *         for i in range(X_J):
- *             xk_sum[i] = zero_val             # <<<<<<<<<<<<<<
+ *             xk_sum[i] = 0.0             # <<<<<<<<<<<<<<
  * 
  *         for k in prange(k_clustz, schedule='guided'):
  */
                   __pyx_t_13 = __pyx_v_i;
                   if (__pyx_t_13 < 0) __pyx_t_13 += __pyx_v_xk_sum.shape[0];
-                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_xk_sum.data) + __pyx_t_13)) )) = __pyx_v_zero_val;
+                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_xk_sum.data) + __pyx_t_13)) )) = 0.0;
                 }
 
-                /* "Djumble/djumble/voperators/cy.pyx":826
- *             xk_sum[i] = zero_val
+                /* "Djumble/djumble/voperators/cy.pyx":956
+ *             xk_sum[i] = 0.0
  * 
  *         for k in prange(k_clustz, schedule='guided'):             # <<<<<<<<<<<<<<
  * 
@@ -8389,22 +9516,21 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
                     if (__pyx_t_9 > 0)
                     {
                         #ifdef _OPENMP
-                        #pragma omp for lastprivate(__pyx_v_ip2) lastprivate(__pyx_v_ip) firstprivate(__pyx_v_k) lastprivate(__pyx_v_k) lastprivate(__pyx_v_jp2) lastprivate(__pyx_v_jp) lastprivate(__pyx_v_xk_pnorm) schedule(guided)
+                        #pragma omp for lastprivate(__pyx_v_jp) lastprivate(__pyx_v_jp2) firstprivate(__pyx_v_k) lastprivate(__pyx_v_k) lastprivate(__pyx_v_ip) lastprivate(__pyx_v_ip2) schedule(guided)
                         #endif /* _OPENMP */
                         for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_9; __pyx_t_8++){
                             {
                                 __pyx_v_k = 0 + 1 * __pyx_t_8;
                                 /* Initialize private variables to invalid values */
-                                __pyx_v_ip2 = ((Py_ssize_t)0xbad0bad0);
-                                __pyx_v_ip = ((Py_ssize_t)0xbad0bad0);
-                                __pyx_v_jp2 = ((Py_ssize_t)0xbad0bad0);
                                 __pyx_v_jp = ((Py_ssize_t)0xbad0bad0);
-                                __pyx_v_xk_pnorm = ((double)__PYX_NAN());
+                                __pyx_v_jp2 = ((Py_ssize_t)0xbad0bad0);
+                                __pyx_v_ip = ((Py_ssize_t)0xbad0bad0);
+                                __pyx_v_ip2 = ((Py_ssize_t)0xbad0bad0);
 
-                                /* "Djumble/djumble/voperators/cy.pyx":829
+                                /* "Djumble/djumble/voperators/cy.pyx":959
  * 
  *             # Summing up all the X data points for the current cluster. Equivalent to sum in axis-0.
- *             for jp in prange(X_J):             # <<<<<<<<<<<<<<
+ *             for jp in prange(X_J, schedule='guided'):             # <<<<<<<<<<<<<<
  *                 for ip in range(ct_I):
  *                     # The i vector has k cluster-tag equal to the requested k the sum it up.
  */
@@ -8419,7 +9545,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
                                         #endif /* _OPENMP */
                                         {
                                             #if 0
-                                            #pragma omp for lastprivate(__pyx_v_ip) firstprivate(__pyx_v_jp) lastprivate(__pyx_v_jp)
+                                            #pragma omp for firstprivate(__pyx_v_jp) lastprivate(__pyx_v_jp) lastprivate(__pyx_v_ip) schedule(guided)
                                             #endif /* _OPENMP */
                                             for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_15; __pyx_t_14++){
                                                 {
@@ -8427,9 +9553,9 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
                                                     /* Initialize private variables to invalid values */
                                                     __pyx_v_ip = ((Py_ssize_t)0xbad0bad0);
 
-                                                    /* "Djumble/djumble/voperators/cy.pyx":830
+                                                    /* "Djumble/djumble/voperators/cy.pyx":960
  *             # Summing up all the X data points for the current cluster. Equivalent to sum in axis-0.
- *             for jp in prange(X_J):
+ *             for jp in prange(X_J, schedule='guided'):
  *                 for ip in range(ct_I):             # <<<<<<<<<<<<<<
  *                     # The i vector has k cluster-tag equal to the requested k the sum it up.
  *                     if clust_tags[ip] == k:
@@ -8438,7 +9564,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
                                                     for (__pyx_t_17 = 0; __pyx_t_17 < __pyx_t_16; __pyx_t_17+=1) {
                                                       __pyx_v_ip = __pyx_t_17;
 
-                                                      /* "Djumble/djumble/voperators/cy.pyx":832
+                                                      /* "Djumble/djumble/voperators/cy.pyx":962
  *                 for ip in range(ct_I):
  *                     # The i vector has k cluster-tag equal to the requested k the sum it up.
  *                     if clust_tags[ip] == k:             # <<<<<<<<<<<<<<
@@ -8450,7 +9576,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
                                                       __pyx_t_19 = (((*((__pyx_t_5numpy_intp_t *) ( /* dim=0 */ ((char *) (((__pyx_t_5numpy_intp_t *) __pyx_v_clust_tags.data) + __pyx_t_18)) ))) == __pyx_v_k) != 0);
                                                       if (__pyx_t_19) {
 
-                                                        /* "Djumble/djumble/voperators/cy.pyx":833
+                                                        /* "Djumble/djumble/voperators/cy.pyx":963
  *                     # The i vector has k cluster-tag equal to the requested k the sum it up.
  *                     if clust_tags[ip] == k:
  *                         xk_sum[jp] += X[ip, jp]             # <<<<<<<<<<<<<<
@@ -8465,7 +9591,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
                                                         if (__pyx_t_22 < 0) __pyx_t_22 += __pyx_v_xk_sum.shape[0];
                                                         *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_xk_sum.data) + __pyx_t_22)) )) += (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_X.data + __pyx_t_20 * __pyx_v_X.strides[0]) )) + __pyx_t_21)) )));
 
-                                                        /* "Djumble/djumble/voperators/cy.pyx":832
+                                                        /* "Djumble/djumble/voperators/cy.pyx":962
  *                 for ip in range(ct_I):
  *                     # The i vector has k cluster-tag equal to the requested k the sum it up.
  *                     if clust_tags[ip] == k:             # <<<<<<<<<<<<<<
@@ -8480,23 +9606,23 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
                                     }
                                 }
 
-                                /* "Djumble/djumble/voperators/cy.pyx":836
+                                /* "Djumble/djumble/voperators/cy.pyx":966
  * 
  *             # Calculating denominator xk_pnorm(parametrized-norm) == || xi||(A).
  *             for ip2 in range(X_J):             # <<<<<<<<<<<<<<
- *                 xk_pnorm = xk_pnorm + sqrt(xk_sum[ip2] * A[ip2] * xk_sum[ip2])
+ *                 xk_pnorms[k] += sqrt(xk_sum[ip2] * A[ip2] * xk_sum[ip2])
  * 
  */
                                 __pyx_t_15 = __pyx_v_X_J;
                                 for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_15; __pyx_t_14+=1) {
                                   __pyx_v_ip2 = __pyx_t_14;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":837
+                                  /* "Djumble/djumble/voperators/cy.pyx":967
  *             # Calculating denominator xk_pnorm(parametrized-norm) == || xi||(A).
  *             for ip2 in range(X_J):
- *                 xk_pnorm = xk_pnorm + sqrt(xk_sum[ip2] * A[ip2] * xk_sum[ip2])             # <<<<<<<<<<<<<<
+ *                 xk_pnorms[k] += sqrt(xk_sum[ip2] * A[ip2] * xk_sum[ip2])             # <<<<<<<<<<<<<<
  * 
- *             # Calculating the Centroid of the (assumed) hyper-sphear.
+ *             # Preveting division by 0.0
  */
                                   __pyx_t_23 = __pyx_v_ip2;
                                   if (__pyx_t_23 < 0) __pyx_t_23 += __pyx_v_xk_sum.shape[0];
@@ -8504,34 +9630,70 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
                                   if (__pyx_t_24 < 0) __pyx_t_24 += __pyx_v_A.shape[0];
                                   __pyx_t_25 = __pyx_v_ip2;
                                   if (__pyx_t_25 < 0) __pyx_t_25 += __pyx_v_xk_sum.shape[0];
-                                  __pyx_v_xk_pnorm = (__pyx_v_xk_pnorm + sqrt((((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_xk_sum.data) + __pyx_t_23)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_24)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_xk_sum.data) + __pyx_t_25)) ))))));
+                                  __pyx_t_26 = __pyx_v_k;
+                                  if (__pyx_t_26 < 0) __pyx_t_26 += __pyx_v_xk_pnorms.shape[0];
+                                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_xk_pnorms.data) + __pyx_t_26)) )) += sqrt((((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_xk_sum.data) + __pyx_t_23)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_24)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_xk_sum.data) + __pyx_t_25)) )))));
                                 }
 
-                                /* "Djumble/djumble/voperators/cy.pyx":840
+                                /* "Djumble/djumble/voperators/cy.pyx":970
+ * 
+ *             # Preveting division by 0.0
+ *             if xk_pnorms[k] == 0.0:             # <<<<<<<<<<<<<<
+ *                 xk_pnorms[k] = 0.000001
+ * 
+ */
+                                __pyx_t_27 = __pyx_v_k;
+                                if (__pyx_t_27 < 0) __pyx_t_27 += __pyx_v_xk_pnorms.shape[0];
+                                __pyx_t_19 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_xk_pnorms.data) + __pyx_t_27)) ))) == 0.0) != 0);
+                                if (__pyx_t_19) {
+
+                                  /* "Djumble/djumble/voperators/cy.pyx":971
+ *             # Preveting division by 0.0
+ *             if xk_pnorms[k] == 0.0:
+ *                 xk_pnorms[k] = 0.000001             # <<<<<<<<<<<<<<
+ * 
+ *             # Calculating the Centroid of the (assumed) hyper-sphear.
+ */
+                                  __pyx_t_28 = __pyx_v_k;
+                                  if (__pyx_t_28 < 0) __pyx_t_28 += __pyx_v_xk_pnorms.shape[0];
+                                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_xk_pnorms.data) + __pyx_t_28)) )) = 0.000001;
+
+                                  /* "Djumble/djumble/voperators/cy.pyx":970
+ * 
+ *             # Preveting division by 0.0
+ *             if xk_pnorms[k] == 0.0:             # <<<<<<<<<<<<<<
+ *                 xk_pnorms[k] = 0.000001
+ * 
+ */
+                                }
+
+                                /* "Djumble/djumble/voperators/cy.pyx":974
  * 
  *             # Calculating the Centroid of the (assumed) hyper-sphear.
  *             for jp2 in range(X_J):             # <<<<<<<<<<<<<<
- *                 mu_arr[k, jp2] = xk_sum[jp2] / xk_pnorm
+ *                 mu_arr[k, jp2] = xk_sum[jp2] / xk_pnorms[k]
  * 
  */
                                 __pyx_t_15 = __pyx_v_X_J;
                                 for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_15; __pyx_t_14+=1) {
                                   __pyx_v_jp2 = __pyx_t_14;
 
-                                  /* "Djumble/djumble/voperators/cy.pyx":841
+                                  /* "Djumble/djumble/voperators/cy.pyx":975
  *             # Calculating the Centroid of the (assumed) hyper-sphear.
  *             for jp2 in range(X_J):
- *                 mu_arr[k, jp2] = xk_sum[jp2] / xk_pnorm             # <<<<<<<<<<<<<<
+ *                 mu_arr[k, jp2] = xk_sum[jp2] / xk_pnorms[k]             # <<<<<<<<<<<<<<
  * 
  *     return mu_arr
  */
-                                  __pyx_t_26 = __pyx_v_jp2;
-                                  if (__pyx_t_26 < 0) __pyx_t_26 += __pyx_v_xk_sum.shape[0];
-                                  __pyx_t_27 = __pyx_v_k;
-                                  __pyx_t_28 = __pyx_v_jp2;
-                                  if (__pyx_t_27 < 0) __pyx_t_27 += __pyx_v_mu_arr.shape[0];
-                                  if (__pyx_t_28 < 0) __pyx_t_28 += __pyx_v_mu_arr.shape[1];
-                                  *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_mu_arr.data + __pyx_t_27 * __pyx_v_mu_arr.strides[0]) )) + __pyx_t_28)) )) = ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_xk_sum.data) + __pyx_t_26)) ))) / __pyx_v_xk_pnorm);
+                                  __pyx_t_29 = __pyx_v_jp2;
+                                  if (__pyx_t_29 < 0) __pyx_t_29 += __pyx_v_xk_sum.shape[0];
+                                  __pyx_t_30 = __pyx_v_k;
+                                  if (__pyx_t_30 < 0) __pyx_t_30 += __pyx_v_xk_pnorms.shape[0];
+                                  __pyx_t_31 = __pyx_v_k;
+                                  __pyx_t_32 = __pyx_v_jp2;
+                                  if (__pyx_t_31 < 0) __pyx_t_31 += __pyx_v_mu_arr.shape[0];
+                                  if (__pyx_t_32 < 0) __pyx_t_32 += __pyx_v_mu_arr.shape[1];
+                                  *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_mu_arr.data + __pyx_t_31 * __pyx_v_mu_arr.strides[0]) )) + __pyx_t_32)) )) = ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_xk_sum.data) + __pyx_t_29)) ))) / (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_xk_pnorms.data) + __pyx_t_30)) ))));
                                 }
                             }
                         }
@@ -8547,7 +9709,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
         #endif
       }
 
-      /* "Djumble/djumble/voperators/cy.pyx":814
+      /* "Djumble/djumble/voperators/cy.pyx":944
  *     # The following operatsion taking place in the non-gil and parallel...
  *     # ...openmp emviroment.
  *     with nogil, parallel():             # <<<<<<<<<<<<<<
@@ -8565,8 +9727,8 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
       }
   }
 
-  /* "Djumble/djumble/voperators/cy.pyx":843
- *                 mu_arr[k, jp2] = xk_sum[jp2] / xk_pnorm
+  /* "Djumble/djumble/voperators/cy.pyx":977
+ *                 mu_arr[k, jp2] = xk_sum[jp2] / xk_pnorms[k]
  * 
  *     return mu_arr             # <<<<<<<<<<<<<<
  * 
@@ -8576,7 +9738,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
   __pyx_r = __pyx_v_mu_arr;
   goto __pyx_L0;
 
-  /* "Djumble/djumble/voperators/cy.pyx":788
+  /* "Djumble/djumble/voperators/cy.pyx":917
  * 
  * 
  * cpdef double [:, ::1] mean_cosA(double [:, ::1] X,             # <<<<<<<<<<<<<<
@@ -8604,14 +9766,15 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
   __pyx_L2:;
   __PYX_XDEC_MEMVIEW(&__pyx_v_mu_arr, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_v_xk_sum, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_xk_pnorms, 1);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_21mean_cosA(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_7Djumble_7djumble_10voperators_2cy_20mean_cosA[] = "  mean_cosA method: It is calculating the centroids of the hyper-spherical clusters.\n        Using the parametrized cosine mean as explained in the documentation.\n\n    ";
-static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_21mean_cosA(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_25mean_cosA(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_7Djumble_7djumble_10voperators_2cy_24mean_cosA[] = "  mean_cosA method: It is calculating the centroids of the hyper-spherical clusters.\n        Using the parametrized cosine mean as explained in the documentation.\n\n    ";
+static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_25mean_cosA(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_X = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_clust_tags = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_A = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -8644,21 +9807,21 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_21mean_cosA(PyObjec
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_clust_tags)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("mean_cosA", 1, 4, 4, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 788; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("mean_cosA", 1, 4, 4, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 917; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_A)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("mean_cosA", 1, 4, 4, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 788; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("mean_cosA", 1, 4, 4, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 917; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_k_clustz)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("mean_cosA", 1, 4, 4, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 788; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("mean_cosA", 1, 4, 4, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 917; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "mean_cosA") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 788; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "mean_cosA") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 917; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -8668,27 +9831,27 @@ static PyObject *__pyx_pw_7Djumble_7djumble_10voperators_2cy_21mean_cosA(PyObjec
       values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
     }
-    __pyx_v_X = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0]); if (unlikely(!__pyx_v_X.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 788; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_clust_tags = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_5numpy_intp_t(values[1]); if (unlikely(!__pyx_v_clust_tags.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 789; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_A = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2]); if (unlikely(!__pyx_v_A.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 790; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_k_clustz = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_k_clustz == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 791; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_X = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0]); if (unlikely(!__pyx_v_X.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 917; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_clust_tags = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_5numpy_intp_t(values[1]); if (unlikely(!__pyx_v_clust_tags.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 918; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_A = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2]); if (unlikely(!__pyx_v_A.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 919; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_k_clustz = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_k_clustz == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 920; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("mean_cosA", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 788; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("mean_cosA", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 917; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Djumble.djumble.voperators.cy.mean_cosA", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_20mean_cosA(__pyx_self, __pyx_v_X, __pyx_v_clust_tags, __pyx_v_A, __pyx_v_k_clustz);
+  __pyx_r = __pyx_pf_7Djumble_7djumble_10voperators_2cy_24mean_cosA(__pyx_self, __pyx_v_X, __pyx_v_clust_tags, __pyx_v_A, __pyx_v_k_clustz);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_20mean_cosA(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_X, __Pyx_memviewslice __pyx_v_clust_tags, __Pyx_memviewslice __pyx_v_A, int __pyx_v_k_clustz) {
+static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_24mean_cosA(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_X, __Pyx_memviewslice __pyx_v_clust_tags, __Pyx_memviewslice __pyx_v_A, int __pyx_v_k_clustz) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -8698,11 +9861,11 @@ static PyObject *__pyx_pf_7Djumble_7djumble_10voperators_2cy_20mean_cosA(CYTHON_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("mean_cosA", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_X.memview)) { __Pyx_RaiseUnboundLocalError("X"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 788; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_clust_tags.memview)) { __Pyx_RaiseUnboundLocalError("clust_tags"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 788; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  if (unlikely(!__pyx_v_A.memview)) { __Pyx_RaiseUnboundLocalError("A"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 788; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(__pyx_v_X, __pyx_v_clust_tags, __pyx_v_A, __pyx_v_k_clustz, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 788; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 788; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_v_X.memview)) { __Pyx_RaiseUnboundLocalError("X"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 917; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_clust_tags.memview)) { __Pyx_RaiseUnboundLocalError("clust_tags"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 917; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (unlikely(!__pyx_v_A.memview)) { __Pyx_RaiseUnboundLocalError("A"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 917; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  __pyx_t_1 = __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(__pyx_v_X, __pyx_v_clust_tags, __pyx_v_A, __pyx_v_k_clustz, 0); if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 917; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 917; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
   __pyx_r = __pyx_t_2;
@@ -8896,7 +10059,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  * 
  *             if ((flags & pybuf.PyBUF_F_CONTIGUOUS == pybuf.PyBUF_F_CONTIGUOUS)
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -8952,7 +10115,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  * 
  *             info.buf = PyArray_DATA(self)
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -9261,7 +10424,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  *                 if   t == NPY_BYTE:        f = "b"
  *                 elif t == NPY_UBYTE:       f = "B"
  */
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 259; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 259; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_Raise(__pyx_t_3, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -10094,7 +11257,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  * 
  *         if ((child.byteorder == c'>' and little_endian) or
  */
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 799; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__5, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 799; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_Raise(__pyx_t_3, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -10162,7 +11325,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  *             # One could encode it in the format string and have Cython
  *             # complain instead, BUT: < and > in format strings also imply
  */
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__5, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 803; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 803; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_Raise(__pyx_t_3, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -10271,7 +11434,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  * 
  *             # Until ticket #99 is fixed, use integers to avoid warnings
  */
-        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 823; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 823; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_Raise(__pyx_t_4, 0, 0, 0);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -11058,7 +12221,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  *         if itemsize <= 0:
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 129; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 129; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -11090,7 +12253,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  *         if not isinstance(format, bytes):
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__9, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -11125,7 +12288,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  */
     __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_format, __pyx_n_s_encode); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 135; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__9, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 135; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 135; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF_SET(__pyx_v_format, __pyx_t_5);
@@ -11201,7 +12364,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  * 
  */
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__11, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_Raise(__pyx_t_5, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -11485,7 +12648,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  *             if self.dtype_is_object:
  */
-      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__11, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_Raise(__pyx_t_5, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -11726,7 +12889,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
  *         info.buf = self.data
  *         info.len = self.len
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -14512,7 +15675,7 @@ static PyObject *__pyx_memoryview_convert_item_to_object(struct __pyx_memoryview
  *         else:
  *             if len(self.view.format) == 1:
  */
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 447; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 447; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_Raise(__pyx_t_6, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -15342,7 +16505,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_7strides___get__(st
  * 
  *             return tuple([stride for stride in self.view.strides[:self.view.ndim]])
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 523; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__15, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 523; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -15459,7 +16622,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_10suboffsets___get_
     __Pyx_XDECREF(__pyx_r);
     __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->view.ndim); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 531; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyNumber_Multiply(__pyx_tuple__15, __pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 531; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyNumber_Multiply(__pyx_tuple__16, __pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 531; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_r = __pyx_t_3;
@@ -16799,9 +17962,9 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
         __Pyx_GOTREF(__pyx_t_7);
         { Py_ssize_t __pyx_temp;
           for (__pyx_temp=0; __pyx_temp < ((__pyx_v_ndim - __pyx_t_8) + 1); __pyx_temp++) {
-            __Pyx_INCREF(__pyx_slice__16);
-            __Pyx_GIVEREF(__pyx_slice__16);
-            PyList_SET_ITEM(__pyx_t_7, __pyx_temp, __pyx_slice__16);
+            __Pyx_INCREF(__pyx_slice__17);
+            __Pyx_GIVEREF(__pyx_slice__17);
+            PyList_SET_ITEM(__pyx_t_7, __pyx_temp, __pyx_slice__17);
           }
         }
         __pyx_t_9 = __Pyx_PyList_Extend(__pyx_v_result, __pyx_t_7); if (unlikely(__pyx_t_9 == -1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 640; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -16834,7 +17997,7 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
  *         else:
  */
       /*else*/ {
-        __pyx_t_9 = __Pyx_PyList_Append(__pyx_v_result, __pyx_slice__17); if (unlikely(__pyx_t_9 == -1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_9 = __Pyx_PyList_Append(__pyx_v_result, __pyx_slice__18); if (unlikely(__pyx_t_9 == -1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       }
       __pyx_L7:;
 
@@ -16979,9 +18142,9 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
     __Pyx_GOTREF(__pyx_t_3);
     { Py_ssize_t __pyx_temp;
       for (__pyx_temp=0; __pyx_temp < __pyx_v_nslices; __pyx_temp++) {
-        __Pyx_INCREF(__pyx_slice__18);
-        __Pyx_GIVEREF(__pyx_slice__18);
-        PyList_SET_ITEM(__pyx_t_3, __pyx_temp, __pyx_slice__18);
+        __Pyx_INCREF(__pyx_slice__19);
+        __Pyx_GIVEREF(__pyx_slice__19);
+        PyList_SET_ITEM(__pyx_t_3, __pyx_temp, __pyx_slice__19);
       }
     }
     __pyx_t_9 = __Pyx_PyList_Extend(__pyx_v_result, __pyx_t_3); if (unlikely(__pyx_t_9 == -1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 654; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -17108,7 +18271,7 @@ static PyObject *assert_direct_dimensions(Py_ssize_t *__pyx_v_suboffsets, int __
  * 
  * 
  */
-      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__19, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 661; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__20, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 661; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_Raise(__pyx_t_5, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -23048,17 +24211,19 @@ static PyTypeObject __pyx_type___pyx_memoryviewslice = {
 };
 
 static PyMethodDef __pyx_methods[] = {
-  {"cos2Da_rows", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_1cos2Da_rows, METH_VARARGS|METH_KEYWORDS, 0},
-  {"cos2Da", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_3cos2Da, METH_VARARGS|METH_KEYWORDS, 0},
-  {"cosdis_2d", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_5cosdis_2d, METH_VARARGS|METH_KEYWORDS, 0},
-  {"eudis_2d", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_7eudis_2d, METH_VARARGS|METH_KEYWORDS, 0},
-  {"get_diag", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_9get_diag, METH_O, 0},
-  {"vdiv_num", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_11vdiv_num, METH_VARARGS|METH_KEYWORDS, 0},
-  {"vsqrt", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_13vsqrt, METH_O, 0},
-  {"partial_derivative", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_15partial_derivative, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7Djumble_7djumble_10voperators_2cy_14partial_derivative},
-  {"pDerivative_seq_rows", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_17pDerivative_seq_rows, METH_VARARGS|METH_KEYWORDS, 0},
-  {"pDerivative_seq_one2many", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_19pDerivative_seq_one2many, METH_VARARGS|METH_KEYWORDS, 0},
-  {"mean_cosA", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_21mean_cosA, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7Djumble_7djumble_10voperators_2cy_20mean_cosA},
+  {"cosDa", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_1cosDa, METH_VARARGS|METH_KEYWORDS, 0},
+  {"cosDa_rows", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_3cosDa_rows, METH_VARARGS|METH_KEYWORDS, 0},
+  {"cosDa_v2r", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_5cosDa_v2r, METH_VARARGS|METH_KEYWORDS, 0},
+  {"cosDa_vect", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_7cosDa_vect, METH_VARARGS|METH_KEYWORDS, 0},
+  {"cosD", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_9cosD, METH_VARARGS|METH_KEYWORDS, 0},
+  {"eudis_2d", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_11eudis_2d, METH_VARARGS|METH_KEYWORDS, 0},
+  {"get_diag", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_13get_diag, METH_O, 0},
+  {"vdiv_num", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_15vdiv_num, METH_VARARGS|METH_KEYWORDS, 0},
+  {"vsqrt", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_17vsqrt, METH_O, 0},
+  {"partial_derivative", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_19partial_derivative, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7Djumble_7djumble_10voperators_2cy_18partial_derivative},
+  {"pDerivative_seq_rows", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_21pDerivative_seq_rows, METH_VARARGS|METH_KEYWORDS, 0},
+  {"pDerivative_seq_one2many", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_23pDerivative_seq_one2many, METH_VARARGS|METH_KEYWORDS, 0},
+  {"mean_cosA", (PyCFunction)__pyx_pw_7Djumble_7djumble_10voperators_2cy_25mean_cosA, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7Djumble_7djumble_10voperators_2cy_24mean_cosA},
   {0, 0, 0, 0}
 };
 
@@ -23126,11 +24291,13 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_fortran, __pyx_k_fortran, sizeof(__pyx_k_fortran), 0, 0, 1, 1},
   {&__pyx_n_u_fortran, __pyx_k_fortran, sizeof(__pyx_k_fortran), 0, 1, 0, 1},
   {&__pyx_kp_s_got_differing_extents_in_dimensi, __pyx_k_got_differing_extents_in_dimensi, sizeof(__pyx_k_got_differing_extents_in_dimensi), 0, 0, 1, 0},
+  {&__pyx_n_s_i, __pyx_k_i, sizeof(__pyx_k_i), 0, 0, 1, 1},
   {&__pyx_n_s_id, __pyx_k_id, sizeof(__pyx_k_id), 0, 0, 1, 1},
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
   {&__pyx_n_s_itemsize, __pyx_k_itemsize, sizeof(__pyx_k_itemsize), 0, 0, 1, 1},
   {&__pyx_kp_s_itemsize_0_for_cython_array, __pyx_k_itemsize_0_for_cython_array, sizeof(__pyx_k_itemsize_0_for_cython_array), 0, 0, 1, 0},
   {&__pyx_n_s_k_clustz, __pyx_k_k_clustz, sizeof(__pyx_k_k_clustz), 0, 0, 1, 1},
+  {&__pyx_n_s_m, __pyx_k_m, sizeof(__pyx_k_m), 0, 0, 1, 1},
   {&__pyx_n_s_m1, __pyx_k_m1, sizeof(__pyx_k_m1), 0, 0, 1, 1},
   {&__pyx_n_s_m1r, __pyx_k_m1r, sizeof(__pyx_k_m1r), 0, 0, 1, 1},
   {&__pyx_n_s_m2, __pyx_k_m2, sizeof(__pyx_k_m2), 0, 0, 1, 1},
@@ -23138,6 +24305,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_memview, __pyx_k_memview, sizeof(__pyx_k_memview), 0, 0, 1, 1},
   {&__pyx_n_s_mode, __pyx_k_mode, sizeof(__pyx_k_mode), 0, 0, 1, 1},
+  {&__pyx_n_s_mr, __pyx_k_mr, sizeof(__pyx_k_mr), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
   {&__pyx_n_s_name_2, __pyx_k_name_2, sizeof(__pyx_k_name_2), 0, 0, 1, 1},
   {&__pyx_kp_u_ndarray_is_not_C_contiguous, __pyx_k_ndarray_is_not_C_contiguous, sizeof(__pyx_k_ndarray_is_not_C_contiguous), 0, 1, 0, 0},
@@ -23166,13 +24334,15 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_u_unknown_dtype_code_in_numpy_pxd, __pyx_k_unknown_dtype_code_in_numpy_pxd, sizeof(__pyx_k_unknown_dtype_code_in_numpy_pxd), 0, 1, 0, 0},
   {&__pyx_n_s_unpack, __pyx_k_unpack, sizeof(__pyx_k_unpack), 0, 0, 1, 1},
   {&__pyx_n_s_v, __pyx_k_v, sizeof(__pyx_k_v), 0, 0, 1, 1},
+  {&__pyx_n_s_v1, __pyx_k_v1, sizeof(__pyx_k_v1), 0, 0, 1, 1},
+  {&__pyx_n_s_v2, __pyx_k_v2, sizeof(__pyx_k_v2), 0, 0, 1, 1},
   {&__pyx_n_s_x1, __pyx_k_x1, sizeof(__pyx_k_x1), 0, 0, 1, 1},
   {&__pyx_n_s_x2, __pyx_k_x2, sizeof(__pyx_k_x2), 0, 0, 1, 1},
   {&__pyx_n_s_zeros, __pyx_k_zeros, sizeof(__pyx_k_zeros), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 799; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -23190,6 +24360,17 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
+  /* "Djumble/djumble/voperators/cy.pyx":886
+ *         m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
+ *         tmp_a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
+ *         one_elem_cp = cvarray(shape=(1,), itemsize=sizeof(int), format="i")             # <<<<<<<<<<<<<<
+ * 
+ *         # The following operatsion taking place in the non-gil and parallel...
+ */
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_int_1); if (unlikely(!__pyx_tuple_)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 886; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple_);
+  __Pyx_GIVEREF(__pyx_tuple_);
+
   /* "../../../../../../usr/lib/python2.7/dist-packages/Cython/Includes/numpy/__init__.pxd":218
  *             if ((flags & pybuf.PyBUF_C_CONTIGUOUS == pybuf.PyBUF_C_CONTIGUOUS)
  *                 and not PyArray_CHKFLAGS(self, NPY_C_CONTIGUOUS)):
@@ -23197,9 +24378,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *             if ((flags & pybuf.PyBUF_F_CONTIGUOUS == pybuf.PyBUF_F_CONTIGUOUS)
  */
-  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_u_ndarray_is_not_C_contiguous); if (unlikely(!__pyx_tuple_)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple_);
-  __Pyx_GIVEREF(__pyx_tuple_);
+  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_u_ndarray_is_not_C_contiguous); if (unlikely(!__pyx_tuple__2)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__2);
+  __Pyx_GIVEREF(__pyx_tuple__2);
 
   /* "../../../../../../usr/lib/python2.7/dist-packages/Cython/Includes/numpy/__init__.pxd":222
  *             if ((flags & pybuf.PyBUF_F_CONTIGUOUS == pybuf.PyBUF_F_CONTIGUOUS)
@@ -23208,9 +24389,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *             info.buf = PyArray_DATA(self)
  */
-  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_u_ndarray_is_not_Fortran_contiguou); if (unlikely(!__pyx_tuple__2)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__2);
-  __Pyx_GIVEREF(__pyx_tuple__2);
+  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_u_ndarray_is_not_Fortran_contiguou); if (unlikely(!__pyx_tuple__3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__3);
+  __Pyx_GIVEREF(__pyx_tuple__3);
 
   /* "../../../../../../usr/lib/python2.7/dist-packages/Cython/Includes/numpy/__init__.pxd":259
  *                 if ((descr.byteorder == c'>' and little_endian) or
@@ -23219,9 +24400,9 @@ static int __Pyx_InitCachedConstants(void) {
  *                 if   t == NPY_BYTE:        f = "b"
  *                 elif t == NPY_UBYTE:       f = "B"
  */
-  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_u_Non_native_byte_order_not_suppor); if (unlikely(!__pyx_tuple__3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 259; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__3);
-  __Pyx_GIVEREF(__pyx_tuple__3);
+  __pyx_tuple__4 = PyTuple_Pack(1, __pyx_kp_u_Non_native_byte_order_not_suppor); if (unlikely(!__pyx_tuple__4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 259; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__4);
+  __Pyx_GIVEREF(__pyx_tuple__4);
 
   /* "../../../../../../usr/lib/python2.7/dist-packages/Cython/Includes/numpy/__init__.pxd":799
  * 
@@ -23230,9 +24411,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *         if ((child.byteorder == c'>' and little_endian) or
  */
-  __pyx_tuple__4 = PyTuple_Pack(1, __pyx_kp_u_Format_string_allocated_too_shor); if (unlikely(!__pyx_tuple__4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 799; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__4);
-  __Pyx_GIVEREF(__pyx_tuple__4);
+  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_kp_u_Format_string_allocated_too_shor); if (unlikely(!__pyx_tuple__5)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 799; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__5);
+  __Pyx_GIVEREF(__pyx_tuple__5);
 
   /* "../../../../../../usr/lib/python2.7/dist-packages/Cython/Includes/numpy/__init__.pxd":803
  *         if ((child.byteorder == c'>' and little_endian) or
@@ -23241,9 +24422,9 @@ static int __Pyx_InitCachedConstants(void) {
  *             # One could encode it in the format string and have Cython
  *             # complain instead, BUT: < and > in format strings also imply
  */
-  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_kp_u_Non_native_byte_order_not_suppor); if (unlikely(!__pyx_tuple__5)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 803; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__5);
-  __Pyx_GIVEREF(__pyx_tuple__5);
+  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_u_Non_native_byte_order_not_suppor); if (unlikely(!__pyx_tuple__6)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 803; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__6);
+  __Pyx_GIVEREF(__pyx_tuple__6);
 
   /* "../../../../../../usr/lib/python2.7/dist-packages/Cython/Includes/numpy/__init__.pxd":823
  *             t = child.type_num
@@ -23252,9 +24433,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *             # Until ticket #99 is fixed, use integers to avoid warnings
  */
-  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_u_Format_string_allocated_too_shor_2); if (unlikely(!__pyx_tuple__6)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 823; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__6);
-  __Pyx_GIVEREF(__pyx_tuple__6);
+  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_u_Format_string_allocated_too_shor_2); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 823; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__7);
+  __Pyx_GIVEREF(__pyx_tuple__7);
 
   /* "View.MemoryView":129
  * 
@@ -23263,9 +24444,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *         if itemsize <= 0:
  */
-  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_Empty_shape_tuple_for_cython_arr); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 129; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__7);
-  __Pyx_GIVEREF(__pyx_tuple__7);
+  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_kp_s_Empty_shape_tuple_for_cython_arr); if (unlikely(!__pyx_tuple__8)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 129; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__8);
+  __Pyx_GIVEREF(__pyx_tuple__8);
 
   /* "View.MemoryView":132
  * 
@@ -23274,9 +24455,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *         if not isinstance(format, bytes):
  */
-  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_kp_s_itemsize_0_for_cython_array); if (unlikely(!__pyx_tuple__8)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__8);
-  __Pyx_GIVEREF(__pyx_tuple__8);
+  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_kp_s_itemsize_0_for_cython_array); if (unlikely(!__pyx_tuple__9)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__9);
+  __Pyx_GIVEREF(__pyx_tuple__9);
 
   /* "View.MemoryView":135
  * 
@@ -23285,9 +24466,9 @@ static int __Pyx_InitCachedConstants(void) {
  *         self._format = format  # keep a reference to the byte string
  *         self.format = self._format
  */
-  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_n_s_ASCII); if (unlikely(!__pyx_tuple__9)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 135; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__9);
-  __Pyx_GIVEREF(__pyx_tuple__9);
+  __pyx_tuple__10 = PyTuple_Pack(1, __pyx_n_s_ASCII); if (unlikely(!__pyx_tuple__10)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 135; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__10);
+  __Pyx_GIVEREF(__pyx_tuple__10);
 
   /* "View.MemoryView":144
  * 
@@ -23296,9 +24477,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__10 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_shape_and_str); if (unlikely(!__pyx_tuple__10)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__10);
-  __Pyx_GIVEREF(__pyx_tuple__10);
+  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_shape_and_str); if (unlikely(!__pyx_tuple__11)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__11);
+  __Pyx_GIVEREF(__pyx_tuple__11);
 
   /* "View.MemoryView":172
  *             self.data = <char *>malloc(self.len)
@@ -23307,9 +24488,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *             if self.dtype_is_object:
  */
-  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_array_data); if (unlikely(!__pyx_tuple__11)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__11);
-  __Pyx_GIVEREF(__pyx_tuple__11);
+  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_array_data); if (unlikely(!__pyx_tuple__12)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__12);
+  __Pyx_GIVEREF(__pyx_tuple__12);
 
   /* "View.MemoryView":188
  *             bufmode = PyBUF_F_CONTIGUOUS | PyBUF_ANY_CONTIGUOUS
@@ -23318,9 +24499,9 @@ static int __Pyx_InitCachedConstants(void) {
  *         info.buf = self.data
  *         info.len = self.len
  */
-  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_kp_s_Can_only_create_a_buffer_that_is); if (unlikely(!__pyx_tuple__12)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__12);
-  __Pyx_GIVEREF(__pyx_tuple__12);
+  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_s_Can_only_create_a_buffer_that_is); if (unlikely(!__pyx_tuple__13)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__13);
+  __Pyx_GIVEREF(__pyx_tuple__13);
 
   /* "View.MemoryView":447
  *             result = struct.unpack(self.view.format, bytesitem)
@@ -23329,9 +24510,9 @@ static int __Pyx_InitCachedConstants(void) {
  *         else:
  *             if len(self.view.format) == 1:
  */
-  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_s_Unable_to_convert_item_to_object); if (unlikely(!__pyx_tuple__13)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 447; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__13);
-  __Pyx_GIVEREF(__pyx_tuple__13);
+  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_s_Unable_to_convert_item_to_object); if (unlikely(!__pyx_tuple__14)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 447; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__14);
+  __Pyx_GIVEREF(__pyx_tuple__14);
 
   /* "View.MemoryView":523
  *             if self.view.strides == NULL:
@@ -23340,9 +24521,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *             return tuple([stride for stride in self.view.strides[:self.view.ndim]])
  */
-  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_s_Buffer_view_does_not_expose_stri); if (unlikely(!__pyx_tuple__14)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 523; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__14);
-  __Pyx_GIVEREF(__pyx_tuple__14);
+  __pyx_tuple__15 = PyTuple_Pack(1, __pyx_kp_s_Buffer_view_does_not_expose_stri); if (unlikely(!__pyx_tuple__15)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 523; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__15);
+  __Pyx_GIVEREF(__pyx_tuple__15);
 
   /* "View.MemoryView":531
  *         def __get__(self):
@@ -23351,12 +24532,12 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *             return tuple([suboffset for suboffset in self.view.suboffsets[:self.view.ndim]])
  */
-  __pyx_tuple__15 = PyTuple_New(1); if (unlikely(!__pyx_tuple__15)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 531; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__15);
+  __pyx_tuple__16 = PyTuple_New(1); if (unlikely(!__pyx_tuple__16)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 531; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__16);
   __Pyx_INCREF(__pyx_int_neg_1);
   __Pyx_GIVEREF(__pyx_int_neg_1);
-  PyTuple_SET_ITEM(__pyx_tuple__15, 0, __pyx_int_neg_1);
-  __Pyx_GIVEREF(__pyx_tuple__15);
+  PyTuple_SET_ITEM(__pyx_tuple__16, 0, __pyx_int_neg_1);
+  __Pyx_GIVEREF(__pyx_tuple__16);
 
   /* "View.MemoryView":640
  *         if item is Ellipsis:
@@ -23365,9 +24546,9 @@ static int __Pyx_InitCachedConstants(void) {
  *                 seen_ellipsis = True
  *             else:
  */
-  __pyx_slice__16 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__16)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 640; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_slice__16);
-  __Pyx_GIVEREF(__pyx_slice__16);
+  __pyx_slice__17 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__17)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 640; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_slice__17);
+  __Pyx_GIVEREF(__pyx_slice__17);
 
   /* "View.MemoryView":643
  *                 seen_ellipsis = True
@@ -23376,9 +24557,9 @@ static int __Pyx_InitCachedConstants(void) {
  *             have_slices = True
  *         else:
  */
-  __pyx_slice__17 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__17)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_slice__17);
-  __Pyx_GIVEREF(__pyx_slice__17);
+  __pyx_slice__18 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__18)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_slice__18);
+  __Pyx_GIVEREF(__pyx_slice__18);
 
   /* "View.MemoryView":654
  *     nslices = ndim - len(result)
@@ -23387,9 +24568,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *     return have_slices or nslices, tuple(result)
  */
-  __pyx_slice__18 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__18)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 654; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_slice__18);
-  __Pyx_GIVEREF(__pyx_slice__18);
+  __pyx_slice__19 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__19)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 654; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_slice__19);
+  __Pyx_GIVEREF(__pyx_slice__19);
 
   /* "View.MemoryView":661
  *     for suboffset in suboffsets[:ndim]:
@@ -23398,9 +24579,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__19 = PyTuple_Pack(1, __pyx_kp_s_Indirect_dimensions_not_supporte); if (unlikely(!__pyx_tuple__19)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 661; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__19);
-  __Pyx_GIVEREF(__pyx_tuple__19);
+  __pyx_tuple__20 = PyTuple_Pack(1, __pyx_kp_s_Indirect_dimensions_not_supporte); if (unlikely(!__pyx_tuple__20)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 661; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__20);
+  __Pyx_GIVEREF(__pyx_tuple__20);
 
   /* "View.MemoryView":278
  *         return self.name
@@ -23409,9 +24590,9 @@ static int __Pyx_InitCachedConstants(void) {
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")
  */
-  __pyx_tuple__20 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct_or_indirect); if (unlikely(!__pyx_tuple__20)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 278; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__20);
-  __Pyx_GIVEREF(__pyx_tuple__20);
+  __pyx_tuple__21 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct_or_indirect); if (unlikely(!__pyx_tuple__21)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 278; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__21);
+  __Pyx_GIVEREF(__pyx_tuple__21);
 
   /* "View.MemoryView":279
  * 
@@ -23420,9 +24601,9 @@ static int __Pyx_InitCachedConstants(void) {
  * cdef indirect = Enum("<strided and indirect>")
  * 
  */
-  __pyx_tuple__21 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct); if (unlikely(!__pyx_tuple__21)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__21);
-  __Pyx_GIVEREF(__pyx_tuple__21);
+  __pyx_tuple__22 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct); if (unlikely(!__pyx_tuple__22)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__22);
+  __Pyx_GIVEREF(__pyx_tuple__22);
 
   /* "View.MemoryView":280
  * cdef generic = Enum("<strided and direct or indirect>")
@@ -23431,9 +24612,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__22 = PyTuple_Pack(1, __pyx_kp_s_strided_and_indirect); if (unlikely(!__pyx_tuple__22)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__22);
-  __Pyx_GIVEREF(__pyx_tuple__22);
+  __pyx_tuple__23 = PyTuple_Pack(1, __pyx_kp_s_strided_and_indirect); if (unlikely(!__pyx_tuple__23)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__23);
+  __Pyx_GIVEREF(__pyx_tuple__23);
 
   /* "View.MemoryView":283
  * 
@@ -23442,9 +24623,9 @@ static int __Pyx_InitCachedConstants(void) {
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")
  * 
  */
-  __pyx_tuple__23 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_direct); if (unlikely(!__pyx_tuple__23)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__23);
-  __Pyx_GIVEREF(__pyx_tuple__23);
+  __pyx_tuple__24 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_direct); if (unlikely(!__pyx_tuple__24)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__24);
+  __Pyx_GIVEREF(__pyx_tuple__24);
 
   /* "View.MemoryView":284
  * 
@@ -23453,9 +24634,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__24 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_indirect); if (unlikely(!__pyx_tuple__24)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__24);
-  __Pyx_GIVEREF(__pyx_tuple__24);
+  __pyx_tuple__25 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_indirect); if (unlikely(!__pyx_tuple__25)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__25);
+  __Pyx_GIVEREF(__pyx_tuple__25);
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -23660,7 +24841,7 @@ PyMODINIT_FUNC PyInit_cy(void)
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__20, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 278; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__21, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 278; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_XGOTREF(generic);
   __Pyx_DECREF_SET(generic, __pyx_t_1);
@@ -23674,7 +24855,7 @@ PyMODINIT_FUNC PyInit_cy(void)
  * cdef indirect = Enum("<strided and indirect>")
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__21, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__22, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_XGOTREF(strided);
   __Pyx_DECREF_SET(strided, __pyx_t_1);
@@ -23688,7 +24869,7 @@ PyMODINIT_FUNC PyInit_cy(void)
  * 
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__22, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__23, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_XGOTREF(indirect);
   __Pyx_DECREF_SET(indirect, __pyx_t_1);
@@ -23702,7 +24883,7 @@ PyMODINIT_FUNC PyInit_cy(void)
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__23, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__24, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_XGOTREF(contiguous);
   __Pyx_DECREF_SET(contiguous, __pyx_t_1);
@@ -23716,7 +24897,7 @@ PyMODINIT_FUNC PyInit_cy(void)
  * 
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__24, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__25, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_XGOTREF(indirect_contiguous);
   __Pyx_DECREF_SET(indirect_contiguous, __pyx_t_1);
@@ -24736,16 +25917,6 @@ static void __Pyx_WriteUnraisable(const char *name, CYTHON_UNUSED int clineno,
     if (nogil)
         PyGILState_Release(state);
 #endif
-}
-
-static void __Pyx_RaiseUnboundMemoryviewSliceNogil(const char *varname) {
-    #ifdef WITH_THREAD
-    PyGILState_STATE gilstate = PyGILState_Ensure();
-    #endif
-    __Pyx_RaiseUnboundLocalError(varname);
-    #ifdef WITH_THREAD
-    PyGILState_Release(gilstate);
-    #endif
 }
 
 #if PY_MAJOR_VERSION < 3
@@ -26229,6 +27400,28 @@ raise_neg_overflow:
     PyErr_SetString(PyExc_OverflowError,
         "can't convert negative value to Py_intptr_t");
     return (Py_intptr_t) -1;
+}
+
+static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dc_int(PyObject *obj) {
+    __Pyx_memviewslice result = { 0, 0, { 0 }, { 0 }, { 0 } };
+    __Pyx_BufFmt_StackElem stack[1];
+    int axes_specs[] = { (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_CONTIG) };
+    int retcode;
+    if (obj == Py_None) {
+        result.memview = (struct __pyx_memoryview_obj *) Py_None;
+        return result;
+    }
+    retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, __Pyx_IS_C_CONTIG,
+                                                 (PyBUF_C_CONTIGUOUS | PyBUF_FORMAT | PyBUF_WRITABLE), 1,
+                                                 &__Pyx_TypeInfo_int, stack,
+                                                 &result, obj);
+    if (unlikely(retcode == -1))
+        goto __pyx_fail;
+    return result;
+__pyx_fail:
+    result.memview = NULL;
+    result.data = NULL;
+    return result;
 }
 
 static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {

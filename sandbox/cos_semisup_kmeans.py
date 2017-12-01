@@ -1,5 +1,7 @@
+#! /usr/bin/env python
 # The following comment enables the use of utf-8 within the script.
 # -*- coding: utf-8 -*-
+
 
 import numpy as np
 import scipy as sp
@@ -98,8 +100,8 @@ init_centrs_arr = [0, 550, 1100]
 
 print "Running HMRF Kmeans"
 hkmeans = hks.HMRFKmeans(
-    k_clusters, must_lnk_con_arr, cannot_lnk_con_arr, init_centroids=None,
-    ml_wg=1.0, cl_wg=1.0, max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5,
+    k_clusters, must_lnk_con_arr, cannot_lnk_con_arr, init_centroids=init_centrs_arr,
+    ml_wg=1.0, cl_wg=1.0, max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=0.9,
     d_params=None, norm_part=False, globj_norm=False
 )
 

@@ -104,18 +104,21 @@ class HMRFKmeans(object):
         # init_clstr_sets_lst = FarFirstCosntraint()
         # init_clstr_sets_lst = ConsolidateAL()
         clstr_tags_arr = np.empty(x_data.shape[0], dtype=np.int)
-        clstr_tags_arr[:] = 100
+        clstr_tags_arr[:] = 999999
 
         # Selecting a random set of centroids if not any given as class initialization argument.
-        if self.init_centroids is None:
-            # Pick k random vector from the x_data set as initial centroids. Where k is equals...
-            # ...the number of self.k_clusters.
-            self.init_centroids = np.random.randint(0, self.k_clusters, size=x_data.shape[0])
 
-        # Setting one index of the x_data set per expected cluster as the initialization centroid...
-        # ...for this cluster.
-        for i, idx in enumerate(self.init_centroids):
-            clstr_tags_arr[idx] = i
+        # Pick k random vector from the x_data set as initial centroids. Where k is equals...
+        # ...the number of self.k_clusters.
+        if self.init_centroids is None:
+            self.init_centroids = np.random.randint(0, self.k_clusters, size=x_data.shape[0])
+        else:
+            # Setting one index of the x_data set per expected cluster as the initialization centroid...
+            # ...for this cluster.
+            for i, idx in enumerate(self.init_centroids):
+                clstr_tags_arr[idx] = i
+
+        print self.init_centroids
 
         # ########
         # # The above might actually change based on the initialization set-up will be used.
@@ -133,7 +136,10 @@ class HMRFKmeans(object):
         # )
 
         # Calculating the initial Centroids of the assumed hyper-shperical clusters.
+        print clstr_tags_arr
         mu_arr = vop.mean_cosA(x_data, clstr_tags_arr, self.A, self.k_clusters)
+
+        print np.array(mu_arr)
 
         # EM algorithm execution.
 
@@ -164,13 +170,13 @@ class HMRFKmeans(object):
             # NOTE: Normalizing the samples under the new parameters values in order to reducing...
             # ...the cosine distance calculation to a simple dot products calculation in the...
             # ...rest of the EM (sub)steps.
-            x_data = np.divide(
-                x_data,
-                np.sqrt(
-                    np.diag(np.dot(np.dot(x_data, self.A[:, :].toarray()), x_data.T)),
-                    dtype=np.float
-                ).reshape(x_data.shape[0], 1)
-            )
+            # x_data = np.divide(
+            #     x_data,
+            #     np.sqrt(
+            #         np.diag(np.dot(np.dot(x_data, self.A[:, :].toarray()), x_data.T)),
+            #         dtype=np.float
+            #     ).reshape(x_data.shape[0], 1)
+            # )
 
             # Calculating Global JObjective function.
             glob_jobj = self.GlobJObjCosA(x_data, mu_arr, clstr_tags_arr)
@@ -297,9 +303,9 @@ class HMRFKmeans(object):
 
         # Calculating the cosine distance of the specific x_i from the cluster's centroid.
         # --------------------------------------------------------------------------------
-        dist = vop.cos2Da_rows(
-            mu_arr, x_data, self.A, np.array([mu_i], dtype=np.int), np.array([x_idx], dtype=np.int)
-        )
+        dist = vop.cosDa_vect(mu_arr[mu_i], x_data[x_idx], self.A)
+
+        # print np.array(mu_arr), x_data[x_idx]
 
         # Calculating Must-Link violation cost.
         # -------------------------------------
@@ -317,13 +323,16 @@ class HMRFKmeans(object):
             # Getting the indeces of must-link than are not in the cluster as they should have been.
             viol_idxs = self.mst_lnk_idxs[:, ~np.in1d(mliz_with_smpli, clstr_idx_arr)]
 
-            if viol_idxs.shape[0]:
+            if np.size(viol_idxs):
 
                 # Calculating all pairs of violation costs for must-link constraints.
                 # NOTE: The violation cost is equivalent to the parametrized Cosine distance...
                 # ...which here is equivalent to the (1 - dot product) because the data points...
                 # ...assumed to be normalized by the parametrized Norm of the vectors.
-                viol_costs = vop.cos2Da_rows(x_data, x_data, self.A, x_idx, viol_idxs[1])
+                print np.asarray(viol_idxs[1])
+                viol_costs = vop.cosDa_v2r(
+                    x_data[x_idx], x_data, self.A, np.array(viol_idxs[1])
+                )
 
                 # Sum-ing up Weighted violations costs.
                 ml_cost = np.sum(viol_costs)
@@ -346,14 +355,16 @@ class HMRFKmeans(object):
             # ...have been.
             viol_idxs = self.cnt_lnk_idxs[:, np.in1d(cliz_with_smpli, clstr_idx_arr)]
 
-            if viol_idxs.shape[0]:
+            if np.size(viol_idxs):
 
                 # Calculating all pairs of violation costs for cannot-link constraints.
                 # NOTE: The violation cost is equivalent to the maxCosine distance minus the...
                 # ...parametrized Cosine distance of the vectors. Since MaxCosine is 1 then...
                 # ...maxCosineDistance - CosineDistance == CosineSimilarty of the vectors....
                 # ...Again the data points assumed to be normalized.
-                viol_costs = vop.cos2Da_rows(x_data, x_data, self.A, x_idx, viol_idxs[1])
+                viol_costs = vop.cosDa_v2r(
+                    x_data[x_idx], x_data, self.A, np.array(viol_idxs[1])
+                )
                 # viol_costs = np.ones_like(viol_costs) - viol_costs
 
                 # Sum-ing up Weighted violations costs.
@@ -373,7 +384,7 @@ class HMRFKmeans(object):
             (2 * self.A.shape[0] * np.log(self.ray_sigma))
 
         # NOTE!
-        # params_pdf = 0.0
+        params_pdf = 0.0
 
         # Calculating the log normalization function of the von Mises-Fisher distribution...
         # ...NOTE: Only for this cluster i.e. this vMF of the whole PDF mixture.
@@ -435,7 +446,7 @@ class HMRFKmeans(object):
             # Calculating all pairs of violation costs for must-link constraints.
             # NOTE: The violation cost is equivalent to the maxCosine distance.
             viol_costs = np.sum(
-                vop.cos2Da_rows(x_data, x_data, self.A, viol_ipairs[0], viol_ipairs[1])
+                vop.cosDa_rows(x_data, x_data, self.A, viol_ipairs[0], viol_ipairs[1])
             )
 
             # if viol_costs.shape[0] > 1:
@@ -477,7 +488,7 @@ class HMRFKmeans(object):
             # Calculating all pairs of violation costs for cannot-link constraints.
             # NOTE: The violation cost is equivalent to the maxCosine distance
             viol_costs = np.sum(
-                vop.cos2Da_rows(x_data, x_data, self.A, viol_ipairs[0], viol_ipairs[1])
+                vop.cosDa_rows(x_data, x_data, self.A, viol_ipairs[0], viol_ipairs[1])
             )
 
             # if viol_costs.shape[0] > 1:
@@ -617,7 +628,7 @@ class HMRFKmeans(object):
                 cl_clstr_comn_idxs[0].nonzero()[0]
             )
 
-            cl_viol_pairs.append(elf.cnt_lnk_idxs[:, cl_viol_columns])
+            cl_viol_pairs.append(self.cnt_lnk_idxs[:, cl_viol_columns])
 
             #
             # cl_cnt += float(viol_ipairs.shape[0])
@@ -626,9 +637,9 @@ class HMRFKmeans(object):
         # ...for each cluster.
         # ---------------------------------------------------------------------------------
         xm_pderiv = vop.pDerivative_seq_one2many(
-            A, mu_arr, x_data, np.arange(mu_arr.shape[0]), clstr_tags_arr
+            A, mu_arr, x_data, np.arange(mu_arr.shape[0], dtype=np.int32), clstr_tags_arr
         )
-
+        print "pass"
         # Calculating Must-Link violation cost.
         # -------------------------------------
         if ml_viol_pairs:
