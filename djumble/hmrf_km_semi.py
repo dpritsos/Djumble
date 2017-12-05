@@ -629,8 +629,8 @@ class HMRFKmeans(object):
 
             # Calculating the partial derivatives of all pairs of violations for...
             # ...must-link constraints.
-            mlcost_pderiv = vop.pDerivative_seq_rows(
-                A, x_data, x_data, np.array(ml_viol_pairs[0]), np.array(ml_viol_pairs[1])
+            mlcost_pderiv = vop.pDerivative_seq_rpairs(
+                A, x_data, self.ml_viol_pairs, np.array(ml_viol_pairs[1])
             )
 
         # Calculating Cannot-Link violation cost.
@@ -642,8 +642,8 @@ class HMRFKmeans(object):
 
             # Calculating all pairs of violation costs for cannot-link constraints.
             # NOTE: The violation cost is equivalent to the maxCosine distance
-            clcost_pderiv = vop.pDerivative_seq_rows(
-                A, x_data, x_data, np.array(cl_viol_pairs[0]), np.array(cl_viol_pairs[1])
+            clcost_pderiv = vop.pDerivative_seq_rpairs(
+                A, x_data, self.ml_viol_pairs, np.array(cl_viol_pairs[1])
             )
 
         # Averaging EVERYTHING

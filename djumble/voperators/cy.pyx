@@ -109,9 +109,9 @@ cpdef double [:, ::1] cosDa(double [:, ::1] m1, double [:, ::1] m2, double[::1] 
 
 
 cpdef double [::1] cosDa_rpairs(double [:, ::1] m,
-                                   double[::1] A,
-                                   cnp.intp_t [:, ::1] mrp,
-                                   cnp.intp_t [::1] mrp_r):
+                                double[::1] A,
+                                cnp.intp_t [:, ::1] mrp,
+                                cnp.intp_t [::1] mrp_r):
 
     cdef:
         # Matrix index variables.
@@ -722,31 +722,28 @@ cdef inline double pDerivative(double x1_ai,
     return res_a
 
 
-cpdef double [::1] pDerivative_seq_rows(double[::1] A,
-                                        double [:, ::1] m1,
-                                        double [:, ::1] m2,
-                                        cnp.intp_t [::1] m1r,
-                                        cnp.intp_t [::1] m2r):
-
+cpdef double [::1] pDerivative_seq_rpairs(double[::1] A,
+                                          double [:, ::1] m,
+                                          cnp.intp_t [:, ::1] mrp,
+                                          cnp.intp_t [::1] mrp_r):
     cdef:
         # Matrix index variables.
-        Py_ssize_t im1, im2, a1, i, j, i2, j2, i3, j3, k, k2
+        Py_ssize_t im, i, j, i2, i3, ai, j2
 
         # Matrices dimentions intilized variables.
         Py_ssize_t a_I = A.shape[0]
-        Py_ssize_t m1r_I = m1r.shape[0]
-        Py_ssize_t m2r_I = m2r.shape[0]
+        Py_ssize_t mrpr_I = mrp_r.shape[0]
 
         # MemoryViews for the cython arrays used for sotring the temporary and...
         # ...to be retured results.
-        double [::1] m1_norms
-        double [::1] m2_norms
+        double [::1] v1_norms
+        double [::1] v2_norms
         double [::1] a_pDz_vect
         double x1x2dota
 
     # Creating the temporary cython arrays.
-    m1_norms = cvarray(shape=(m1r_I,), itemsize=sizeof(double), format="d")
-    m2_norms = cvarray(shape=(m2r_I,), itemsize=sizeof(double), format="d")
+    m1_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")
+    m2_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")
     a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
 
     # The following operatsion taking place in the non-gil and parallel...
@@ -756,63 +753,48 @@ cpdef double [::1] pDerivative_seq_rows(double[::1] A,
         # Initilising temporary storage arrays. NOTE: This is a mandatory process because as...
         # ...in C garbage values can case floating point overflow, thus, peculiar results...
         # ...like NaN or incorrect calculatons.
-        for im1 in range(m1r_I):
-            m1_norms[im1] = 0.0
+        for im in range(mrpr_I):
+            v1_norms[im] = 0.0
+            v2_norms[im] = 0.0
 
-        for im2 in range(m2r_I):
-            m2_norms[im2] = 0.0
+        for im in range(a_I):
+            a_pDz_vect[im] = 0.0
 
-        for a1 in range(a_I):
-            a_pDz_vect[a1] = 0.0
-
-        # Calculating the Norms for the first matrix.
-        for i in prange(m1r_I, schedule='guided'):
+        # Calculating the Norms for the Vector Pairs.
+        for i in prange(mrpr_I, schedule='guided'):
 
             # Calculating Sum.
-            for j in range(a_I):
-                m1_norms[i] += m1[m1r[i], j] * m1[m1r[i], j] * A[j]
+            for j in range(m_J):
+                v0_norms[i] += m[mrp[mrp_r[i], 0], j] * m[mrp[mrp_r[i], 0], j] * A[j]
+                v1_norms[i] += m[mrp[mrp_r[i], 1], j] * m[mrp[mrp_r[i], 1], j] * A[j]
 
             # Calculating the Square root of the sum
-            m1_norms[i] = sqrt(m1_norms[i])
+            v0_norms[i] = sqrt(v0_norms[i])
+            v1_norms[i] = sqrt(v1_norms[i])
 
             # Preventing Division by Zero.
-            if m1_norms[i] == 0.0:
-                m1_norms[i] = 0.000001
-
-
-        # Calculating the Norms for the second matrix.
-        for i2 in prange(m2r_I, schedule='guided'):
-
-            # Calculating distorted dot product.
-            for j2 in range(a_I):
-                m2_norms[i2] += m2[m2r[i2], j2] * m2[m2r[i2], j2] * A[j2]
-
-            # Calculating the Square root of the sum
-            m2_norms[i2] = sqrt(m2_norms[i2])
-
-            # Preventing Division by Zero.
-            if m2_norms[i2] == 0.0:
-                m2_norms[i2] = 0.000001
+            if v0_norms[i] == 0.0:
+                v0_norms[i] = 0.000001
+            if v1_norms[i] == 0.0:
+                v1_norms[i] = 0.000001
 
 
         # Calculating the Sequence of partial derivatives for every A array elements.
         # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
-        for j3 in prange(a_I, schedule='guided'):
+        for j2 in prange(a_I, schedule='guided'):
 
-            for i3 in range(m1r_I):
+            for i2 in range(m1r_I):
 
-                for k in range(m2r_I):
+                # Calculating the elemnt-wise sum of products distorted by A.
+                # Note: x1x2dota = vdot(dot1d_ds(x1, A), x2)
+                x1x2dota = 0.0
+                for ai in range(a_I):
+                    x1x2dota = x1x2dota + m1[m1r[i2], ai] * A[ai] * m2[m2r[i3], ai]
 
-                    # Calculating the elemnt-wise sum of products distorted by A.
-                    # Note: x1x2dota = vdot(dot1d_ds(x1, A), x2)
-                    x1x2dota = 0.0
-                    for k2 in range(a_I):
-                        x1x2dota = x1x2dota + m1[m1r[i3], k2] * A[k2] * m2[m2r[k], k2]
-
-                    # Calulating partial derivative for elemnt a_i of A array.
-                    a_pDz_vect[j3] = pDerivative(
-                        m1[i3, j3], m2[k, j3], m1_norms[i3], m2_norms[k], x1x2dota
-                    )
+                # Calulating partial derivative for elemnt a_i of A array.
+                a_pDz_vect[j2] = pDerivative(
+                    m1[i2, j2], m2[k, j2], m1_norms[i2], m2_norms[k], x1x2dota
+                )
 
     return a_pDz_vect
 
