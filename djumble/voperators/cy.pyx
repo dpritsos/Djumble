@@ -736,8 +736,8 @@ cpdef double [::1] pDerivative_seq_rpairs(double[::1] A,
 
         # MemoryViews for the cython arrays used for sotring the temporary and...
         # ...to be retured results.
+        double [::1] v0_norms
         double [::1] v1_norms
-        double [::1] v2_norms
         double [::1] a_pDz_vect
         double x1x2dota
 
@@ -754,8 +754,8 @@ cpdef double [::1] pDerivative_seq_rpairs(double[::1] A,
         # ...in C garbage values can case floating point overflow, thus, peculiar results...
         # ...like NaN or incorrect calculatons.
         for im in range(mrpr_I):
+            v0_norms[im] = 0.0
             v1_norms[im] = 0.0
-            v2_norms[im] = 0.0
 
         for im in range(a_I):
             a_pDz_vect[im] = 0.0
@@ -764,7 +764,7 @@ cpdef double [::1] pDerivative_seq_rpairs(double[::1] A,
         for i in prange(mrpr_I, schedule='guided'):
 
             # Calculating Sum.
-            for j in range(m_J):
+            for j in range(a_I):
                 v0_norms[i] += m[mrp[mrp_r[i], 0], j] * m[mrp[mrp_r[i], 0], j] * A[j]
                 v1_norms[i] += m[mrp[mrp_r[i], 1], j] * m[mrp[mrp_r[i], 1], j] * A[j]
 
@@ -783,17 +783,18 @@ cpdef double [::1] pDerivative_seq_rpairs(double[::1] A,
         # NOTE: The m2 matrix is expected to be NON-trasposed but it will treated like it.
         for j2 in prange(a_I, schedule='guided'):
 
-            for i2 in range(m1r_I):
+            for i2 in range(mrpr_I):
 
                 # Calculating the elemnt-wise sum of products distorted by A.
                 # Note: x1x2dota = vdot(dot1d_ds(x1, A), x2)
                 x1x2dota = 0.0
                 for ai in range(a_I):
-                    x1x2dota = x1x2dota + m1[m1r[i2], ai] * A[ai] * m2[m2r[i3], ai]
+                    x1x2dota = x1x2dota + m[mrp[mrp_r[i2], 0], ai] * A[ai] * m[mrp[mrp_r[i2], 1], ai]
 
                 # Calulating partial derivative for elemnt a_i of A array.
                 a_pDz_vect[j2] = pDerivative(
-                    m1[i2, j2], m2[k, j2], m1_norms[i2], m2_norms[k], x1x2dota
+                    m[mrp[mrp_r[i2], 0], j2], m[mrp[mrp_r[i2], 0], j2],
+                    v0_norms[i2], v1_norms[i2], x1x2dota
                 )
 
     return a_pDz_vect
