@@ -742,8 +742,8 @@ cpdef double [::1] pDerivative_seq_rpairs(double[::1] A,
         double x1x2dota
 
     # Creating the temporary cython arrays.
-    m1_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")
-    m2_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")
+    v0_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")
+    v1_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")
     a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
 
     # The following operatsion taking place in the non-gil and parallel...

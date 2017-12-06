@@ -1447,9 +1447,6 @@ static void __Pyx_WriteUnraisable(const char *name, int clineno,
                                   int lineno, const char *filename,
                                   int full_traceback, int nogil);
 
-/* None.proto */
-static void __Pyx_RaiseUnboundMemoryviewSliceNogil(const char *varname);
-
 /* RaiseException.proto */
 static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
 
@@ -8164,8 +8161,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
   __Pyx_memviewslice __pyx_v_v1_norms = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_a_pDz_vect = { 0, 0, { 0 }, { 0 }, { 0 } };
   double __pyx_v_x1x2dota;
-  CYTHON_UNUSED PyObject *__pyx_v_m1_norms = NULL;
-  CYTHON_UNUSED PyObject *__pyx_v_m2_norms = NULL;
   __Pyx_memviewslice __pyx_r = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -8262,8 +8257,8 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
   /* "Djumble/djumble/voperators/cy.pyx":745
  * 
  *     # Creating the temporary cython arrays.
- *     m1_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
- *     m2_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")
+ *     v0_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
+ *     v1_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")
  *     a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
  */
   __pyx_t_1 = __Pyx_PyDict_NewPresized(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 745, __pyx_L1_error)
@@ -8285,13 +8280,17 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
   __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 745, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_m1_norms = __pyx_t_3;
-  __pyx_t_3 = 0;
+  __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_3);
+  if (unlikely(!__pyx_t_4.memview)) __PYX_ERR(0, 745, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_v_v0_norms = __pyx_t_4;
+  __pyx_t_4.memview = NULL;
+  __pyx_t_4.data = NULL;
 
   /* "Djumble/djumble/voperators/cy.pyx":746
  *     # Creating the temporary cython arrays.
- *     m1_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")
- *     m2_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
+ *     v0_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")
+ *     v1_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  *     a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")
  * 
  */
@@ -8314,12 +8313,16 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
   __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_array_type), __pyx_empty_tuple, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 746, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v_m2_norms = __pyx_t_2;
-  __pyx_t_2 = 0;
+  __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_2);
+  if (unlikely(!__pyx_t_4.memview)) __PYX_ERR(0, 746, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_v_v1_norms = __pyx_t_4;
+  __pyx_t_4.memview = NULL;
+  __pyx_t_4.data = NULL;
 
   /* "Djumble/djumble/voperators/cy.pyx":747
- *     m1_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")
- *     m2_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")
+ *     v0_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")
+ *     v1_norms = cvarray(shape=(mrpr_I,), itemsize=sizeof(double), format="d")
  *     a_pDz_vect = cvarray(shape=(a_I,), itemsize=sizeof(double), format="d")             # <<<<<<<<<<<<<<
  * 
  *     # The following operatsion taking place in the non-gil and parallel...
@@ -8365,10 +8368,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
       #endif
       /*try:*/ {
         {
-            const char *__pyx_parallel_filename = NULL; int __pyx_parallel_lineno = 0, __pyx_parallel_clineno = 0;
-            PyObject *__pyx_parallel_exc_type = NULL, *__pyx_parallel_exc_value = NULL, *__pyx_parallel_exc_tb = NULL;
-            int __pyx_parallel_why;
-            __pyx_parallel_why = 0;
             #if ((defined(__APPLE__) || defined(__OSX__)) && (defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && (__GNUC_MINOR__ > 95)))))
                 #undef likely
                 #undef unlikely
@@ -8376,15 +8375,9 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
                 #define unlikely(x) (x)
             #endif
             #ifdef _OPENMP
-            #pragma omp parallel private(__pyx_v_im) private(__pyx_t_10, __pyx_t_11, __pyx_t_12, __pyx_t_13, __pyx_t_14, __pyx_t_15, __pyx_t_16, __pyx_t_17, __pyx_t_18, __pyx_t_19, __pyx_t_20, __pyx_t_21, __pyx_t_22, __pyx_t_23, __pyx_t_24, __pyx_t_25, __pyx_t_26, __pyx_t_27, __pyx_t_28, __pyx_t_29, __pyx_t_30, __pyx_t_31, __pyx_t_32, __pyx_t_33, __pyx_t_34, __pyx_t_35, __pyx_t_36, __pyx_t_37, __pyx_t_38, __pyx_t_39, __pyx_t_40, __pyx_t_41, __pyx_t_42, __pyx_t_43, __pyx_t_44, __pyx_t_45, __pyx_t_46, __pyx_t_47, __pyx_t_48, __pyx_t_49, __pyx_t_5, __pyx_t_50, __pyx_t_51, __pyx_t_52, __pyx_t_53, __pyx_t_54, __pyx_t_55, __pyx_t_56, __pyx_t_57, __pyx_t_58, __pyx_t_59, __pyx_t_6, __pyx_t_60, __pyx_t_61, __pyx_t_62, __pyx_t_63, __pyx_t_64, __pyx_t_65, __pyx_t_66, __pyx_t_67, __pyx_t_68, __pyx_t_69, __pyx_t_7, __pyx_t_70, __pyx_t_71, __pyx_t_8, __pyx_t_9) private(__pyx_filename, __pyx_lineno, __pyx_clineno) shared(__pyx_parallel_why, __pyx_parallel_exc_type, __pyx_parallel_exc_value, __pyx_parallel_exc_tb)
+            #pragma omp parallel private(__pyx_v_im) private(__pyx_t_10, __pyx_t_11, __pyx_t_12, __pyx_t_13, __pyx_t_14, __pyx_t_15, __pyx_t_16, __pyx_t_17, __pyx_t_18, __pyx_t_19, __pyx_t_20, __pyx_t_21, __pyx_t_22, __pyx_t_23, __pyx_t_24, __pyx_t_25, __pyx_t_26, __pyx_t_27, __pyx_t_28, __pyx_t_29, __pyx_t_30, __pyx_t_31, __pyx_t_32, __pyx_t_33, __pyx_t_34, __pyx_t_35, __pyx_t_36, __pyx_t_37, __pyx_t_38, __pyx_t_39, __pyx_t_40, __pyx_t_41, __pyx_t_42, __pyx_t_43, __pyx_t_44, __pyx_t_45, __pyx_t_46, __pyx_t_47, __pyx_t_48, __pyx_t_49, __pyx_t_5, __pyx_t_50, __pyx_t_51, __pyx_t_52, __pyx_t_53, __pyx_t_54, __pyx_t_55, __pyx_t_56, __pyx_t_57, __pyx_t_58, __pyx_t_59, __pyx_t_6, __pyx_t_60, __pyx_t_61, __pyx_t_62, __pyx_t_63, __pyx_t_64, __pyx_t_65, __pyx_t_66, __pyx_t_67, __pyx_t_68, __pyx_t_69, __pyx_t_7, __pyx_t_70, __pyx_t_71, __pyx_t_8, __pyx_t_9)
             #endif /* _OPENMP */
             {
-                #ifdef _OPENMP
-                #ifdef WITH_THREAD
-                PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                #endif
-                Py_BEGIN_ALLOW_THREADS
-                #endif /* _OPENMP */
                 /* Initialize private variables to invalid values */
                 __pyx_v_im = ((Py_ssize_t)0xbad0bad0);
 
@@ -8406,7 +8399,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  *             v1_norms[im] = 0.0
  * 
  */
-                  if (unlikely(!__pyx_v_v0_norms.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("v0_norms"); __PYX_ERR(0, 757, __pyx_L8_error) }
                   __pyx_t_7 = __pyx_v_im;
                   if (__pyx_t_7 < 0) __pyx_t_7 += __pyx_v_v0_norms.shape[0];
                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v0_norms.data) + __pyx_t_7)) )) = 0.0;
@@ -8418,7 +8410,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  * 
  *         for im in range(a_I):
  */
-                  if (unlikely(!__pyx_v_v1_norms.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("v1_norms"); __PYX_ERR(0, 758, __pyx_L8_error) }
                   __pyx_t_8 = __pyx_v_im;
                   if (__pyx_t_8 < 0) __pyx_t_8 += __pyx_v_v1_norms.shape[0];
                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v1_norms.data) + __pyx_t_8)) )) = 0.0;
@@ -8457,12 +8448,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
                 __pyx_t_5 = __pyx_v_mrpr_I;
                 if (1 == 0) abort();
                 {
-                    Py_ssize_t __pyx_parallel_temp0 = ((Py_ssize_t)0xbad0bad0);
-                    Py_ssize_t __pyx_parallel_temp1 = ((Py_ssize_t)0xbad0bad0);
-                    const char *__pyx_parallel_filename = NULL; int __pyx_parallel_lineno = 0, __pyx_parallel_clineno = 0;
-                    PyObject *__pyx_parallel_exc_type = NULL, *__pyx_parallel_exc_value = NULL, *__pyx_parallel_exc_tb = NULL;
-                    int __pyx_parallel_why;
-                    __pyx_parallel_why = 0;
                     __pyx_t_10 = (__pyx_t_5 - 0 + 1 - 1/abs(1)) / 1;
                     if (__pyx_t_10 > 0)
                     {
@@ -8470,7 +8455,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
                         #pragma omp for firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) lastprivate(__pyx_v_j) schedule(guided)
                         #endif /* _OPENMP */
                         for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_10; __pyx_t_6++){
-                            if (__pyx_parallel_why < 2)
                             {
                                 __pyx_v_i = (Py_ssize_t)(0 + 1 * __pyx_t_6);
                                 /* Initialize private variables to invalid values */
@@ -8516,7 +8500,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
                                   if (__pyx_t_22 < 0) __pyx_t_22 += __pyx_v_m.shape[1];
                                   __pyx_t_23 = __pyx_v_j;
                                   if (__pyx_t_23 < 0) __pyx_t_23 += __pyx_v_A.shape[0];
-                                  if (unlikely(!__pyx_v_v0_norms.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("v0_norms"); __PYX_ERR(0, 768, __pyx_L16_error) }
                                   __pyx_t_24 = __pyx_v_i;
                                   if (__pyx_t_24 < 0) __pyx_t_24 += __pyx_v_v0_norms.shape[0];
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v0_norms.data) + __pyx_t_24)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m.data + __pyx_t_16 * __pyx_v_m.strides[0]) )) + __pyx_t_17)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m.data + __pyx_t_21 * __pyx_v_m.strides[0]) )) + __pyx_t_22)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_23)) ))));
@@ -8550,7 +8533,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
                                   if (__pyx_t_34 < 0) __pyx_t_34 += __pyx_v_m.shape[1];
                                   __pyx_t_35 = __pyx_v_j;
                                   if (__pyx_t_35 < 0) __pyx_t_35 += __pyx_v_A.shape[0];
-                                  if (unlikely(!__pyx_v_v1_norms.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("v1_norms"); __PYX_ERR(0, 769, __pyx_L16_error) }
                                   __pyx_t_36 = __pyx_v_i;
                                   if (__pyx_t_36 < 0) __pyx_t_36 += __pyx_v_v1_norms.shape[0];
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v1_norms.data) + __pyx_t_36)) )) += (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m.data + __pyx_t_28 * __pyx_v_m.strides[0]) )) + __pyx_t_29)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m.data + __pyx_t_33 * __pyx_v_m.strides[0]) )) + __pyx_t_34)) )))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_A.data) + __pyx_t_35)) ))));
@@ -8563,10 +8545,8 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  *             v1_norms[i] = sqrt(v1_norms[i])
  * 
  */
-                                if (unlikely(!__pyx_v_v0_norms.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("v0_norms"); __PYX_ERR(0, 772, __pyx_L16_error) }
                                 __pyx_t_37 = __pyx_v_i;
                                 if (__pyx_t_37 < 0) __pyx_t_37 += __pyx_v_v0_norms.shape[0];
-                                if (unlikely(!__pyx_v_v0_norms.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("v0_norms"); __PYX_ERR(0, 772, __pyx_L16_error) }
                                 __pyx_t_38 = __pyx_v_i;
                                 if (__pyx_t_38 < 0) __pyx_t_38 += __pyx_v_v0_norms.shape[0];
                                 *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v0_norms.data) + __pyx_t_38)) )) = sqrt((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v0_norms.data) + __pyx_t_37)) ))));
@@ -8578,10 +8558,8 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  * 
  *             # Preventing Division by Zero.
  */
-                                if (unlikely(!__pyx_v_v1_norms.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("v1_norms"); __PYX_ERR(0, 773, __pyx_L16_error) }
                                 __pyx_t_39 = __pyx_v_i;
                                 if (__pyx_t_39 < 0) __pyx_t_39 += __pyx_v_v1_norms.shape[0];
-                                if (unlikely(!__pyx_v_v1_norms.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("v1_norms"); __PYX_ERR(0, 773, __pyx_L16_error) }
                                 __pyx_t_40 = __pyx_v_i;
                                 if (__pyx_t_40 < 0) __pyx_t_40 += __pyx_v_v1_norms.shape[0];
                                 *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v1_norms.data) + __pyx_t_40)) )) = sqrt((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v1_norms.data) + __pyx_t_39)) ))));
@@ -8593,7 +8571,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  *                 v0_norms[i] = 0.000001
  *             if v1_norms[i] == 0.0:
  */
-                                if (unlikely(!__pyx_v_v0_norms.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("v0_norms"); __PYX_ERR(0, 776, __pyx_L16_error) }
                                 __pyx_t_41 = __pyx_v_i;
                                 if (__pyx_t_41 < 0) __pyx_t_41 += __pyx_v_v0_norms.shape[0];
                                 __pyx_t_42 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v0_norms.data) + __pyx_t_41)) ))) == 0.0) != 0);
@@ -8606,7 +8583,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  *             if v1_norms[i] == 0.0:
  *                 v1_norms[i] = 0.000001
  */
-                                  if (unlikely(!__pyx_v_v0_norms.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("v0_norms"); __PYX_ERR(0, 777, __pyx_L16_error) }
                                   __pyx_t_43 = __pyx_v_i;
                                   if (__pyx_t_43 < 0) __pyx_t_43 += __pyx_v_v0_norms.shape[0];
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v0_norms.data) + __pyx_t_43)) )) = 0.000001;
@@ -8627,7 +8603,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  *                 v1_norms[i] = 0.000001
  * 
  */
-                                if (unlikely(!__pyx_v_v1_norms.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("v1_norms"); __PYX_ERR(0, 778, __pyx_L16_error) }
                                 __pyx_t_44 = __pyx_v_i;
                                 if (__pyx_t_44 < 0) __pyx_t_44 += __pyx_v_v1_norms.shape[0];
                                 __pyx_t_42 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v1_norms.data) + __pyx_t_44)) ))) == 0.0) != 0);
@@ -8640,7 +8615,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  * 
  * 
  */
-                                  if (unlikely(!__pyx_v_v1_norms.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("v1_norms"); __PYX_ERR(0, 779, __pyx_L16_error) }
                                   __pyx_t_45 = __pyx_v_i;
                                   if (__pyx_t_45 < 0) __pyx_t_45 += __pyx_v_v1_norms.shape[0];
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v1_norms.data) + __pyx_t_45)) )) = 0.000001;
@@ -8653,63 +8627,8 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  * 
  */
                                 }
-                                goto __pyx_L23;
-                                __pyx_L16_error:;
-                                {
-                                    #ifdef WITH_THREAD
-                                    PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                                    #endif
-                                    #ifdef _OPENMP
-                                    #pragma omp flush(__pyx_parallel_exc_type)
-                                    #endif /* _OPENMP */
-                                    if (!__pyx_parallel_exc_type) {
-                                      __Pyx_ErrFetchWithState(&__pyx_parallel_exc_type, &__pyx_parallel_exc_value, &__pyx_parallel_exc_tb);
-                                      __pyx_parallel_filename = __pyx_filename; __pyx_parallel_lineno = __pyx_lineno; __pyx_parallel_clineno = __pyx_clineno;
-                                      __Pyx_GOTREF(__pyx_parallel_exc_type);
-                                    }
-                                    #ifdef WITH_THREAD
-                                    __Pyx_PyGILState_Release(__pyx_gilstate_save);
-                                    #endif
-                                }
-                                __pyx_parallel_why = 4;
-                                goto __pyx_L22;
-                                __pyx_L22:;
-                                #ifdef _OPENMP
-                                #pragma omp critical(__pyx_parallel_lastprivates0)
-                                #endif /* _OPENMP */
-                                {
-                                    __pyx_parallel_temp0 = __pyx_v_i;
-                                    __pyx_parallel_temp1 = __pyx_v_j;
-                                }
-                                __pyx_L23:;
-                                #ifdef _OPENMP
-                                #pragma omp flush(__pyx_parallel_why)
-                                #endif /* _OPENMP */
                             }
                         }
-                    }
-                    if (__pyx_parallel_exc_type) {
-                      /* This may have been overridden by a continue, break or return in another thread. Prefer the error. */
-                      __pyx_parallel_why = 4;
-                    }
-                    if (__pyx_parallel_why) {
-                      __pyx_v_i = __pyx_parallel_temp0;
-                      __pyx_v_j = __pyx_parallel_temp1;
-                      switch (__pyx_parallel_why) {
-                            case 4:
-                        {
-                            #ifdef WITH_THREAD
-                            PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                            #endif
-                            __Pyx_GIVEREF(__pyx_parallel_exc_type);
-                            __Pyx_ErrRestoreWithState(__pyx_parallel_exc_type, __pyx_parallel_exc_value, __pyx_parallel_exc_tb);
-                            __pyx_filename = __pyx_parallel_filename; __pyx_lineno = __pyx_parallel_lineno; __pyx_clineno = __pyx_parallel_clineno;
-                            #ifdef WITH_THREAD
-                            __Pyx_PyGILState_Release(__pyx_gilstate_save);
-                            #endif
-                        }
-                        goto __pyx_L8_error;
-                      }
                     }
                 }
 
@@ -8723,14 +8642,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
                 __pyx_t_10 = __pyx_v_a_I;
                 if (1 == 0) abort();
                 {
-                    Py_ssize_t __pyx_parallel_temp0 = ((Py_ssize_t)0xbad0bad0);
-                    Py_ssize_t __pyx_parallel_temp1 = ((Py_ssize_t)0xbad0bad0);
-                    Py_ssize_t __pyx_parallel_temp2 = ((Py_ssize_t)0xbad0bad0);
-                    double __pyx_parallel_temp3 = ((double)__PYX_NAN());
-                    const char *__pyx_parallel_filename = NULL; int __pyx_parallel_lineno = 0, __pyx_parallel_clineno = 0;
-                    PyObject *__pyx_parallel_exc_type = NULL, *__pyx_parallel_exc_value = NULL, *__pyx_parallel_exc_tb = NULL;
-                    int __pyx_parallel_why;
-                    __pyx_parallel_why = 0;
                     __pyx_t_5 = (__pyx_t_10 - 0 + 1 - 1/abs(1)) / 1;
                     if (__pyx_t_5 > 0)
                     {
@@ -8738,7 +8649,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
                         #pragma omp for lastprivate(__pyx_v_ai) lastprivate(__pyx_v_i2) firstprivate(__pyx_v_j2) lastprivate(__pyx_v_j2) lastprivate(__pyx_v_x1x2dota) schedule(guided)
                         #endif /* _OPENMP */
                         for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6++){
-                            if (__pyx_parallel_why < 2)
                             {
                                 __pyx_v_j2 = (Py_ssize_t)(0 + 1 * __pyx_t_6);
                                 /* Initialize private variables to invalid values */
@@ -8844,10 +8754,8 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
  *                 )
  * 
  */
-                                  if (unlikely(!__pyx_v_v0_norms.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("v0_norms"); __PYX_ERR(0, 797, __pyx_L26_error) }
                                   __pyx_t_69 = __pyx_v_i2;
                                   if (__pyx_t_69 < 0) __pyx_t_69 += __pyx_v_v0_norms.shape[0];
-                                  if (unlikely(!__pyx_v_v1_norms.memview)) { __Pyx_RaiseUnboundMemoryviewSliceNogil("v1_norms"); __PYX_ERR(0, 797, __pyx_L26_error) }
                                   __pyx_t_70 = __pyx_v_i2;
                                   if (__pyx_t_70 < 0) __pyx_t_70 += __pyx_v_v1_norms.shape[0];
 
@@ -8862,126 +8770,10 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
                                   if (__pyx_t_71 < 0) __pyx_t_71 += __pyx_v_a_pDz_vect.shape[0];
                                   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a_pDz_vect.data) + __pyx_t_71)) )) = __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m.data + __pyx_t_62 * __pyx_v_m.strides[0]) )) + __pyx_t_63)) ))), (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_m.data + __pyx_t_67 * __pyx_v_m.strides[0]) )) + __pyx_t_68)) ))), (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v0_norms.data) + __pyx_t_69)) ))), (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_v1_norms.data) + __pyx_t_70)) ))), __pyx_v_x1x2dota);
                                 }
-                                goto __pyx_L33;
-                                __pyx_L26_error:;
-                                {
-                                    #ifdef WITH_THREAD
-                                    PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                                    #endif
-                                    #ifdef _OPENMP
-                                    #pragma omp flush(__pyx_parallel_exc_type)
-                                    #endif /* _OPENMP */
-                                    if (!__pyx_parallel_exc_type) {
-                                      __Pyx_ErrFetchWithState(&__pyx_parallel_exc_type, &__pyx_parallel_exc_value, &__pyx_parallel_exc_tb);
-                                      __pyx_parallel_filename = __pyx_filename; __pyx_parallel_lineno = __pyx_lineno; __pyx_parallel_clineno = __pyx_clineno;
-                                      __Pyx_GOTREF(__pyx_parallel_exc_type);
-                                    }
-                                    #ifdef WITH_THREAD
-                                    __Pyx_PyGILState_Release(__pyx_gilstate_save);
-                                    #endif
-                                }
-                                __pyx_parallel_why = 4;
-                                goto __pyx_L32;
-                                __pyx_L32:;
-                                #ifdef _OPENMP
-                                #pragma omp critical(__pyx_parallel_lastprivates1)
-                                #endif /* _OPENMP */
-                                {
-                                    __pyx_parallel_temp0 = __pyx_v_ai;
-                                    __pyx_parallel_temp1 = __pyx_v_i2;
-                                    __pyx_parallel_temp2 = __pyx_v_j2;
-                                    __pyx_parallel_temp3 = __pyx_v_x1x2dota;
-                                }
-                                __pyx_L33:;
-                                #ifdef _OPENMP
-                                #pragma omp flush(__pyx_parallel_why)
-                                #endif /* _OPENMP */
                             }
                         }
                     }
-                    if (__pyx_parallel_exc_type) {
-                      /* This may have been overridden by a continue, break or return in another thread. Prefer the error. */
-                      __pyx_parallel_why = 4;
-                    }
-                    if (__pyx_parallel_why) {
-                      __pyx_v_ai = __pyx_parallel_temp0;
-                      __pyx_v_i2 = __pyx_parallel_temp1;
-                      __pyx_v_j2 = __pyx_parallel_temp2;
-                      __pyx_v_x1x2dota = __pyx_parallel_temp3;
-                      switch (__pyx_parallel_why) {
-                            case 4:
-                        {
-                            #ifdef WITH_THREAD
-                            PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                            #endif
-                            __Pyx_GIVEREF(__pyx_parallel_exc_type);
-                            __Pyx_ErrRestoreWithState(__pyx_parallel_exc_type, __pyx_parallel_exc_value, __pyx_parallel_exc_tb);
-                            __pyx_filename = __pyx_parallel_filename; __pyx_lineno = __pyx_parallel_lineno; __pyx_clineno = __pyx_parallel_clineno;
-                            #ifdef WITH_THREAD
-                            __Pyx_PyGILState_Release(__pyx_gilstate_save);
-                            #endif
-                        }
-                        goto __pyx_L8_error;
-                      }
-                    }
                 }
-                goto __pyx_L35;
-                __pyx_L8_error:;
-                {
-                    #ifdef WITH_THREAD
-                    PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                    #endif
-                    #ifdef _OPENMP
-                    #pragma omp flush(__pyx_parallel_exc_type)
-                    #endif /* _OPENMP */
-                    if (!__pyx_parallel_exc_type) {
-                      __Pyx_ErrFetchWithState(&__pyx_parallel_exc_type, &__pyx_parallel_exc_value, &__pyx_parallel_exc_tb);
-                      __pyx_parallel_filename = __pyx_filename; __pyx_parallel_lineno = __pyx_lineno; __pyx_parallel_clineno = __pyx_clineno;
-                      __Pyx_GOTREF(__pyx_parallel_exc_type);
-                    }
-                    #ifdef WITH_THREAD
-                    __Pyx_PyGILState_Release(__pyx_gilstate_save);
-                    #endif
-                }
-                __pyx_parallel_why = 4;
-                goto __pyx_L35;
-                __pyx_L35:;
-                #ifdef _OPENMP
-                Py_END_ALLOW_THREADS
-                #else
-{
-#ifdef WITH_THREAD
-                PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                #endif
-                #endif /* _OPENMP */
-                /* Clean up any temporaries */
-                #ifdef WITH_THREAD
-                __Pyx_PyGILState_Release(__pyx_gilstate_save);
-                #endif
-                #ifndef _OPENMP
-}
-#endif /* _OPENMP */
-            }
-            if (__pyx_parallel_exc_type) {
-              /* This may have been overridden by a continue, break or return in another thread. Prefer the error. */
-              __pyx_parallel_why = 4;
-            }
-            if (__pyx_parallel_why) {
-              switch (__pyx_parallel_why) {
-                    case 4:
-                {
-                    #ifdef WITH_THREAD
-                    PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                    #endif
-                    __Pyx_GIVEREF(__pyx_parallel_exc_type);
-                    __Pyx_ErrRestoreWithState(__pyx_parallel_exc_type, __pyx_parallel_exc_value, __pyx_parallel_exc_tb);
-                    __pyx_filename = __pyx_parallel_filename; __pyx_lineno = __pyx_parallel_lineno; __pyx_clineno = __pyx_parallel_clineno;
-                    #ifdef WITH_THREAD
-                    __Pyx_PyGILState_Release(__pyx_gilstate_save);
-                    #endif
-                }
-                goto __pyx_L4_error;
-              }
             }
         }
         #if ((defined(__APPLE__) || defined(__OSX__)) && (defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && (__GNUC_MINOR__ > 95)))))
@@ -9006,13 +8798,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
           Py_BLOCK_THREADS
           #endif
           goto __pyx_L5;
-        }
-        __pyx_L4_error: {
-          #ifdef WITH_THREAD
-          __Pyx_FastGIL_Forget();
-          Py_BLOCK_THREADS
-          #endif
-          goto __pyx_L1_error;
         }
         __pyx_L5:;
       }
@@ -9056,8 +8841,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_pDerivative
   __PYX_XDEC_MEMVIEW(&__pyx_v_v0_norms, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_v_v1_norms, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_v_a_pDz_vect, 1);
-  __Pyx_XDECREF(__pyx_v_m1_norms);
-  __Pyx_XDECREF(__pyx_v_m2_norms);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
@@ -28146,17 +27929,6 @@ static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject 
     if (nogil)
         PyGILState_Release(state);
 #endif
-}
-
-/* None */
-  static void __Pyx_RaiseUnboundMemoryviewSliceNogil(const char *varname) {
-    #ifdef WITH_THREAD
-    PyGILState_STATE gilstate = PyGILState_Ensure();
-    #endif
-    __Pyx_RaiseUnboundLocalError(varname);
-    #ifdef WITH_THREAD
-    PyGILState_Release(gilstate);
-    #endif
 }
 
 /* RaiseException */

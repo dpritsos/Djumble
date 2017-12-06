@@ -113,8 +113,8 @@ class HMRFKmeans(object):
         if self.init_centroids is None:
             self.init_centroids = np.random.randint(0, self.k_clusters, size=x_data.shape[0])
         else:
-            # Setting one index of the x_data set per expected cluster as the initialization centroid...
-            # ...for this cluster.
+            # Setting one index of the x_data set per expected cluster as the initialization...
+            # ...centroid for this cluster.
             for i, idx in enumerate(self.init_centroids):
                 clstr_tags_arr[idx] = i
 
@@ -308,14 +308,18 @@ class HMRFKmeans(object):
         # -------------------------------------
         ml_cost = 0.0
 
-        # Getting the index(s) of the must-link-constraints index-table of this data sample.
-        if x_idx not in clstr_idx_arr:
-            ml_voil_tests = np.isin(self.ml_pair_idxs, np.hstack((x_idx, clstr_idx_arr)))
-        else:
-            ml_voil_tests = np.isin(self.ml_pair_idxs, clstr_idx_arr)
+        # Selecting ml_pairs containing the x_idx.
+        mlvpairs_wth_xidx = self.ml_pair_idxs[np.where((self.ml_pair_idxs == x_idx))[0]]
 
+        # Selecting must-link vionlation where the x_idx is included
+        if x_idx not in clstr_idx_arr:
+            ml_voil_tests = np.isin(mlvpairs_wth_xidx, np.hstack((x_idx, clstr_idx_arr)))
+        else:
+            ml_voil_tests = np.isin(mlvpairs_wth_xidx, clstr_idx_arr)
+
+        # Getting the must-link-constraints violations.
         mlv_pair_rows = np.where(
-            (np.logical_or(ml_voil_tests[:, 0], ml_voil_tests[:, 1]) == False)
+            (np.logical_and(ml_voil_tests[:, 0], ml_voil_tests[:, 1]) == False)
         )[0]
 
         mlv_cnts = np.size(mlv_pair_rows)
@@ -338,11 +342,14 @@ class HMRFKmeans(object):
         # ---------------------------------------
         cl_cost = 0.0
 
+        # Selecting cl_pairs containing the x_idx.
+        clvpairs_wth_xidx = self.cl_pair_idxs[np.where((self.cl_pair_idxs == x_idx))[0]]
+
         # Getting the index(s) of the cannot-link-constraints index-table of this data sample.
         if x_idx not in clstr_idx_arr:
-            cl_voil_tests = np.isin(self.cl_pair_idxs, np.hstack((x_idx, clstr_idx_arr)))
+            cl_voil_tests = np.isin(clvpairs_wth_xidx, np.hstack((x_idx, clstr_idx_arr)))
         else:
-            cl_voil_tests = np.isin(self.cl_pair_idxs, clstr_idx_arr)
+            cl_voil_tests = np.isin(clvpairs_wth_xidx, clstr_idx_arr)
 
         clv_pair_rows = np.where(
             (np.logical_and(cl_voil_tests[:, 0], cl_voil_tests[:, 1]) == True)
@@ -566,52 +573,26 @@ class HMRFKmeans(object):
             # Getting the indeces for the i cluster.
             clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
             clstr_idxs_arrz_lst.append(clstr_idxs_arr)
-
-            #
             # smpls_cnt += float(clstr_idxs_arr.shape[0])
-
-            # Getting the must-link left side of the pair constraints, i.e. the row indeces...
-            # ...of the constraints matrix that are in the cluster's set of indeces.
-            in_clstr_ml_rows = np.in1d(self.ml_pair_idxs[0], clstr_idxs_arr)
 
             # Getting the indeces of must-link than are not in the cluster as they should...
             # ...have been.
+            ml_voil_tests = np.isin(self.ml_pair_idxs, clstr_idxs_arr)
+            mlv_pair_rows = np.where(
+                (np.logical_or(ml_voil_tests[:, 0], ml_voil_tests[:, 1]) == False)
+            )[0]
 
-            ml_clstr_comn_idxs = np.in1d(
-                self.ml_pair_idxs, clstr_idxs_arr
-            ).reshape(2, self.ml_pair_idxs.shape[1])
-
-            ml_viol_columns = np.intersect1d(
-                np.where(ml_clstr_comn_idxs[0] != ml_clstr_comn_idxs[1])[0],
-                np.hstack(
-                    (ml_clstr_comn_idxs[0].nonzero()[0], ml_clstr_comn_idxs[1].nonzero()[0])
-                )
-            )
-
-            ml_viol_pairs.append(self.ml_pair_idxs[:, ml_viol_columns])
-
-            #
+            ml_viol_pairs.append(mlv_pair_rows)
             # ml_cnt += float(viol_ipairs.shape[0])
 
             # Getting the cannot-link left side of the pair constraints, i.e. the row indeces...
             # ...of the constraints matrix that are in the cluster's set of indeces.
-            in_clstr_cl_rows = np.in1d(self.cl_pair_idxs[0], clstr_idxs_arr)
+            cl_voil_tests = np.isin(self.cl_pair_idxs, clstr_idxs_arr)
+            clv_pair_rows = np.where(
+                (np.logical_and(cl_voil_tests[:, 0], cl_voil_tests[:, 1]) == True)
+            )[0]
 
-            # Getting the indeces of cannot-link than are in the cluster as they shouldn't...
-            # ...have been.
-
-            cl_clstr_comn_idxs = np.in1d(
-                self.cl_pair_idxs, clstr_idxs_arr
-            ).reshape(2, self.cl_pair_idxs.shape[1])
-
-            cl_viol_columns = np.intersect1d(
-                np.where(cl_clstr_comn_idxs[0] == cl_clstr_comn_idxs[1])[0],
-                cl_clstr_comn_idxs[0].nonzero()[0]
-            )
-
-            cl_viol_pairs.append(self.cl_pair_idxs[:, cl_viol_columns])
-
-            #
+            cl_viol_pairs.append(clv_pair_rows)
             # cl_cnt += float(viol_ipairs.shape[0])
 
         # Calculating the partial derivatives of each parameter for all cluster's member...
@@ -623,6 +604,7 @@ class HMRFKmeans(object):
 
         # Calculating Must-Link violation cost.
         # -------------------------------------
+
         ml_viol_pairs = np.hstack(ml_viol_pairs)
 
         if np.size(ml_viol_pairs):
@@ -630,7 +612,7 @@ class HMRFKmeans(object):
             # Calculating the partial derivatives of all pairs of violations for...
             # ...must-link constraints.
             mlcost_pderiv = vop.pDerivative_seq_rpairs(
-                A, x_data, self.ml_viol_pairs, np.array(ml_viol_pairs[1])
+                A, x_data, self.ml_pair_idxs, ml_viol_pairs
             )
 
         # Calculating Cannot-Link violation cost.
@@ -643,7 +625,7 @@ class HMRFKmeans(object):
             # Calculating all pairs of violation costs for cannot-link constraints.
             # NOTE: The violation cost is equivalent to the maxCosine distance
             clcost_pderiv = vop.pDerivative_seq_rpairs(
-                A, x_data, self.ml_viol_pairs, np.array(cl_viol_pairs[1])
+                A, x_data, self.cl_pair_idxs, cl_viol_pairs
             )
 
         # Averaging EVERYTHING
