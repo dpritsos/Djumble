@@ -335,7 +335,7 @@ class HMRFKmeans(object):
             )
 
             # Sum-ing up Weighted violations costs.
-            ml_cost = np.sum(viol_costs) / float(mlv_cnts)
+            ml_cost = np.sum(viol_costs)  # / float(mlv_cnts)
             # ml_cost = np.sum(np.multiply(self.ml_wg, viol_costs)) <--- PORPER
 
         # Calculating Cannot-Link violation cost.
@@ -364,13 +364,13 @@ class HMRFKmeans(object):
             # ...parametrized Cosine distance of the vectors. Since MaxCosine is 1 then...
             # ...maxCosineDistance - CosineDistance == CosineSimilarty of the vectors....
             # ...Again the data points assumed to be normalized.
-            viol_costs = np.sum(
+            viol_costs = 1.0 - np.array(
                 vop.cosDa_rpairs(
                     x_data, self.A, self.cl_pair_idxs, clv_pair_rows
                 )
             )
 
-            cl_cost = np.sum(viol_costs) / float(clv_cnts)
+            cl_cost = np.sum(viol_costs)  # / float(clv_cnts)
             # cl_cost = np.sum(np.multiply(self.cl_wg, viol_costs)) <--- PORPER
 
             # Equivalent to: (in a for-loop implementation)
@@ -386,7 +386,7 @@ class HMRFKmeans(object):
             (2 * self.A.shape[0] * np.log(self.ray_sigma))
 
         # NOTE!
-        params_pdf = 0.0
+        # params_pdf = 0.0
 
         # Calculating the log normalization function of the von Mises-Fisher distribution...
         # ...NOTE: Only for this cluster i.e. this vMF of the whole PDF mixture.
@@ -401,7 +401,7 @@ class HMRFKmeans(object):
         # Calculating and returning the J-Objective value for this cluster's set-up.
         if np.size(clv_pair_rows):
             print np.array(dist), ml_cost, cl_cost,  params_pdf,  norm_part_value
-        return dist + ml_cost + cl_cost - params_pdf + norm_part_value
+        return dist + ml_cost + cl_cost + params_pdf + norm_part_value
 
     def GlobJObjCosA(self, x_data, mu_arr, clstr_tags_arr):
         """
@@ -435,6 +435,9 @@ class HMRFKmeans(object):
             )[0]
 
             # ml_cnt += float(viol_ipairs.shape[0])
+            print "for mu=", i
+            print np.size(mlv_pair_rows)
+            print mlv_pair_rows
 
             if np.size(mlv_pair_rows):
 
@@ -454,7 +457,7 @@ class HMRFKmeans(object):
                 # Sum-ing up Weighted violations costs. NOTE: Here the matrix multiply...
                 # ...should be element-by-element.
 
-                ml_cost += np.sum(np.multiply(self.ml_wg, viol_costs))
+                ml_cost += self.ml_wg * viol_costs
 
             # Calculating Cannot-Link violation cost.
             # ---------------------------------------
@@ -462,6 +465,7 @@ class HMRFKmeans(object):
             # Getting the cannot-link left side of the pair constraints, i.e. the row indeces...
             # ...of the constraints matrix that are in the cluster's set of indeces.
             cl_voil_tests = np.isin(self.cl_pair_idxs, clstr_idxs_arr)
+            print cl_voil_tests
             clv_pair_rows = np.where(
                 (np.logical_and(cl_voil_tests[:, 0], cl_voil_tests[:, 1]) == True)
             )[0]
@@ -472,7 +476,7 @@ class HMRFKmeans(object):
 
                 # Calculating all pairs of violation costs for cannot-link constraints.
                 # NOTE: The violation cost is equivalent to the maxCosine distance
-                viol_costs = np.sum(
+                viol_costs = 1.0 - np.array(
                     vop.cosDa_rpairs(
                         x_data, self.A, self.cl_pair_idxs, clv_pair_rows
                     )
@@ -487,7 +491,7 @@ class HMRFKmeans(object):
                 # ...should be element-by-element. NOTE#2: We are getting only the lower...
                 # ...triangle because we need the cosine distance of the constraints pairs...
                 # ...only ones.
-                cl_cost += np.sum(np.multiply(self.cl_wg, viol_costs))
+                cl_cost += self.cl_wg * np.sum(viol_costs)
 
         """
         # Averaging EVERYTHING.
@@ -501,15 +505,15 @@ class HMRFKmeans(object):
         """
 
         # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
-        if self.globj_norm:
-            sum1, sum2 = 0.0, 0.0
-            for a in np.diag(self.A[:, :].toarray()):
-                sum1 += np.log(a)
-                sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
-            params_pdf = sum1 - sum2 -\
-                (2 * np.diag(self.A[:, :].toarray()).shape[0] * np.log(self.ray_sigma))
-        else:
-            params_pdf = 0.0
+        # if self.globj_norm:
+        sum1, sum2 = 0.0, 0.0
+        for a in self.A:
+            sum1 += np.log(a)
+            sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
+        params_pdf = sum1 - sum2 -\
+            (2 * self.A.shape[0] * np.log(self.ray_sigma))
+        # else:
+        #     params_pdf = 0.0
 
         # Calculating the log normalization function of the von Mises-Fisher distribution...
         # ...of the whole mixture.
@@ -529,7 +533,7 @@ class HMRFKmeans(object):
 
         # Calculating and returning the Global J-Objective value for the current Spherical...
         # ...vMF-Mixture set-up.
-        return sum_d + ml_cost + cl_cost - params_pdf + norm_part_value
+        return sum_d + ml_cost + cl_cost + params_pdf + norm_part_value
 
     def UpdateDistorParams(self, A, x_data, mu_arr, clstr_tags_arr):
         """ Update Distortion Parameters: This function is updating the whole set of the distortion

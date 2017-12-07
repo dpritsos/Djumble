@@ -105,7 +105,7 @@ init_centrs_arr = [0, 550, 1100]
 print "Running HMRF Kmeans"
 hkmeans = hks.HMRFKmeans(
     k_clusters, must_lnk_con_arr, cannot_lnk_con_arr, init_centroids=init_centrs_arr,
-    ml_wg=1.0, cl_wg=1.0, max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=0.9,
+    ml_wg=1.0, cl_wg=1.0, max_iter=300, cvg=0.001, lrn_rate=0.003, ray_sigma=0.5,
     d_params=None, norm_part=False, globj_norm=False
 )
 
@@ -116,21 +116,31 @@ res = hkmeans.fit(copy.deepcopy(x_data_2d_arr))
 
 # res = ckmeans_arr.fit(x_data_2d_arr, np.array([50]))
 
-print len(res[1]), np.in1d(-9, res[1]), np.in1d(30, res[1])
+print res[1]
+print hkmeans.get_params()
 
+clstr_neigh = dict()
+for idx, mu_idx in enumerate(res[1]):
 
-for mu_idx, clstr_idxs in enumerate(res[1]):
+    if mu_idx in clstr_neigh:
+        clstr_neigh[mu_idx].append(idx)
+    else:
+        clstr_neigh[mu_idx] = [idx]
 
-    print mu_idx+1, len(clstr_idxs), np.sort(clstr_idxs)
+    print mu_idx, idx
+
+print clstr_neigh
+
+"""
 
     for xy in x_data_2d_arr[list(clstr_idxs)]:
-        plt.text(xy[0], xy[1], str(mu_idx+1), color='red', fontsize=15)
+        plt.text(xy[0], xy[1], str(mu_idx), color='red', fontsize=15)
     # plt.plot(x_data_2d_arr2, '^')
     # plt.plot(x_data_2d_arr3, '>')
 
 plt.show()
 
-"""
+
 for mu_idx, mu in enumerate(res[0]):
 
     clstr_idxs = np.where(res[1] == mu_idx)[0]
