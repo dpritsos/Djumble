@@ -3065,7 +3065,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa(__Pyx
                                   /* "Djumble/djumble/voperators/cy.pyx":106
  * 
  *                 # Getting Cosine Distance.
- *                 csdis_vect[i3, j3] =  acos(csdis_vect[i3, j3]) / pi             # <<<<<<<<<<<<<<
+ *                 csdis_vect[i3, j3] =  2 * acos(csdis_vect[i3, j3]) / pi             # <<<<<<<<<<<<<<
  * 
  *     return csdis_vect
  */
@@ -3077,7 +3077,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa(__Pyx
                                   __pyx_t_55 = __pyx_v_j3;
                                   if (__pyx_t_54 < 0) __pyx_t_54 += __pyx_v_csdis_vect.shape[0];
                                   if (__pyx_t_55 < 0) __pyx_t_55 += __pyx_v_csdis_vect.shape[1];
-                                  *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_54 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_55)) )) = (acos((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_52 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_53)) )))) / __pyx_v_pi);
+                                  *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_54 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_55)) )) = ((2.0 * acos((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_52 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_53)) ))))) / __pyx_v_pi);
                                 }
                             }
                         }
@@ -3113,7 +3113,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa(__Pyx
   }
 
   /* "Djumble/djumble/voperators/cy.pyx":108
- *                 csdis_vect[i3, j3] =  acos(csdis_vect[i3, j3]) / pi
+ *                 csdis_vect[i3, j3] =  2 * acos(csdis_vect[i3, j3]) / pi
  * 
  *     return csdis_vect             # <<<<<<<<<<<<<<
  * 
@@ -3830,7 +3830,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_rpair
                                   /* "Djumble/djumble/voperators/cy.pyx":182
  * 
  *                 # Getting Cosine Distance.
- *                 csdis_vect[i2] =  acos(csdis_vect[i2]) / pi             # <<<<<<<<<<<<<<
+ *                 csdis_vect[i2] =  2 * acos(csdis_vect[i2]) / pi             # <<<<<<<<<<<<<<
  * 
  *     return csdis_vect
  */
@@ -3838,7 +3838,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_rpair
                                   if (__pyx_t_62 < 0) __pyx_t_62 += __pyx_v_csdis_vect.shape[0];
                                   __pyx_t_63 = __pyx_v_i2;
                                   if (__pyx_t_63 < 0) __pyx_t_63 += __pyx_v_csdis_vect.shape[0];
-                                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_csdis_vect.data) + __pyx_t_63)) )) = (acos((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_csdis_vect.data) + __pyx_t_62)) )))) / __pyx_v_pi);
+                                  *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_csdis_vect.data) + __pyx_t_63)) )) = ((2.0 * acos((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_csdis_vect.data) + __pyx_t_62)) ))))) / __pyx_v_pi);
                                 }
                             }
                         }
@@ -3874,7 +3874,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_rpair
   }
 
   /* "Djumble/djumble/voperators/cy.pyx":184
- *                 csdis_vect[i2] =  acos(csdis_vect[i2]) / pi
+ *                 csdis_vect[i2] =  2 * acos(csdis_vect[i2]) / pi
  * 
  *     return csdis_vect             # <<<<<<<<<<<<<<
  * 
@@ -4501,7 +4501,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_v2r(_
                                 /* "Djumble/djumble/voperators/cy.pyx":259
  * 
  *             # Getting Cosine Distance.
- *             csdis_vect[i2] =  acos(csdis_vect[i2]) / pi             # <<<<<<<<<<<<<<
+ *             csdis_vect[i2] =  2 * acos(csdis_vect[i2]) / pi             # <<<<<<<<<<<<<<
  * 
  *     return csdis_vect
  */
@@ -4509,7 +4509,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_v2r(_
                                 if (__pyx_t_37 < 0) __pyx_t_37 += __pyx_v_csdis_vect.shape[0];
                                 __pyx_t_38 = __pyx_v_i2;
                                 if (__pyx_t_38 < 0) __pyx_t_38 += __pyx_v_csdis_vect.shape[0];
-                                *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_csdis_vect.data) + __pyx_t_38)) )) = (acos((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_csdis_vect.data) + __pyx_t_37)) )))) / __pyx_v_pi);
+                                *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_csdis_vect.data) + __pyx_t_38)) )) = ((2.0 * acos((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_csdis_vect.data) + __pyx_t_37)) ))))) / __pyx_v_pi);
                             }
                         }
                     }
@@ -4544,7 +4544,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_v2r(_
   }
 
   /* "Djumble/djumble/voperators/cy.pyx":261
- *             csdis_vect[i2] =  acos(csdis_vect[i2]) / pi
+ *             csdis_vect[i2] =  2 * acos(csdis_vect[i2]) / pi
  * 
  *     return csdis_vect             # <<<<<<<<<<<<<<
  * 
@@ -4939,11 +4939,11 @@ static double __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_vect(__Pyx_memvie
         /* "Djumble/djumble/voperators/cy.pyx":310
  * 
  *         # Getting Cosine Distance.
- *         csdis =  acos(csdis) / pi             # <<<<<<<<<<<<<<
+ *         csdis =  2 * acos(csdis) / pi             # <<<<<<<<<<<<<<
  * 
  *     return csdis
  */
-        __pyx_v_csdis = (acos(__pyx_v_csdis) / __pyx_v_pi);
+        __pyx_v_csdis = ((2.0 * acos(__pyx_v_csdis)) / __pyx_v_pi);
       }
 
       /* "Djumble/djumble/voperators/cy.pyx":283
@@ -4966,7 +4966,7 @@ static double __pyx_f_7Djumble_7djumble_10voperators_2cy_cosDa_vect(__Pyx_memvie
   }
 
   /* "Djumble/djumble/voperators/cy.pyx":312
- *         csdis =  acos(csdis) / pi
+ *         csdis =  2 * acos(csdis) / pi
  * 
  *     return csdis             # <<<<<<<<<<<<<<
  * 
@@ -5725,7 +5725,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosD(__Pyx_
                                   /* "Djumble/djumble/voperators/cy.pyx":401
  * 
  *                 # Getting Cosine Distance.
- *                 csdis_vect[i, j] =  acos(csdis_vect[i, j]) / pi             # <<<<<<<<<<<<<<
+ *                 csdis_vect[i, j] =  2 * acos(csdis_vect[i, j]) / pi             # <<<<<<<<<<<<<<
  * 
  *     return csdis_vect
  */
@@ -5737,7 +5737,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosD(__Pyx_
                                   __pyx_t_52 = __pyx_v_j;
                                   if (__pyx_t_51 < 0) __pyx_t_51 += __pyx_v_csdis_vect.shape[0];
                                   if (__pyx_t_52 < 0) __pyx_t_52 += __pyx_v_csdis_vect.shape[1];
-                                  *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_51 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_52)) )) = (acos((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_49 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_50)) )))) / __pyx_v_pi);
+                                  *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_51 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_52)) )) = ((2.0 * acos((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_csdis_vect.data + __pyx_t_49 * __pyx_v_csdis_vect.strides[0]) )) + __pyx_t_50)) ))))) / __pyx_v_pi);
                                 }
                             }
                         }
@@ -5773,7 +5773,7 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_cosD(__Pyx_
   }
 
   /* "Djumble/djumble/voperators/cy.pyx":403
- *                 csdis_vect[i, j] =  acos(csdis_vect[i, j]) / pi
+ *                 csdis_vect[i, j] =  2 * acos(csdis_vect[i, j]) / pi
  * 
  *     return csdis_vect             # <<<<<<<<<<<<<<
  * 

@@ -103,7 +103,7 @@ cpdef double [:, ::1] cosDa(double [:, ::1] m1, double [:, ::1] m2, double[::1] 
                 csdis_vect[i3, j3] = csdis_vect[i3, j3] / (m1_norms[i3] * m2_norms[j3])
 
                 # Getting Cosine Distance.
-                csdis_vect[i3, j3] =  acos(csdis_vect[i3, j3]) / pi
+                csdis_vect[i3, j3] =  2 * acos(csdis_vect[i3, j3]) / pi
 
     return csdis_vect
 
@@ -179,7 +179,7 @@ cpdef double [::1] cosDa_rpairs(double [:, ::1] m,
                 csdis_vect[i2] = csdis_vect[i2] / (v0_norms[i2] * v1_norms[i2])
 
                 # Getting Cosine Distance.
-                csdis_vect[i2] =  acos(csdis_vect[i2]) / pi
+                csdis_vect[i2] =  2 * acos(csdis_vect[i2]) / pi
 
     return csdis_vect
 
@@ -256,7 +256,7 @@ cpdef double [::1] cosDa_v2r(double [::1] v,
             csdis_vect[i2] = csdis_vect[i2] / (m_norms[i2] * v_norm)
 
             # Getting Cosine Distance.
-            csdis_vect[i2] =  acos(csdis_vect[i2]) / pi
+            csdis_vect[i2] =  2 * acos(csdis_vect[i2]) / pi
 
     return csdis_vect
 
@@ -307,7 +307,7 @@ cpdef double cosDa_vect(double [::1] v1, double [::1] v2, double[::1] A):
         csdis = csdis / (v1_norm * v2_norm)
 
         # Getting Cosine Distance.
-        csdis =  acos(csdis) / pi
+        csdis =  2 * acos(csdis) / pi
 
     return csdis
 
@@ -398,7 +398,7 @@ cpdef double [:, ::1] cosD(double [:, ::1] m1, double [:, ::1] m2):
                 csdis_vect[i, j] = csdis_vect[i, j] / (m1_norms[i] * m2_norms[j])
 
                 # Getting Cosine Distance.
-                csdis_vect[i, j] =  acos(csdis_vect[i, j]) / pi
+                csdis_vect[i, j] =  2 * acos(csdis_vect[i, j]) / pi
 
     return csdis_vect
 
