@@ -23,7 +23,7 @@ import djumble.hmrf_km_semi as hks
 
 
 
-test_dims = 10000
+test_dims = 1000
 
 print "Creating Sample"
 x_data_2d_arr1 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
@@ -105,7 +105,7 @@ init_centrs_arr = [0, 550, 1100]
 print "Running HMRF Kmeans"
 hkmeans = hks.HMRFKmeans(
     k_clusters, must_lnk_con_arr, cannot_lnk_con_arr, init_centroids=init_centrs_arr,
-    ml_wg=1.0, cl_wg=1.0, max_iter=30, cvg=0.001, lrn_rate=0.03, ray_sigma=0.5,
+    ml_wg=1.0, cl_wg=1.0, max_iter=100, cvg=0.001, lrn_rate=0.003, ray_sigma=2.5,
     d_params=None, norm_part=False, globj_norm=False
 )
 

@@ -481,7 +481,7 @@ class HMRFKmeans(object):
 
                 # Calculating all pairs of violation costs for cannot-link constraints.
                 # NOTE: The violation cost is equivalent to the maxCosine distance
-                viol_costs = 1.0 - np.array(
+                viol_costs = np.array(
                     vop.cosDa_rpairs(
                         x_data, self.A, self.cl_pair_idxs, clv_pair_rows
                     )
@@ -496,7 +496,8 @@ class HMRFKmeans(object):
                 # ...should be element-by-element. NOTE#2: We are getting only the lower...
                 # ...triangle because we need the cosine distance of the constraints pairs...
                 # ...only ones.
-                cl_cost += self.cl_wg * np.sum(viol_costs)
+                max_vcost = np.max(viol_costs)
+                cl_cost += self.cl_wg * np.sum(max_vcost - viol_costs)
 
         """
         # Averaging EVERYTHING.
@@ -566,7 +567,7 @@ class HMRFKmeans(object):
         print "In UpdateDistorParams..."
 
         # Initializing...
-        # new_A = np.zeros_like(A.data, dtype=np.float)
+        new_A = np.zeros_like(A, dtype=np.float)
         # xm_pderiv, mlcost_pderiv, clcost_pderiv = 0.0, 0.0, 0.0
         # smpls_cnt, ml_cnt, cl_cnt = 0.0, 0.0, 0.0
         mlcost_pderiv = np.zeros_like(A.data, dtype=np.float)
@@ -646,6 +647,9 @@ class HMRFKmeans(object):
         # if cl_cnt:
         #     clcost_pderiv = clcost_pderiv / cl_cnt
 
+        # Getting the Max CL cost distance partial derivative.
+        max_clc_pder = np.max(clcost_pderiv)
+
         # Updating Process.
         for i, a in enumerate(A):
 
@@ -662,14 +666,15 @@ class HMRFKmeans(object):
                 a_pderiv = 1e-15
 
             # Changing a diagonal value of the A cosine similarity parameters measure.
-            A[i] = a +\
+            print a_pderiv
+            new_A[i] = a +\
                 (
                     self.lrn_rate *
                     (
                         xm_pderiv[i]
                         + (self.ml_wg * mlcost_pderiv[i])
-                        + (self.cl_wg * clcost_pderiv[i]) # Check if +/-
-                        + a_pderiv # Check if +/-
+                        + (self.cl_wg * (max_clc_pder - clcost_pderiv[i]))  # Check if +/-
+                        - a_pderiv  # Check if +/-
                     )
                 )
 
@@ -705,7 +710,8 @@ class HMRFKmeans(object):
                 new_A[a_idx] = 1e-15
         """
 
-        # A[:, :] = sp.sparse.lil_matrix(np.diag(new_A))
+        A[:] = new_A[:]
+
 
         # Returning the A parameters.
         return A
