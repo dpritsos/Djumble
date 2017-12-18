@@ -240,6 +240,16 @@ class HMRFKmeans(object):
             # Calculating the new Clusters.
             for x_idx in np.random.permutation(np.arange(x_data.shape[0])):
 
+                """
+                # Looking for skipping indices that should not participate in clustering.
+                for i in range(self.neg_i4c_size):
+                    if self.neg_idxs4clstring[i] == x_idx:
+                        skip_smpl = True
+
+                # Skipping the indices should not participate in clustering.
+                if not skip_smpl:
+                """
+
                 # Setting the initial value for the previews J-Objective value.
                 last_jobj = np.Inf
 
@@ -516,8 +526,7 @@ class HMRFKmeans(object):
         for a in self.A:
             sum1 += np.log(a)
             sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
-        params_pdf = sum1 - sum2 -\
-            (2 * self.A.shape[0] * np.log(self.ray_sigma))
+        params_pdf = sum1 - sum2 - (2 * self.A.shape[0] * np.log(self.ray_sigma))
         # else:
         #     params_pdf = 0.0
 
