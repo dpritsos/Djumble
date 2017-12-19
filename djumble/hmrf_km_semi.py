@@ -6,6 +6,7 @@ import scipy as sp
 import scipy.stats as sps
 import random as rnd
 import scipy.special as special
+import warnings
 
 from .voperators import cy as vop
 
@@ -43,7 +44,7 @@ class HMRFKmeans(object):
 
     def __init__(self, k_clusters, must_lnk_con, cannot_lnk_con, init_centroids=None,
                  ml_wg=1.0, cl_wg=1.0, max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5,
-                 d_params=None, norm_part=False, globj_norm=False):
+                 d_params=None, icm_max_i=10, enable_norm=False):
 
         self.k_clusters = k_clusters
         self.ml_pair_idxs = must_lnk_con
@@ -56,12 +57,8 @@ class HMRFKmeans(object):
         self.lrn_rate = lrn_rate
         self.ray_sigma = ray_sigma
         self.A = d_params
-        self.norm_part = norm_part
-
-        # This option enables or disables the normalizations values to be included in the...
-        # ...calculation of the total values, other than the total cosine distances, the...
-        # ...total must-link and cannot-link violation scores.
-        self.globj_norm = globj_norm
+        self.icm_max_i = icm_max_i
+        self.enable_norm = enable_norm
 
     def fit(self, x_data):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
@@ -145,10 +142,13 @@ class HMRFKmeans(object):
         last_gobj = np.Inf
 
         # While no convergence yet repeat for at least i times.
-        for conv_step in range(self.max_iter):
+        for c_step in range(self.max_iter):
 
             print
-            print conv_step
+            print c_step
+
+            # Storing the amount of iterations until convergence.
+            self.conv_step = c_step
 
             # The E-Step.
 
@@ -189,9 +189,6 @@ class HMRFKmeans(object):
 
             print "Global Objective (narray)", glob_jobj
 
-        # Storing the amount of iterations until convergence.
-        self.conv_step = conv_step
-
         # Closing the internal process pool.
         # self.da_pool.close()
         # self.da_pool.join()
@@ -210,7 +207,7 @@ class HMRFKmeans(object):
             'lrn_rate': self.lrn_rate,
             'ray_sigma': self.ray_sigma,
             'dist_msur_params': self.A,
-            'norm_part': self.norm_part
+            'enable_norm': self.enable_norm
         }
 
     def ICM(self, x_data, mu_arr, clstr_tags_arr):
@@ -235,7 +232,13 @@ class HMRFKmeans(object):
         print "In ICM..."
 
         no_change_cnt = 0
-        while no_change_cnt < 2:
+        # while no_change_cnt < 2:
+        for dump in range(self.icm_max_i):
+
+            # Stopping the rearrangment of the clusters when at least 2 times nothing changed...
+            # ...thus, most-likelly the arrangmet is optimal.
+            if no_change_cnt == 2:
+                break
 
             # Calculating the new Clusters.
             for x_idx in np.random.permutation(np.arange(x_data.shape[0])):
@@ -381,38 +384,45 @@ class HMRFKmeans(object):
             )
 
             cl_cost = np.sum(viol_costs)  # / float(clv_cnts)
-            # cl_cost = np.sum(np.multiply(self.cl_wg, viol_costs)) <--- PORPER
 
-            # Equivalent to: (in a for-loop implementation)
-            # cl_cost += self.w_violations[x[0], x[1]] *\
-            # (1 - self.CosDistA(x_data[x[0], :], x_data[x[1], :]))
+        if self.enable_norm:
+            # Calculating the cosine distance parameters PDF. In fact the log-form...
+            # ...of Rayleigh's PDF.
+            sum1, sum2 = 0.0, 0.0
+            for a in self.A:
+                sum1 += np.log(a)
+                sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
+            params_pdf = sum1 - sum2 -\
+                (2 * self.A.shape[0] * np.log(self.ray_sigma))
 
-        # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
-        sum1, sum2 = 0.0, 0.0
-        for a in self.A:
-            sum1 += np.log(a)
-            sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
-        params_pdf = sum1 - sum2 -\
-            (2 * self.A.shape[0] * np.log(self.ray_sigma))
+            # Calculating the log normalization function of the von Mises-Fisher distribution...
+            # ...NOTE: Only for this cluster i.e. this vMF of the whole PDF mixture.
+            sum1, sum2 = 0.0, 0.0
+            for a in self.A:
+                sum1 += np.log(a)
+                sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
+            params_pdf = sum1 - sum2 - (2 * self.A.shape[0] * np.log(self.ray_sigma))
 
-        # NOTE!
-        params_pdf = 0.0
+            # Calculating the log normalization function of the von Mises-Fisher distribution...
+            # ...of the whole mixture.
+            if mu_arr.shape[1] == 1:
+                norm_part_value = 0.0
+            elif mu_arr.shape[1] >= 100:
+                norm_part_value = self.ray_sigma * mu_arr.shape[1]
+            else:
+                norm_part_value = 0.0
+                norm_part_value = self.NormPart(x_data[clstr_idx_arr])
 
-        # Calculating the log normalization function of the von Mises-Fisher distribution...
-        # ...NOTE: Only for this cluster i.e. this vMF of the whole PDF mixture.
-        if self.norm_part:
-            norm_part_value = self.NormPart(x_data[clstr_idx_arr])
-        else:
-            norm_part_value = 0.0
+            # if np.size(clv_pair_rows):
+            # sum0 = dist + ml_cost + cl_cost + params_pdf + norm_part_value
+            # if np.min(self.A) < 0 or np.max(self.A) > 1.0 or sum0 == np.NaN:
+            #     print self.A
+            # print np.array(dist), ml_cost, cl_cost, params_pdf, norm_part_value, sum0
 
-        # print "In JObjCosA...", dist, ml_cost, cl_cost, params_pdf, norm_part_value
-        # print "Params are: ", self.A
+            return dist + ml_cost + cl_cost + params_pdf + norm_part_value
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
-        if np.size(clv_pair_rows):
-            print self.A
-        #     print np.array(dist), ml_cost, cl_cost,  params_pdf,  norm_part_value
-        return dist + ml_cost + cl_cost + params_pdf + norm_part_value
+        return dist + ml_cost + cl_cost
 
     def GlobJObjCosA(self, x_data, mu_arr, clstr_tags_arr):
         """
@@ -422,10 +432,10 @@ class HMRFKmeans(object):
 
         # Calculating the distance of all vectors, the must-link and cannot-link violations scores.
         sum_d, ml_cost, cl_cost, norm_part_value, params_pdf = 0.0, 0.0, 0.0, 0.0, 0.0
-        smlps_cnt, ml_cnt, cl_cnt = 0.0, 0.0, 0.0
+        # ml_cnt, cl_cnt = 0.0, 0.0
 
-        xd_rows = np.arange(x_data.shape[0])
-        mu_rows = np.arange(mu_arr.shape[0])
+        # xd_rows = np.arange(x_data.shape[0])
+        # mu_rows = np.arange(mu_arr.shape[0])
 
         # Calculating the cosine distances and add the to the total sum of distances.
         # ---------------------------------------------------------------------------
@@ -445,13 +455,9 @@ class HMRFKmeans(object):
                 (np.logical_xor(ml_voil_tests[:, 0], ml_voil_tests[:, 1]) == True)
             )[0]
 
-            # ml_cnt += float(viol_ipairs.shape[0])
-            # print "for mu=", i
-            # print np.size(mlv_pair_rows)
-            # print mlv_pair_rows
-            # print ml_voil_tests
+            ml_cnt = np.size(mlv_pair_rows)
 
-            if np.size(mlv_pair_rows):
+            if ml_cnt:
 
                 # Calculating all pairs of violation costs for must-link constraints.
                 # NOTE: The violation cost is equivalent to the maxCosine distance.
@@ -460,14 +466,6 @@ class HMRFKmeans(object):
                         x_data, self.A, self.ml_pair_idxs, mlv_pair_rows
                     )
                 )
-
-                # if viol_costs.shape[0] > 1:
-                #     viol_costs_onetime = np.tril(viol_costs, -1)
-                # else:
-                #     viol_costs_onetime = viol_costs
-
-                # Sum-ing up Weighted violations costs. NOTE: Here the matrix multiply...
-                # ...should be element-by-element.
 
                 ml_cost += self.ml_wg * viol_costs
 
@@ -481,13 +479,9 @@ class HMRFKmeans(object):
                 (np.logical_and(cl_voil_tests[:, 0], cl_voil_tests[:, 1]) == True)
             )[0]
 
-            # print np.size(clv_pair_rows)
-            # print clv_pair_rows
-            # print cl_voil_tests
+            cl_cnt = np.size(clv_pair_rows)
 
-            # cl_cnt += float(viol_ipairs.shape[0])
-
-            if np.size(clv_pair_rows):
+            if cl_cnt:
 
                 # Calculating all pairs of violation costs for cannot-link constraints.
                 # NOTE: The violation cost is equivalent to the maxCosine distance
@@ -497,58 +491,68 @@ class HMRFKmeans(object):
                     )
                 )
 
-                # if viol_costs.shape[0] > 1:
-                #     viol_costs_onetime = np.tril(viol_costs, -1)
-                # else:
-                #     viol_costs_onetime = viol_costs
-
-                # Sum-ing up Weighted violations costs. NOTE: Here the matrix multiply...
-                # ...should be element-by-element. NOTE#2: We are getting only the lower...
-                # ...triangle because we need the cosine distance of the constraints pairs...
-                # ...only ones.
-                max_vcost = np.max(viol_costs)
+                max_vcost = 1.0  # np.max(viol_costs)
                 cl_cost += self.cl_wg * np.sum(max_vcost - viol_costs)
 
-        """
-        # Averaging EVERYTHING.
-        sum_d = sum_d / smlps_cnt
+        if self.enable_norm:
+            # Calculating the cosine distance parameters PDF. In fact the log-form...
+            # ...of Rayleigh's PDF.
+            sum1, sum2 = 0.0, 0.0
+            for a in self.A:
+                sum1 += np.log(a)
+                sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
+            params_pdf = sum1 - sum2 - (2 * self.A.shape[0] * np.log(self.ray_sigma))
 
-        if ml_cnt:
-            ml_cost = ml_cost / ml_cnt
+            # Calculating the log normalization function of the von Mises-Fisher distribution...
+            # ...of the whole mixture.
+            if mu_arr.shape[1] == 1:
 
-        if cl_cnt:
-            cl_cost = cl_cost / cl_cnt
-        """
+                wrn_msg = "Data points cannot have less than two(2) dimension. Thus" +\
+                    " normalization partision function (Bezzel) will become Zero (0)"
+                warnings.warn(wrn_msg)
 
-        # Calculating the cosine distance parameters PDF. In fact the log-form of Rayleigh's PDF.
-        # if self.globj_norm:
-        sum1, sum2 = 0.0, 0.0
-        for a in self.A:
-            sum1 += np.log(a)
-            sum2 += np.square(a) / (2 * np.square(self.ray_sigma))
-        params_pdf = sum1 - sum2 - (2 * self.A.shape[0] * np.log(self.ray_sigma))
-        # else:
-        #     params_pdf = 0.0
+                norm_part_value = 0.0
 
-        # Calculating the log normalization function of the von Mises-Fisher distribution...
-        # ...of the whole mixture.
-        if self.norm_part and self.globj_norm:
-            norm_part_value = 0.0
-            for i in enumerate(mu_arr.shape[0]):
-                clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
-                norm_part_value += self.NormPart(x_data[clstr_idxs_arr])
+            elif mu_arr.shape[1] >= 100:
+
+                wrn_msg = "Dimentions are very high (i.e. more than 100) high, thus Bessel" +\
+                    " function equals Zero (0). A heuristic will be used that is Data matrix" +\
+                    " dimensions multiplication"
+                warnings.warn(wrn_msg)
+
+                norm_part_value = self.ray_sigma * mu_arr.shape[1]
+            else:
+
+                norm_part_value = 0.0
+
+                for i in np.arange(mu_arr.shape[0]):
+                    clstr_idxs_arr = np.where(clstr_tags_arr == i)[0]
+                    norm_part_value += self.NormPart(x_data[clstr_idxs_arr])
+
+            print 'dims', x_data.shape[1]
+            print 'sum_d, ml_cost, cl_cost', sum_d, ml_cost, cl_cost
+            print 'sum_d + ml_cost + cl_cost', sum_d + ml_cost + cl_cost
+            print 'np.log(Rayleigh)', params_pdf
+            print 'N*(np.log(cdk) + np.log(k))', norm_part_value
+
+            return sum_d + ml_cost + cl_cost + params_pdf + norm_part_value
+
         else:
-            norm_part_value = 0.0
+
+            # Averaging all-total distance costs.
+            sum_d = sum_d / (x_data.shape[0] * mu_arr.shape[0])
+            if ml_cnt:
+                ml_cost = ml_cost / ml_cnt
+            if cl_cnt:
+                cl_cost = cl_cost / cl_cnt
 
         print 'dims', x_data.shape[1]
         print 'sum_d, ml_cost, cl_cost', sum_d, ml_cost, cl_cost
         print 'sum_d + ml_cost + cl_cost', sum_d + ml_cost + cl_cost
-        print 'np.log(Rayleigh)', params_pdf
-        print 'N*(np.log(cdk) + np.log(k))', norm_part_value
 
         # Calculating and returning the Global J-Objective value for the current Spherical...
         # ...vMF-Mixture set-up.
-        return sum_d + ml_cost + cl_cost + params_pdf + norm_part_value
+        return sum_d + ml_cost + cl_cost
 
     def UpdateDistorParams(self, A, x_data, mu_arr, clstr_tags_arr):
         """ Update Distortion Parameters: This function is updating the whole set of the distortion
@@ -602,7 +606,6 @@ class HMRFKmeans(object):
             )[0]
 
             ml_viol_pairs.append(mlv_pair_rows)
-            # ml_cnt += float(viol_ipairs.shape[0])
 
             # Getting the cannot-link left side of the pair constraints, i.e. the row indeces...
             # ...of the constraints matrix that are in the cluster's set of indeces.
@@ -611,10 +614,7 @@ class HMRFKmeans(object):
                 (np.logical_and(cl_voil_tests[:, 0], cl_voil_tests[:, 1]) == True)
             )[0]
 
-            # print cl_voil_tests, clv_pair_rows
-
             cl_viol_pairs.append(clv_pair_rows)
-            # cl_cnt += float(viol_ipairs.shape[0])
 
         # Calculating the partial derivatives of each parameter for all cluster's member...
         # ...for each cluster.
@@ -662,65 +662,110 @@ class HMRFKmeans(object):
         # Updating Process.
         for i, a in enumerate(A):
 
-            # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
-            a_pderiv = (1 / a) - (a / np.square(self.ray_sigma))
-            # NOTE: a_pderiv = 0.0
-            # print 'Rayleigh Partial', a_pderiv
-
-            if np.abs(a_pderiv) == np.inf:
-                print "Invalid patch for Rayleighs P'(A) triggered: (+/-)INF P'(A)=", a_pderiv
-                a_pderiv = 1e-15
-            elif a_pderiv == np.nan:
-                print "Invalid patch for Rayleighs P(A) triggered: NaN P'(A)=", a_pderiv
-                a_pderiv = 1e-15
+            if self.enable_norm:
+                # Calculating the Partial Derivative of Rayleigh's PDF over A parameters.
+                a_pderiv = (1 / a) - (a / np.square(self.ray_sigma))
+            else:
+                a_pderiv = 0.0
 
             # Changing a diagonal value of the A cosine similarity parameters measure.
-            print a_pderiv
             new_A[i] = a +\
                 (
                     self.lrn_rate *
                     (
                         xm_pderiv[i]
                         + (self.ml_wg * mlcost_pderiv[i])
-                        + (self.cl_wg * (max_clc_pder - clcost_pderiv[i]))  # Check if +/-
-                        - a_pderiv  # Check if +/-
+                        + (self.cl_wg * (max_clc_pder - clcost_pderiv[i]))
+                        - a_pderiv
                     )
                 )
 
-        """
-        for a_idx, a in enumerate(np.array([a[0] for a in A.data])):
+            # print self.lrn_rate, xm_pderiv[i], mlcost_pderiv[i], (max_clc_pder - clcost_pderiv[i]), a_pderiv
 
+        # NOTE: Fale-safe operation when a value of distortion paramters vector becames negative.
+        # Chaning the A distortion parameters vector to  a vector of 0.5.
+        if np.min(new_A) < 0.0:
 
-            # print self.lrn_rate * (xm_pderiv + mlcost_pderiv + clcost_pderiv - a_pderiv)
-            # print xm_pderiv, mlcost_pderiv, clcost_pderiv, a_pderiv
-            if new_A[a_idx] < 0.0:
-                print self.lrn_rate
-                print xm_pderiv
-                print mlcost_pderiv
-                print clcost_pderiv
-                print a_pderiv
-                0/0
+            wrn_msg = "Negative value found in the distortion paramters vector. " +\
+                "A vector is replacing it automatically with 0.1 values."
+            warnings.warn(wrn_msg)
 
-            # ΝΟΤΕ: Invalid patch for let the experiments to be completed.
-            if new_A[a_idx] < 0.0:
-                print "Invalid patch for A triggered: (-) Negative A=", new_A[a_idx], a_pderiv
-                new_A[a_idx] = 1e-15
+            A = np.zeros_like(A)
+            A[:] = 0.1
 
-            elif new_A[a_idx] == 0.0:
-                print "Invalid patch for A triggered: (0) Zero A=", new_A[a_idx], a_pderiv
-                new_A[a_idx] = 1e-15
+        elif np.max(new_A) > 1.0:
 
-            elif np.abs(new_A[a_idx]) == np.Inf:
-                print "Invalid patch for A triggered: (+/-)INF A=", new_A[a_idx], a_pderiv
-                new_A[a_idx] = 1e-15
+            wrn_msg = "Over 1.0 value found in the distortion paramters vector. " +\
+                "A vector is replacing it automatically with 0.9 values."
+            warnings.warn(wrn_msg)
 
-            elif new_A[a_idx] == np.NaN:
-                print "Invalid patch for A triggered: NaN A=", new_A[a_idx], a_pderiv
-                new_A[a_idx] = 1e-15
-        """
+            A = np.zeros_like(A)
+            A[:] = 0.9
 
-        A[:] = new_A[:]
+        else:
 
+            A[:] = new_A[:]
 
+        print A
         # Returning the A parameters.
         return A
+
+    def NormPart(self, Xsub):
+        """
+         The von Mises and von Mises - Fisher Logarithmic Normalization partition function:...
+            is calculated in this method. For the 2D data the function is simplified for faster
+            calculation.
+
+            *** This function has been build after great research on the subject. However, some
+            things are not very clear this is always in a revision state until theoretically proven
+            to be correctly used.
+
+            Arguments
+            ---------
+                Xsub: The subset of the data point are included in the von Mises-Fisher
+                    distribution.
+
+            Output
+            ------
+                The logarithmic value of the partition normalization function.
+
+        """
+
+        # Calculating the r.
+        # The r it suppose to be the norm of the data points of the current cluster, not the...
+        # ...whole mixture as it is in the global objective function. ## Might this need to be...
+        # ...revised.
+        r = np.linalg.norm(Xsub)
+
+        # Calculating the Von Misses Fisher's k concentration is approximated as seen..
+        # ....in Banerjee et al. 2003.
+        dim = Xsub.shape[1]
+
+        # Calculating the partition function depending on the vector dimensions.
+        k = (r * dim - np.power(r, 3.0)) / (1 - np.power(r, 2.0))
+
+        # k=0.001 only for the case where the r is too small. Usually at the 1-2 first iterations...
+        # ...of the EM/Kmeans.
+        if k < 0.0:
+            k = 0.001
+
+        if dim > 3:
+
+            # This is the proper way for calculating the von Misses Fisher normalization factor.
+            bessel = np.abs(special.jv((dim / 2.0) - 1.0, k))
+            # bessel = np.abs(self.Jd((dim/2.0)-1.0, k))
+            cdk = np.power(k, (dim / 2.0) - 1) / (np.power(2 * np.pi, dim / 2) * bessel)
+
+        else:
+
+            # This is the proper way for calculating the vMF normalization factor for 2D vectors.
+            bessel = np.abs(special.jv(0, k))
+            # bessel = np.abs(self.Jd(0, k))
+            cdk = 1.0 / (2 * np.pi * bessel)
+
+        # Returning the log of the normalization function plus the log of the k that is used in...
+        # ...the von Mises Fisher PDF, which is separated from the Cosine Distance due to the log.
+        # The normalizers are multiplied by the number of all the X data subset, because it is...
+        # the global normalizer after the whole summations has been completed.
+        # NOTE: Still this need to be revised.
+        return np.log(cdk) + np.log(k) # * Xsub.shape[0]

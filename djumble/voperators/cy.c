@@ -10315,8 +10315,6 @@ static __Pyx_memviewslice __pyx_f_7Djumble_7djumble_10voperators_2cy_mean_cosA(_
  *                 mu_arr[k, jp2] = xk_sum[jp2] / xk_pnorms[k]
  * 
  *     return mu_arr             # <<<<<<<<<<<<<<
- * 
- * """
  */
   __PYX_INC_MEMVIEW(&__pyx_v_mu_arr, 0);
   __pyx_r = __pyx_v_mu_arr;
