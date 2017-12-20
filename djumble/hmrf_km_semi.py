@@ -46,6 +46,18 @@ class HMRFKmeans(object):
                  ml_wg=1.0, cl_wg=1.0, max_iter=300, cvg=0.001, lrn_rate=0.0003, ray_sigma=0.5,
                  d_params=None, icm_max_i=10, enable_norm=False):
 
+        if ray_sigma < 1.0 and enable_norm is True:
+            raise Exception(
+                "Ray's Sigma cannot be less than 1 for this algorithm for being stable."
+            )
+
+        if enable_norm is False:
+            wrn_msg = "Ray's Sigma is ignored when normalization factor are desabled, " +\
+                "i.e. enable_norm=False which is the default value for this argument."
+            warnings.warn(wrn_msg)
+
+        self.enable_norm = enable_norm
+        self.ray_sigma = ray_sigma
         self.k_clusters = k_clusters
         self.ml_pair_idxs = must_lnk_con
         self.cl_pair_idxs = cannot_lnk_con
@@ -55,10 +67,8 @@ class HMRFKmeans(object):
         self.max_iter = max_iter
         self.cvg = cvg
         self.lrn_rate = lrn_rate
-        self.ray_sigma = ray_sigma
         self.A = d_params
         self.icm_max_i = icm_max_i
-        self.enable_norm = enable_norm
 
     def fit(self, x_data):
         """ Fit method: The HMRF-Kmeans algorithm is running in this method in order to fit the
@@ -121,17 +131,6 @@ class HMRFKmeans(object):
         # # The above might actually change based on the initialization set-up will be used.
         # ########
 
-        # NOTE: Initially normalizing the samples under the distortion parameters values in...
-        # ...order to reducing the cosine distance calculation to a simple dot products...
-        # ...calculation in the rest of the EM (sub)steps.
-        # x_data = np.divide(
-        #     x_data,
-        #     np.sqrt(
-        #         np.diag(np.dot(np.dot(x_data, self.A[:, :].toarray()), x_data.T)),
-        #         dtype=np.float
-        #     ).reshape(x_data.shape[0], 1)
-        # )
-
         # Calculating the initial Centroids of the assumed hyper-shperical clusters.
         mu_arr = vop.mean_cosA(x_data, clstr_tags_arr, self.A, self.k_clusters)
 
@@ -164,24 +163,13 @@ class HMRFKmeans(object):
             # Re-estimating distortion measure parameters upon the new clusters set-up.
             self.A = self.UpdateDistorParams(self.A, x_data, mu_arr, clstr_tags_arr)
 
-            # NOTE: Normalizing the samples under the new parameters values in order to reducing...
-            # ...the cosine distance calculation to a simple dot products calculation in the...
-            # ...rest of the EM (sub)steps.
-            # x_data = np.divide(
-            #     x_data,
-            #     np.sqrt(
-            #         np.diag(np.dot(np.dot(x_data, self.A[:, :].toarray()), x_data.T)),
-            #         dtype=np.float
-            #     ).reshape(x_data.shape[0], 1)
-            # )
-
             # Calculating Global JObjective function.
             glob_jobj = self.GlobJObjCosA(x_data, mu_arr, clstr_tags_arr)
 
             # Terminating upon the difference of the last two Global JObej values.
             if np.abs(last_gobj - glob_jobj) < self.cvg or glob_jobj < self.cvg:
                 # second condition is TEMP!
-                print 'last_gobj - glob_jobj', last_gobj - glob_jobj
+                print 'last_gobj - glob_jobj', np.abs(last_gobj - glob_jobj)
                 print "Global Objective", glob_jobj
                 break
             else:
@@ -687,20 +675,20 @@ class HMRFKmeans(object):
         if np.min(new_A) < 0.0:
 
             wrn_msg = "Negative value found in the distortion paramters vector. " +\
-                "A vector is replacing it automatically with 0.1 values."
-            warnings.warn(wrn_msg)
-
-            A = np.zeros_like(A)
-            A[:] = 0.1
-
-        elif np.max(new_A) > 1.0:
-
-            wrn_msg = "Over 1.0 value found in the distortion paramters vector. " +\
-                "A vector is replacing it automatically with 0.9 values."
+                "A vector is replacing it automatically with 0.5 values."
             warnings.warn(wrn_msg)
 
             A = np.zeros_like(A)
             A[:] = 0.9
+
+        elif np.max(new_A) > 1.0 and self.enable_norm is True:
+
+            wrn_msg = "Over 1.0 value found in the distortion paramters vector. " +\
+                "A vector is replacing it automatically with 0.5 values."
+            warnings.warn(wrn_msg)
+
+            A = np.zeros_like(A)
+            A[:] = 0.5
 
         else:
 

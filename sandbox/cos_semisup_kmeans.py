@@ -104,8 +104,8 @@ init_centrs_arr = [0, 550, 1100]
 print "Running HMRF Kmeans"
 hkmeans = hks.HMRFKmeans(
     k_clusters, must_lnk_con_arr, cannot_lnk_con_arr, init_centroids=init_centrs_arr,
-    ml_wg=1.0, cl_wg=1.0, max_iter=100, cvg=0.001, lrn_rate=0.5, ray_sigma=2.5, d_params=None,
-    icm_max_i=10,  enable_norm=False
+    ml_wg=1.0, cl_wg=1.0, max_iter=100, cvg=0.001, lrn_rate=30.0, ray_sigma=2.5, d_params=None,
+    icm_max_i=1000, enable_norm=False
 )
 
 res = hkmeans.fit(copy.deepcopy(x_data_2d_arr))
