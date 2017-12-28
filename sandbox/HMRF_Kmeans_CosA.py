@@ -18,6 +18,11 @@ import copy
 import warnings
 
 
+import pstats
+import cProfile
+import StringIO
+
+
 sys.path.append('../')
 import djumble.hmrf_km_semi as hks
 
@@ -101,6 +106,12 @@ k_clusters = 3
 
 init_centrs_arr = [0, 550, 1100]
 
+# Prifilling
+# pr = cProfile.Profile()
+
+# Prifilling - Starts
+# pr.enable()
+
 print "Running HMRF Kmeans"
 hkmeans = hks.HMRFKmeans(
     k_clusters, must_lnk_con_arr, cannot_lnk_con_arr, init_centroids=init_centrs_arr,
@@ -112,6 +123,16 @@ res = hkmeans.fit(copy.deepcopy(x_data_2d_arr))
 
 print res[1]
 print hkmeans.get_params()
+
+# Prifilling - Ends
+# pr.disable()
+
+# Prifilling - Stats
+# s = StringIO.StringIO()
+# ps = pstats.Stats(pr, stream=s)
+# ps.sort_stats("time").print_stats()  # cumtime
+# print s.getvalue()
+
 
 clstr_neigh = dict()
 for idx, mu_idx in enumerate(res[1]):
