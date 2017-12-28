@@ -177,10 +177,6 @@ class HMRFKmeans(object):
 
             print "Global Objective (narray)", glob_jobj
 
-        # Closing the internal process pool.
-        # self.da_pool.close()
-        # self.da_pool.join()
-
         # Returning the Centroids and the Clusters,i.e. the set of indeces for each cluster.
         return mu_arr, clstr_tags_arr
 
@@ -188,6 +184,7 @@ class HMRFKmeans(object):
         return {
             'k_clusters': self.k_clusters,
             'max_iter': self.max_iter,
+            'ICM_Max_Iter': self.icm_max_i,
             'final_iter': self.conv_step,
             'ml_wg': self.ml_wg,
             'cl_wg': self.cl_wg,
@@ -195,7 +192,7 @@ class HMRFKmeans(object):
             'lrn_rate': self.lrn_rate,
             'ray_sigma': self.ray_sigma,
             'dist_msur_params': self.A,
-            'enable_norm': self.enable_norm
+            'enable_norm': self.enable_norm,
         }
 
     def ICM(self, x_data, mu_arr, clstr_tags_arr):
@@ -336,8 +333,7 @@ class HMRFKmeans(object):
             )
 
             # Sum-ing up Weighted violations costs.
-            ml_cost = np.sum(viol_costs)  # / float(mlv_cnts)
-            # ml_cost = np.sum(np.multiply(self.ml_wg, viol_costs)) <--- PORPER
+            ml_cost = self.ml_wg * np.sum(viol_costs)  # / float(mlv_cnts)
 
         # Calculating Cannot-Link violation cost.
         # ---------------------------------------
@@ -371,7 +367,7 @@ class HMRFKmeans(object):
                 )
             )
 
-            cl_cost = np.sum(viol_costs)  # / float(clv_cnts)
+            cl_cost = self.cl_wg * np.sum(viol_costs)  # / float(clv_cnts)
 
         if self.enable_norm:
             # Calculating the cosine distance parameters PDF. In fact the log-form...
@@ -455,7 +451,7 @@ class HMRFKmeans(object):
                     )
                 )
 
-                ml_cost += self.ml_wg * viol_costs
+                ml_cost += viol_costs
 
             # Calculating Cannot-Link violation cost.
             # ---------------------------------------
@@ -480,7 +476,7 @@ class HMRFKmeans(object):
                 )
 
                 max_vcost = 1.0  # np.max(viol_costs)
-                cl_cost += self.cl_wg * np.sum(max_vcost - viol_costs)
+                cl_cost += np.sum(max_vcost - viol_costs)
 
         if self.enable_norm:
             # Calculating the cosine distance parameters PDF. In fact the log-form...
@@ -523,7 +519,8 @@ class HMRFKmeans(object):
             print 'np.log(Rayleigh)', params_pdf
             print 'N*(np.log(cdk) + np.log(k))', norm_part_value
 
-            return sum_d + ml_cost + cl_cost + params_pdf + norm_part_value
+            return sum_d + (self.ml_wg * ml_cost) + (self.cl_wg * cl_cost) +\
+                params_pdf + norm_part_value
 
         else:
 
@@ -540,7 +537,7 @@ class HMRFKmeans(object):
 
         # Calculating and returning the Global J-Objective value for the current Spherical...
         # ...vMF-Mixture set-up.
-        return sum_d + ml_cost + cl_cost
+        return sum_d + (self.ml_wg * ml_cost) + (self.cl_wg * cl_cost)
 
     def UpdateDistorParams(self, A, x_data, mu_arr, clstr_tags_arr):
         """ Update Distortion Parameters: This function is updating the whole set of the distortion
@@ -668,14 +665,15 @@ class HMRFKmeans(object):
                     )
                 )
 
-            # print self.lrn_rate, xm_pderiv[i], mlcost_pderiv[i], (max_clc_pder - clcost_pderiv[i]), a_pderiv
+            # print self.lrn_rate, xm_pderiv[i], mlcost_pderiv[i]
+            # print (max_clc_pder - clcost_pderiv[i]), a_pderiv
 
         # NOTE: Fale-safe operation when a value of distortion paramters vector becames negative.
-        # Chaning the A distortion parameters vector to  a vector of 0.5.
+        # Chaning the A distortion parameters vector to a vector of 0.9.
         if np.min(new_A) < 0.0:
 
             wrn_msg = "Negative value found in the distortion paramters vector. " +\
-                "A vector is replacing it automatically with 0.5 values."
+                "A vector is replacing it automatically with 0.9 values."
             warnings.warn(wrn_msg)
 
             A = np.zeros_like(A)
@@ -694,7 +692,6 @@ class HMRFKmeans(object):
 
             A[:] = new_A[:]
 
-        print A
         # Returning the A parameters.
         return A
 
@@ -756,4 +753,4 @@ class HMRFKmeans(object):
         # The normalizers are multiplied by the number of all the X data subset, because it is...
         # the global normalizer after the whole summations has been completed.
         # NOTE: Still this need to be revised.
-        return np.log(cdk) + np.log(k) # * Xsub.shape[0]
+        return np.log(cdk) + np.log(k)  # * Xsub.shape[0]
