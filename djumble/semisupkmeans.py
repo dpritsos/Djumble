@@ -11,7 +11,7 @@ import warnings
 from .voperators import cy as vop
 
 
-class HMRFKmeans(object):
+class HMRFKmeansSemiSup(object):
     """ HMRF Kmeans: A Semi-supervised clustering algorithm based on Hidden Markov Random Fields
         Clustering model optimized by Expectation Maximization (EM) algorithm with Hard clustering
         constraints, i.e. a Kmeans Semi-supervised clustering variant.
