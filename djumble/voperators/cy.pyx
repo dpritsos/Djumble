@@ -16,6 +16,11 @@ cdef extern from "math.h":
     cdef double pow(double x, double y) nogil
     cdef double log (double x) nogil
 
+
+# ##################################################################################### #
+# Basic Distance Measures operator. Concarrent programming enamled wherever is possible #
+# ##################################################################################### #
+
 cpdef double [:, ::1] cosDa(double [:, ::1] m1, double [:, ::1] m2, double[::1] A):
 
     cdef:
@@ -403,6 +408,69 @@ cpdef double [:, ::1] cosD(double [:, ::1] m1, double [:, ::1] m2):
     return csdis_vect
 
 
+cpdef double [:, ::1] mean_cosA(double [:, ::1] X,
+                                cnp.intp_t [::1] clust_tags,
+                                double [::1] A,
+                                int k_clustz):
+    """  mean_cosA method: It is calculating the centroids of the hyper-spherical clusters.
+        Using the parametrized cosine mean as explained in the documentation.
+
+    """
+
+    cdef:
+        double zero_val = 1e-15
+        Py_ssize_t k, i, j, ip, jp, ip2, jp2
+        Py_ssize_t X_J = X.shape[1]
+        Py_ssize_t ct_I = clust_tags.shape[0]
+
+        # MemoryViews for the cython arrays used for sotring the temporary and...
+        # ...to be retured results.
+        double [:, ::1] mu_arr
+        double [::1] xk_sum
+        double [::1] xk_pnorms
+
+    mu_arr = cvarray(shape=(k_clustz, X_J), itemsize=sizeof(double), format="d")
+    xk_sum = cvarray(shape=(X_J,), itemsize=sizeof(double), format="d")
+    xk_pnorms = cvarray(shape=(k_clustz,), itemsize=sizeof(double), format="d")
+
+    # The following operatsion taking place in the non-gil and parallel...
+    # ...openmp emviroment.
+    with nogil, parallel():
+
+        # Initilising temporary storage arrays. NOTE: This is a mandatory process because as...
+        # ...in C garbage values can case floating point overflow, thus, peculiar results...
+        # ...like NaN or incorrect calculatons.
+        for i in range(k_clustz):
+            for j in range(X_J):
+                mu_arr[i, j] = 0.0
+
+        for i in range(X_J):
+            xk_sum[i] = 0.0
+
+        for k in prange(k_clustz, schedule='guided'):
+
+            # Summing up all the X data points for the current cluster. Equivalent to sum in axis-0.
+            for jp in prange(X_J, schedule='guided'):
+                for ip in range(ct_I):
+                    # The i vector has k cluster-tag equal to the requested k the sum it up.
+                    if clust_tags[ip] == k:
+                        xk_sum[jp] += X[ip, jp]
+
+            # Calculating denominator xk_pnorm(parametrized-norm) == ||Σ xi||(A).
+            for ip2 in range(X_J):
+                xk_pnorms[k] += sqrt(xk_sum[ip2] * A[ip2] * xk_sum[ip2])
+
+            # Preveting division by 0.0
+            if xk_pnorms[k] == 0.0:
+                xk_pnorms[k] = 0.000001
+
+            # Calculating the Centroid of the (assumed) hyper-sphear.
+            for jp2 in range(X_J):
+                mu_arr[k, jp2] = xk_sum[jp2] / xk_pnorms[k]
+
+    return mu_arr
+
+
 cpdef double [:, ::1] eudis_2d(double [:, ::1] m1, double [:, ::1] m2):
 
     cdef:
@@ -448,6 +516,10 @@ cpdef double [:, ::1] eudis_2d(double [:, ::1] m1, double [:, ::1] m2):
     return eudis_vect
 
 
+# ##################################################################################### #
+# Basic Distance Measure operator. Concarrent programming enamled wherever is possible. #
+# ##################################################################################### #
+
 # Note: For interal usage in cython.
 cdef inline double vdot(double [::1] v1, double [::1] v2):
 
@@ -465,6 +537,7 @@ cdef inline double vdot(double [::1] v1, double [::1] v2):
             res += v1[i] * v2[i]
 
     return res
+
 
 # Note: For interal usage in cython.
 cdef inline double [::1] dot1d_ds(double [::1] v, double [::1] m):
@@ -485,174 +558,6 @@ cdef inline double [::1] dot1d_ds(double [::1] v, double [::1] m):
     with nogil:
         for i in range(I):
             res[i] = v[i] * m[i]
-
-    return res
-
-"""
-# Note: Make it cdef if only for interal usage in cython.
-cpdef double [:, ::1] dot2d(double [:, ::1] m1, double [:, ::1] m2):
-
-    # if m1.shape[1] != m2.shape[0]:
-    #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
-
-    # Matrix index variables.
-    cdef:
-        unsigned int i, j, k
-        unsigned int I = m1.shape[0]
-        unsigned int J = m2.shape[1]
-        unsigned int K = m1.shape[1]
-
-    # Creating the array for results and its memory view
-    double [:, ::1] res = np.zeros((I, J), dtype=np.float)
-
-    # Calculating the dot product.
-    with nogil, parallel():
-        for i in prange(I, schedule='guided'):
-            for j in range(J):
-                for k in range(K):
-                    res[i, j] += m1[i, k] * m2[k, j]
-
-    return res
-"""
-
-# Note: For interal usage in cython.
-cdef double [:, ::1] dot2d_2d(double [:, ::1] m1, double [:, ::1] m2, cnp.intp_t [::1] m2r):
-
-    # Matrix index variables.
-    cdef:
-        Py_ssize_t i, j, ir
-        Py_ssize_t I = m1.shape[0]
-        Py_ssize_t J = m2.shape[1]
-        # Py_ssize_t K = m1.shape[1]
-        Py_ssize_t IR = m2r.shape[0]
-
-        # MemoryViews for the cython arrays used for sotring the temporary and...
-        # ...to be retured results.
-        double [:, ::1] res
-
-    # Creating the numpy.array for results and its memory view
-    res = cvarray(shape=(I, J), itemsize=sizeof(double), format="d")
-
-    # Calculating the dot product.
-    with nogil, parallel():
-        for i in prange(I, schedule='guided'):
-            for j in range(J):
-                for ir in range(IR):
-                    res[i, j] += m1[i, ir] * m2[m2r[ir], j]
-
-    return res
-
-
-# Note: For interal usage in cython.
-cdef double [:, ::1] dot2d_ds(double [:, ::1] m1, double [::1] m2):
-
-    # if m1.shape[1] != m2.shape[0]:
-    #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
-
-    # Matrix index variables.
-    cdef:
-        Py_ssize_t i, j
-        Py_ssize_t I = m1.shape[0]
-        Py_ssize_t J = m2.shape[0]
-
-        # MemoryViews for the cython arrays used for sotring the temporary and...
-        # ...to be retured results.
-        double [:, ::1] res
-
-    # Creating the array for results and its memory view
-    res = cvarray(shape=(I, J), itemsize=sizeof(double), format="d")
-
-    # Calculating the dot product.
-    with nogil, parallel():
-        for i in prange(I, schedule='guided'):
-            for j in range(J):
-                res[i, j] = m1[i, j] * m2[j]
-
-    return res
-
-
-# Note: Make it cdef if only for interal usage in cython.
-cpdef double [::1] get_diag(double [:, ::1] m):
-
-    # Matrix index variables.
-    cdef:
-        unsigned int i
-        unsigned int I = m.shape[0]
-
-        # Creating the numpy.array for results and its memory view
-        double [::1] res = np.zeros((I), dtype=np.float)
-
-    # Calculating the dot product.
-    with nogil:
-        for i in range(I):
-            # The idxs array is giving the actual row index of the data matrix...
-            # ...to be summed up.
-            res[i] += m[i, i]
-
-    return res
-
-"""
-# Note: Make it cdef if only for interal usage in cython.
-cpdef double [:, ::1] div2d_vv(double [:, ::1] m, double [::1] v):
-
-    # _vv stands for Vertical Vector.
-
-    # if m.shape[0] != v.shape[0]:
-    #     raise Exception("Matrix dimensions mismatch. 2D matrix cannot be dived by the vertical vector")
-
-    # Matrix index variables.
-    cdef:
-        unsigned int i0, i1, j
-        unsigned int I0 = m.shape[0]
-        unsigned int I1 = m.shape[1]
-        unsigned int J = v.shape[0]
-
-    # Creating the numpy.array for results and its memory view
-    double [:, ::1] res = np.zeros((I0, I1), dtype=np.float)
-
-    #
-    with nogil, parallel():
-        for i0 in prange(I0, schedule='guided'):
-            for i1 in range(I1):
-                res[i0, i1] = m[i0, i1] / v[i0]
-
-    return res
-"""
-
-# Note: Make it cdef if only for interal usage in cython.
-cpdef double [::1] vdiv_num(double [::1] v, double num):
-
-    # Matrix index variables.
-    cdef:
-        unsigned int i
-        unsigned int I = v.shape[0]
-
-        # Creating the numpy.array for results and its memory view
-        double [::1] res = np.zeros((I), dtype=np.float)
-
-    #
-    with nogil:
-        for i in range(I):
-            res[i] = v[i] / num
-
-    return res
-
-
-# Note: Make it cdef if only for interal usage in cython.
-cpdef double [::1] vsqrt(double [::1] v):
-
-    # Matrix index variables.
-    cdef:
-        unsigned int i
-        unsigned int I = v.shape[0]
-
-        # Creating the numpy.array for results and its memory view
-        double [::1] res = np.zeros((I), dtype=np.float)
-
-    #
-    with nogil:
-        for i in range(I):
-            res[i] = sqrt(v[i])
 
     return res
 
@@ -895,64 +800,174 @@ cpdef double [::1] pDerivative_seq_mk2mr(double[::1] A,
         return a_pDz_vect
 
 
-cpdef double [:, ::1] mean_cosA(double [:, ::1] X,
-                                cnp.intp_t [::1] clust_tags,
-                                double [::1] A,
-                                int k_clustz):
-    """  mean_cosA method: It is calculating the centroids of the hyper-spherical clusters.
-        Using the parametrized cosine mean as explained in the documentation.
+# ######################################################################### #
+# Below this line the Vector Operators are not used in this implementation. #
+# ######################################################################### #
 
-    """
+# Note: For interal usage in cython.
+cdef double [:, ::1] dot2d_2d(double [:, ::1] m1, double [:, ::1] m2, cnp.intp_t [::1] m2r):
 
+    # Matrix index variables.
     cdef:
-        double zero_val = 1e-15
-        Py_ssize_t k, i, j, ip, jp, ip2, jp2
-        Py_ssize_t X_J = X.shape[1]
-        Py_ssize_t ct_I = clust_tags.shape[0]
+        Py_ssize_t i, j, ir
+        Py_ssize_t I = m1.shape[0]
+        Py_ssize_t J = m2.shape[1]
+        # Py_ssize_t K = m1.shape[1]
+        Py_ssize_t IR = m2r.shape[0]
 
         # MemoryViews for the cython arrays used for sotring the temporary and...
         # ...to be retured results.
-        double [:, ::1] mu_arr
-        double [::1] xk_sum
-        double [::1] xk_pnorms
+        double [:, ::1] res
 
-    mu_arr = cvarray(shape=(k_clustz, X_J), itemsize=sizeof(double), format="d")
-    xk_sum = cvarray(shape=(X_J,), itemsize=sizeof(double), format="d")
-    xk_pnorms = cvarray(shape=(k_clustz,), itemsize=sizeof(double), format="d")
+    # Creating the numpy.array for results and its memory view
+    res = cvarray(shape=(I, J), itemsize=sizeof(double), format="d")
 
-    # The following operatsion taking place in the non-gil and parallel...
-    # ...openmp emviroment.
+    # Calculating the dot product.
     with nogil, parallel():
+        for i in prange(I, schedule='guided'):
+            for j in range(J):
+                for ir in range(IR):
+                    res[i, j] += m1[i, ir] * m2[m2r[ir], j]
 
-        # Initilising temporary storage arrays. NOTE: This is a mandatory process because as...
-        # ...in C garbage values can case floating point overflow, thus, peculiar results...
-        # ...like NaN or incorrect calculatons.
-        for i in range(k_clustz):
-            for j in range(X_J):
-                mu_arr[i, j] = 0.0
+    return res
 
-        for i in range(X_J):
-            xk_sum[i] = 0.0
 
-        for k in prange(k_clustz, schedule='guided'):
+# Note: For interal usage in cython.
+cdef double [:, ::1] dot2d_ds(double [:, ::1] m1, double [::1] m2):
 
-            # Summing up all the X data points for the current cluster. Equivalent to sum in axis-0.
-            for jp in prange(X_J, schedule='guided'):
-                for ip in range(ct_I):
-                    # The i vector has k cluster-tag equal to the requested k the sum it up.
-                    if clust_tags[ip] == k:
-                        xk_sum[jp] += X[ip, jp]
+    # if m1.shape[1] != m2.shape[0]:
+    #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
 
-            # Calculating denominator xk_pnorm(parametrized-norm) == ||Σ xi||(A).
-            for ip2 in range(X_J):
-                xk_pnorms[k] += sqrt(xk_sum[ip2] * A[ip2] * xk_sum[ip2])
+    # Matrix index variables.
+    cdef:
+        Py_ssize_t i, j
+        Py_ssize_t I = m1.shape[0]
+        Py_ssize_t J = m2.shape[0]
 
-            # Preveting division by 0.0
-            if xk_pnorms[k] == 0.0:
-                xk_pnorms[k] = 0.000001
+        # MemoryViews for the cython arrays used for sotring the temporary and...
+        # ...to be retured results.
+        double [:, ::1] res
 
-            # Calculating the Centroid of the (assumed) hyper-sphear.
-            for jp2 in range(X_J):
-                mu_arr[k, jp2] = xk_sum[jp2] / xk_pnorms[k]
+    # Creating the array for results and its memory view
+    res = cvarray(shape=(I, J), itemsize=sizeof(double), format="d")
 
-    return mu_arr
+    # Calculating the dot product.
+    with nogil, parallel():
+        for i in prange(I, schedule='guided'):
+            for j in range(J):
+                res[i, j] = m1[i, j] * m2[j]
+
+    return res
+
+
+# Note: Make it cdef if only for interal usage in cython.
+cpdef double [::1] get_diag(double [:, ::1] m):
+
+    # Matrix index variables.
+    cdef:
+        unsigned int i
+        unsigned int I = m.shape[0]
+
+        # Creating the numpy.array for results and its memory view
+        double [::1] res = np.zeros((I), dtype=np.float)
+
+    # Calculating the dot product.
+    with nogil:
+        for i in range(I):
+            # The idxs array is giving the actual row index of the data matrix...
+            # ...to be summed up.
+            res[i] += m[i, i]
+
+    return res
+
+
+# Note: Make it cdef if only for interal usage in cython.
+cpdef double [::1] vdiv_num(double [::1] v, double num):
+
+    # Matrix index variables.
+    cdef:
+        unsigned int i
+        unsigned int I = v.shape[0]
+
+        # Creating the numpy.array for results and its memory view
+        double [::1] res = np.zeros((I), dtype=np.float)
+
+    #
+    with nogil:
+        for i in range(I):
+            res[i] = v[i] / num
+
+    return res
+
+
+# Note: Make it cdef if only for interal usage in cython.
+cpdef double [::1] vsqrt(double [::1] v):
+
+    # Matrix index variables.
+    cdef:
+        unsigned int i
+        unsigned int I = v.shape[0]
+
+        # Creating the numpy.array for results and its memory view
+        double [::1] res = np.zeros((I), dtype=np.float)
+
+    #
+    with nogil:
+        for i in range(I):
+            res[i] = sqrt(v[i])
+
+    return res
+
+
+"""
+# Note: Make it cdef if only for interal usage in cython.
+cpdef double [:, ::1] dot2d(double [:, ::1] m1, double [:, ::1] m2):
+
+    # if m1.shape[1] != m2.shape[0]:
+    #     raise Exception("Matrix dimensions mismatch. Dot product cannot be computed.")
+
+    # Matrix index variables.
+    cdef:
+        unsigned int i, j, k
+        unsigned int I = m1.shape[0]
+        unsigned int J = m2.shape[1]
+        unsigned int K = m1.shape[1]
+
+    # Creating the array for results and its memory view
+    double [:, ::1] res = np.zeros((I, J), dtype=np.float)
+
+    # Calculating the dot product.
+    with nogil, parallel():
+        for i in prange(I, schedule='guided'):
+            for j in range(J):
+                for k in range(K):
+                    res[i, j] += m1[i, k] * m2[k, j]
+
+    return res
+
+# Note: Make it cdef if only for interal usage in cython.
+cpdef double [:, ::1] div2d_vv(double [:, ::1] m, double [::1] v):
+
+    # _vv stands for Vertical Vector.
+
+    # if m.shape[0] != v.shape[0]:
+    #     raise Exception("Matrix dimensions mismatch. 2D matrix cannot be dived by the vertical vector")
+
+    # Matrix index variables.
+    cdef:
+        unsigned int i0, i1, j
+        unsigned int I0 = m.shape[0]
+        unsigned int I1 = m.shape[1]
+        unsigned int J = v.shape[0]
+
+    # Creating the numpy.array for results and its memory view
+    double [:, ::1] res = np.zeros((I0, I1), dtype=np.float)
+
+    #
+    with nogil, parallel():
+        for i0 in prange(I0, schedule='guided'):
+            for i1 in range(I1):
+                res[i0, i1] = m[i0, i1] / v[i0]
+
+    return res
+"""
