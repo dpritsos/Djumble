@@ -794,13 +794,13 @@ class StochSemisupEM(object):
         # Initializing clustering
 
         # Creating distortion parameters stochastic set for the initial ICM run.
-        self.dv = np.ones((eft_per_i, x_data.shape[1]), dtype=np.float)
+        dvz = np.ones((eft_per_i, x_data.shape[1]), dtype=np.float)
         for i in np.arange(eft_per_i - 1):
-            self.dv[i + 1, :] = np.random.exponential(1 / self.efl_usd_vals[0], size=1)
+            dvz[i + 1, :] = np.random.exponential(1 / self.efl_usd_vals[0], size=1)
 
         # Initialising the best stochastic distortion vector with the first of all eft_per_i cases.
-        self.best_dv = np.zeros((x_data.shape[1]), dtype=np.float)
-        self.best_dv[:] = self.dv[0, :]
+        best_dv = np.zeros((x_data.shape[1]), dtype=np.float)
+        best_dv[:] = dvz[0, :]
 
         clstr_tags_arr = np.empty(x_data.shape[0], dtype=np.int)
         clstr_tags_arr[:] = 999999
@@ -841,30 +841,42 @@ class StochSemisupEM(object):
             # Storing the amount of iterations until convergence.
             self.conv_step = c_step
 
-            # The E-Step.
+            # ########### #
+            # The E-Step. #
+            # ########### #
 
             # Assigning every data-set point to the proper cluster upon distortion parameters...
             # ...and centroids for the current iteration.
-            clstr_tags_arr, opt_dv = self.ICM(x_data, mu_arr, clstr_tags_arr)
+            ctags_per_dv = self.ICM(dvz, x_data, mu_arr, clstr_tags_arr)
 
-            self.best_dv[:] = opt_dv
+            # ########### #
+            # The M-Step. #
+            # ########### #
+            for set_dv, ctags_set, in zip(dvz, ctags_per_dv):
 
-            # The M-Step.
+                self.dv = set_dv
 
-            # Recalculating centroids upon the new clusters set-up.
-            mu_arr = vop.mean_cosA(x_data, clstr_tags_arr, self.best_dv[:], self.k_clusters)
+                # Recalculating centroids upon the new clusters set-up.
+                mu_arr_dv = vop.mean_cosA(x_data, ctags_set, set_dv, self.k_clusters)
 
-            # Calculating Global JObjective function.
-            glob_jobj = self.GlobJObjCosA(x_data, mu_arr, clstr_tags_arr)
+                # Calculating Global JObjective function.
+                glob_jobj = self.GlobJObjCosA(x_data, mu_arr, ctags_set)
 
-            # Terminating upon the difference of the last two Global JObej values.
-            if np.abs(last_gobj - glob_jobj) < self.cvg or glob_jobj < self.cvg:
-                # second condition is TEMP!
-                print 'last_gobj - glob_jobj', np.abs(last_gobj - glob_jobj)
-                print "Global Objective", glob_jobj
-                break
-            else:
-                last_gobj = glob_jobj
+                # Terminating upon the difference of the last two Global JObej values.
+                if np.abs(last_gobj - glob_jobj) < self.cvg or glob_jobj < self.cvg:
+                    # second condition is TEMP!
+                    print 'last_gobj - glob_jobj', np.abs(last_gobj - glob_jobj)
+                    print "Global Objective", glob_jobj
+
+                    return mu_arr_dv, ctags_set
+
+                else:
+                    # Keeping the DV vector if the JObjective value is lower.
+                    if glob_jobj < last_gobj:
+                        last_gobj = glob_jobj
+                        best_dv[:] = set_dv
+                        clstr_tags_arr = ctags_set
+                        mu_arr = mu_arr_dv
 
             print "Global Objective (narray)", glob_jobj
 
@@ -877,8 +889,9 @@ class StochSemisupEM(object):
                     self.efl_usd_vals.append(efl)
                     break
 
-            for i in np.arange(self.eft_per_i):
-                self.dv[i, :] = np.random.exponential(1 / elf, size=1)
+            for i in np.arange(self.eft_per_i - 1):
+                dvz[i, :] = np.random.exponential(1 / elf, size=1)
+            dvz = vstack(dvz, best_dv)
 
         # Returning the Centroids and the Clusters,i.e. the set of indeces for each cluster.
         return mu_arr, clstr_tags_arr
@@ -896,15 +909,18 @@ class StochSemisupEM(object):
             'exp_l_usd_vals': self.efl_usd_vals
         }
 
-    def ICM2(self, x_data, mu_arr, clstr_tags_arr):
+    def ICM(self, dvz, x_data, mu_arr, clstr_tags_arr):
         """ ICM: Iterated Conditional Modes (for the E-Step).
             After all points are assigned, they are randomly re-ordered, and the assignment process
             is repeated. This process proceeds until no point changes its cluster assignment
             between two successive iterations.
-
         """
 
         print "In ICM..."
+
+        ctags_stage0 = np.vstack([clstr_tags_arr] * dvz.shape[0])
+        ctags_stage1 = np.zeros_like(ctags_stage0)
+        stg_change_cnt = np.zeros(dvz.shape[0])
 
         no_change_cnt = 0
         # while no_change_cnt < 2:
@@ -912,30 +928,41 @@ class StochSemisupEM(object):
 
             # Stopping the rearrangment of the clusters when at least 2 times nothing changed...
             # ...thus, most-likelly the arrangmet is optimal.
-            if no_change_cnt == 2:
+            if np.all(np.equal(stg_change_cnt, 2)):
                 break
 
-            # Calculating the new Clusters.#
-            # ============================ #
+            # Calculating the new Clusters.
+            for x_idx in np.random.permutation(x_data.shape[0]):
 
-            # Getting the random premutation
-            rnd_idxs = np.random.permutation(x_data.shape[0])
+                # Creating a New
+                for j, dv in enumerate[dvz]:
 
-            for dv in self.dv:
+                    self.dv = dv
 
-                # Calculating the J-Objectives for this Distortion Vector.
-                jobjs = self.JObjCosStochDV(x_data, mu_arr, dv)
+                    # Setting the initial value for the previews J-Objective value.
+                    last_jobj = np.Inf
 
-                # Getting the new cluster tags calculated for the new JObjectives.
-                new_clstr_tags = np.argmin(jobjs, axis=0)
+                    # Calculating the J-Objective for every x_i vector of the x_data set.
+                    for mu_i in np.arange(mu_arr.shape[0]):
 
-                # Counting Non-Changes, i.e. if no change happens for two (2) iteration the...
-                # ...re-assingment process stops.
-                if np.array_equal(new_clstr_tags, clstr_tags_arr):
-                    no_change_cnt += 1
+                        # Getting the indeces for this cluster....based on the previews stage.
+                        clstr_idxs_arr = np.where(ctags_stage0[j] == mu_i)[0]
+
+                        # Calculating the J-Objective.
+                        j_obj = self.JObjCosA(x_idx, x_data, mu_i, mu_arr, clstr_idxs_arr)
+
+                        if j_obj < last_jobj:
+                            last_jobj = j_obj
+                            new_clstr_tag = mu_i
+
+                    # Re-assinging....
+                    ctags_stage1[j, x_idx] = new_clstr_tag
+
+            # Checking if the clusters where for every DV and add 1 in the stage-change counter.
+            stg_change_cnt[np.where(np.all(np.equal(ctags_stage0, ctags_stage1), axis=1))] += 1
 
         # Returning clstr_tags_arr.
-        return clstr_tags_arr
+        return ctags_stage1
 
     def JObjCosA(self, x_idx, x_data, mu_i, mu_arr, clstr_idx_arr):
         """ JObjCosA: J-Objective function for parametrized Cosine Stochastic Distortion Measure.
@@ -1014,14 +1041,6 @@ class StochSemisupEM(object):
             )
 
             cl_cost = self.cl_wg * np.sum(viol_costs)  # / float(clv_cnts)
-
-            # if np.size(clv_pair_rows):
-            # sum0 = dist + ml_cost + cl_cost + params_pdf + norm_part_value
-            # if np.min(self.dv) < 0 or np.max(self.dv) > 1.0 or sum0 == np.NaN:
-            #     print self.dv
-            # print np.array(dist), ml_cost, cl_cost, params_pdf, norm_part_value, sum0
-
-            return dist + ml_cost + cl_cost + params_pdf + norm_part_value
 
         # Calculating and returning the J-Objective value for this cluster's set-up.
         return dist + ml_cost + cl_cost
