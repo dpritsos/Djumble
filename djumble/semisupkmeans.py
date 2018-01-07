@@ -794,13 +794,15 @@ class StochSemisupEM(object):
         # Initializing clustering
 
         # Creating distortion parameters stochastic set for the initial ICM run.
-        dvz = np.ones((eft_per_i, x_data.shape[1]), dtype=np.float)
-        for i in np.arange(eft_per_i - 1):
+        dvz = np.ones((self.eft_per_i, x_data.shape[1]), dtype=np.float)
+        for i in np.arange(self.eft_per_i - 1):
             dvz[i + 1, :] = np.random.exponential(1 / self.efl_usd_vals[0], size=1)
 
         # Initialising the best stochastic distortion vector with the first of all eft_per_i cases.
         best_dv = np.zeros((x_data.shape[1]), dtype=np.float)
         best_dv[:] = dvz[0, :]
+        best_efl = self.efl_usd_vals[0]
+        efl = best_efl
 
         clstr_tags_arr = np.empty(x_data.shape[0], dtype=np.int)
         clstr_tags_arr[:] = 999999
@@ -824,7 +826,7 @@ class StochSemisupEM(object):
         # ########
 
         # Calculating the initial Centroids of the assumed hyper-shperical clusters.
-        mu_arr = vop.mean_cosA(x_data, clstr_tags_arr, self.dv, self.k_clusters)
+        mu_arr = vop.mean_cosA(x_data, clstr_tags_arr, best_dv, self.k_clusters)
 
         # EM algorithm execution.
 
@@ -852,7 +854,7 @@ class StochSemisupEM(object):
             # ########### #
             # The M-Step. #
             # ########### #
-            for set_dv, ctags_set, in zip(dvz, ctags_per_dv):
+            for set_dv, ctags_set in zip(dvz, ctags_per_dv):
 
                 self.dv = set_dv
 
@@ -875,23 +877,28 @@ class StochSemisupEM(object):
                     if glob_jobj < last_gobj:
                         last_gobj = glob_jobj
                         best_dv[:] = set_dv
+                        best_efl = efl
                         clstr_tags_arr = ctags_set
                         mu_arr = mu_arr_dv
 
-            print "Global Objective (narray)", glob_jobj
+            print "Global: jObj-val = ", glob_jobj, ", last jObj-val = ", last_gobj
 
             # Creating the new distortion vectros tocastic set to be tested in the next EM step.
             while True:
                 # Selecting randomly a value from the range of L values...
                 # ...for the exponential distribution function below.
                 efl = np.random.permutation(self.efl_vals)[0]
-                if elf not in self.efl_usd_vals:
+                if efl not in self.efl_usd_vals:
                     self.efl_usd_vals.append(efl)
                     break
 
+                if len(self.efl_usd_vals) == len(self.efl_vals):
+                    efl = best_efl
+                    break
+
             for i in np.arange(self.eft_per_i - 1):
-                dvz[i, :] = np.random.exponential(1 / elf, size=1)
-            dvz = vstack(dvz, best_dv)
+                dvz[i, :] = np.random.exponential(1 / efl, size=1)
+            dvz = np.vstack((dvz, best_dv))
 
         # Returning the Centroids and the Clusters,i.e. the set of indeces for each cluster.
         return mu_arr, clstr_tags_arr
@@ -928,14 +935,20 @@ class StochSemisupEM(object):
 
             # Stopping the rearrangment of the clusters when at least 2 times nothing changed...
             # ...thus, most-likelly the arrangmet is optimal.
-            if np.all(np.equal(stg_change_cnt, 2)):
+            # if np.all(np.equal(stg_change_cnt, 2)):
+            if np.max(stg_change_cnt) == 2:
                 break
+            else:
+                print 'not yet'
 
             # Calculating the new Clusters.
             for x_idx in np.random.permutation(x_data.shape[0]):
+                # print "index", x_idx
 
                 # Creating a New
-                for j, dv in enumerate[dvz]:
+                for j, dv in enumerate(dvz):
+
+                    # print "dv"
 
                     self.dv = dv
 
