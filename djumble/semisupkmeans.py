@@ -118,7 +118,7 @@ class HMRFKmeansSemiSup(object):
         # Pick k random vector from the x_data set as initial centroids. Where k is equals...
         # ...the number of self.k_clusters.
         if self.init_centroids is None:
-            self.init_centroids = np.random.randint(0, self.k_clusters, size=x_data.shape[0])
+            self.init_centroids = np.random.randint(0, x_data.shape[0], size=self.k_clusters)
         else:
             # Setting one index of the x_data set per expected cluster as the initialization...
             # ...centroid for this cluster.
@@ -149,16 +149,20 @@ class HMRFKmeansSemiSup(object):
             # Storing the amount of iterations until convergence.
             self.conv_step = c_step
 
-            # The E-Step.
+            # ########### #
+            # The E-Step. #
+            # ########### #
 
             # Assigning every data-set point to the proper cluster upon distortion parameters...
             # ...and centroids for the current iteration.
-            clstr_tags_arr = self.ICM(x_data, mu_arr, clstr_tags_arr)
+            ctags_set = self.ICM(x_data, mu_arr, clstr_tags_arr)
 
-            # The M-Step.
+            # ########### #
+            # The M-Step. #
+            # ########### #
 
             # Recalculating centroids upon the new clusters set-up.
-            mu_arr = vop.mean_cosA(x_data, clstr_tags_arr, self.dv, self.k_clusters)
+            mu_set = vop.mean_cosA(x_data, clstr_tags_arr, self.dv, self.k_clusters)
 
             # Re-estimating distortion measure parameters upon the new clusters set-up.
             self.dv = self.UpdateDistorParams(self.dv, x_data, mu_arr, clstr_tags_arr)
@@ -173,9 +177,13 @@ class HMRFKmeansSemiSup(object):
                 print "Global Objective", glob_jobj
                 break
             else:
-                last_gobj = glob_jobj
+                if glob_jobj < last_gobj:
+                    last_gobj = glob_jobj
+                clstr_tags_arr[:] = ctags_set[:]
+                mu_arr = mu_set
 
-            print "Global Objective (narray)", glob_jobj
+
+            print "Global: jObj-val = ", glob_jobj, ", last jObj-val = ", last_gobj
 
         # Returning the Centroids and the Clusters,i.e. the set of indeces for each cluster.
         return mu_arr, clstr_tags_arr
@@ -796,7 +804,7 @@ class StochSemisupEM(object):
         # Creating distortion parameters stochastic set for the initial ICM run.
         dvz = np.ones((self.eft_per_i, x_data.shape[1]), dtype=np.float)
         for i in np.arange(self.eft_per_i - 1):
-            dvz[i + 1, :] = np.random.exponential(1 / self.efl_usd_vals[0], size=1)
+            dvz[i + 1, :] = np.random.exponential(1 / self.efl_usd_vals[0], size=x_data.shape[1])
 
         # Initialising the best stochastic distortion vector with the first of all eft_per_i cases.
         best_dv = np.zeros((x_data.shape[1]), dtype=np.float)
@@ -807,12 +815,14 @@ class StochSemisupEM(object):
         clstr_tags_arr = np.empty(x_data.shape[0], dtype=np.int)
         clstr_tags_arr[:] = 999999
 
+        best_clstr_tags_arr = np.zeros_like(clstr_tags_arr)
+
         # Selecting a random set of centroids if not any given as class initialization argument.
 
         # Pick k random vector from the x_data set as initial centroids. Where k is equals...
         # ...the number of self.k_clusters.
         if self.init_centroids is None:
-            self.init_centroids = np.random.randint(0, self.k_clusters, size=x_data.shape[0])
+            self.init_centroids = np.random.randint(0, x_data.shape[0], size=self.k_clusters)
         else:
             # Setting one index of the x_data set per expected cluster as the initialization...
             # ...centroid for this cluster.
@@ -827,6 +837,7 @@ class StochSemisupEM(object):
 
         # Calculating the initial Centroids of the assumed hyper-shperical clusters.
         mu_arr = vop.mean_cosA(x_data, clstr_tags_arr, best_dv, self.k_clusters)
+        best_mu_arr = np.zeros_like(mu_arr)
 
         # EM algorithm execution.
 
@@ -878,8 +889,11 @@ class StochSemisupEM(object):
                         last_gobj = glob_jobj
                         best_dv[:] = set_dv
                         best_efl = efl
-                        clstr_tags_arr = ctags_set
-                        mu_arr = mu_arr_dv
+                        best_clstr_tags_arr[:] = ctags_set[:]
+                        best_mu_arr[:, :] = mu_arr[:, :]
+
+                    clstr_tags_arr[:] = ctags_set[:]
+                    mu_arr = mu_arr_dv
 
             print "Global: jObj-val = ", glob_jobj, ", last jObj-val = ", last_gobj
 
@@ -897,11 +911,13 @@ class StochSemisupEM(object):
                     break
 
             for i in np.arange(self.eft_per_i - 1):
-                dvz[i, :] = np.random.exponential(1 / efl, size=1)
-            dvz = np.vstack((dvz, best_dv))
+                dvz[i, :] = np.random.exponential(1 / efl, size=x_data.shape[1])
+            dvz[-1, :] = best_dv[:]
+
+            print dvz
 
         # Returning the Centroids and the Clusters,i.e. the set of indeces for each cluster.
-        return mu_arr, clstr_tags_arr
+        return best_mu_arr, best_clstr_tags_arr
 
     def get_params(self):
         return {
@@ -1129,10 +1145,12 @@ class StochSemisupEM(object):
 
         # Averaging all-total distance costs.
         sum_d = sum_d / (x_data.shape[0] * mu_arr.shape[0])
+        print "ML", ml_cost, ml_cnt # ml_cost / np.float(ml_cnt)
         if ml_cnt:
-            ml_cost = ml_cost / ml_cnt
+            ml_cost = ml_cost / np.float(ml_cnt)
+        print "CL", cl_cost, cl_cnt # cl_cost / np.float(cl_cnt)
         if cl_cnt:
-            cl_cost = cl_cost / cl_cnt
+            cl_cost = cl_cost / np.float(cl_cnt)
 
         print 'dims', x_data.shape[1]
         print 'sum_d, ml_cost, cl_cost', sum_d, ml_cost, cl_cost

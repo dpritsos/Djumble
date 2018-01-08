@@ -27,8 +27,7 @@ sys.path.append('../')
 import djumble.semisupkmeans as sskm
 
 
-
-test_dims = 100
+test_dims = 10
 
 print "Creating Sample"
 x_data_2d_arr1 = sps.vonmises.rvs(5.0, loc=np.random.uniform(0.0, 1400.0, size=(1, test_dims)), scale=1, size=(500, test_dims))
@@ -116,24 +115,29 @@ print "Running HMRF Kmeans"
 """
 hkmeans = sskm.HMRFKmeansSemiSup(
     k_clusters, must_lnk_con_arr, cannot_lnk_con_arr, init_centroids=init_centrs_arr,
-    ml_wg=1.0, cl_wg=1.0, max_iter=100, cvg=0.001, lrn_rate=30.0, ray_sigma=2.5, d_params=None,
+    ml_wg=1.0, cl_wg=1.0, max_iter=30, cvg=0.001, lrn_rate=0.03, ray_sigma=2.5, d_params=None,
     icm_max_i=1000, enable_norm=False
 )
 
 res = hkmeans.fit(copy.deepcopy(x_data_2d_arr))
-"""
 
+print res[1]
+print hkmeans.get_params()
+
+"""
 ssEM = sskm.StochSemisupEM(
-    k_clusters, must_lnk_con_arr, cannot_lnk_con_arr, init_centroids=None,
-    ml_wg=1.0, cl_wg=1.0, max_iter=30, cvg=0.001, icm_max_i=10,
+    k_clusters, must_lnk_con_arr, cannot_lnk_con_arr, init_centroids=init_centrs_arr,
+    ml_wg=1.0, cl_wg=1.0, max_iter=20, cvg=0.001, icm_max_i=10,
     min_efl=0.5, max_efl=1.5, step_efl=0.1, eft_per_i=10
 )
 
 res = ssEM.fit(copy.deepcopy(x_data_2d_arr))
 
-
 print res[1]
-print hkmeans.get_params()
+print ssEM.get_params()
+
+
+
 
 # Prifilling - Ends
 # pr.disable()
