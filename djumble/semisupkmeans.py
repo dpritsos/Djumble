@@ -113,6 +113,8 @@ class HMRFKmeansSemiSup(object):
         clstr_tags_arr = np.empty(x_data.shape[0], dtype=np.int)
         clstr_tags_arr[:] = 999999
 
+        best_clstr_tags_arr = np.zeros_like(clstr_tags_arr)
+
         # Selecting a random set of centroids if not any given as class initialization argument.
 
         # Pick k random vector from the x_data set as initial centroids. Where k is equals...
@@ -133,6 +135,7 @@ class HMRFKmeansSemiSup(object):
 
         # Calculating the initial Centroids of the assumed hyper-shperical clusters.
         mu_arr = vop.mean_cosA(x_data, clstr_tags_arr, self.dv, self.k_clusters)
+        best_mu_arr = np.zeros_like(mu_arr)
 
         # EM algorithm execution.
 
@@ -155,14 +158,14 @@ class HMRFKmeansSemiSup(object):
 
             # Assigning every data-set point to the proper cluster upon distortion parameters...
             # ...and centroids for the current iteration.
-            ctags_set = self.ICM(x_data, mu_arr, clstr_tags_arr)
+            clstr_tags_arr = self.ICM(x_data, mu_arr, clstr_tags_arr)
 
             # ########### #
             # The M-Step. #
             # ########### #
 
             # Recalculating centroids upon the new clusters set-up.
-            mu_set = vop.mean_cosA(x_data, clstr_tags_arr, self.dv, self.k_clusters)
+            mu_arr = vop.mean_cosA(x_data, clstr_tags_arr, self.dv, self.k_clusters)
 
             # Re-estimating distortion measure parameters upon the new clusters set-up.
             self.dv = self.UpdateDistorParams(self.dv, x_data, mu_arr, clstr_tags_arr)
@@ -175,18 +178,23 @@ class HMRFKmeansSemiSup(object):
                 # second condition is TEMP!
                 print 'last_gobj - glob_jobj', np.abs(last_gobj - glob_jobj)
                 print "Global Objective", glob_jobj
-                break
+
+                # When finding a better Clusters set-up than the last best set-up then stopping...
+                # ...the EM and returning the current results. Here the EM is stopping at a...
+                # ...globla minima given that the cvg precision is relativelly small.
+                return mu_arr, clstr_tags_arr
+
             else:
                 if glob_jobj < last_gobj:
                     last_gobj = glob_jobj
-                clstr_tags_arr[:] = ctags_set[:]
-                mu_arr = mu_set
-
+                    best_clstr_tags_arr[:] = clstr_tags_arr[:]
+                    best_mu_arr[:, :] = mu_arr[:, :]
 
             print "Global: jObj-val = ", glob_jobj, ", last jObj-val = ", last_gobj
 
-        # Returning the Centroids and the Clusters,i.e. the set of indeces for each cluster.
-        return mu_arr, clstr_tags_arr
+        # Returning the Centroids and the Clusters best set-up found in one of the EM iterations...
+        # ..., however, the EM here stops at a local minima not the global.
+        return best_mu_arr, best_clstr_tags_arr
 
     def get_params(self):
         return {
@@ -535,9 +543,9 @@ class HMRFKmeansSemiSup(object):
             # Averaging all-total distance costs.
             sum_d = sum_d / (x_data.shape[0] * mu_arr.shape[0])
             if ml_cnt:
-                ml_cost = ml_cost / ml_cnt
+                ml_cost = ml_cost / np.float(ml_cnt)
             if cl_cnt:
-                cl_cost = cl_cost / cl_cnt
+                cl_cost = cl_cost / np.flaot(cl_cnt)
 
         print 'dims', x_data.shape[1]
         print 'sum_d, ml_cost, cl_cost', sum_d, ml_cost, cl_cost
@@ -914,9 +922,8 @@ class StochSemisupEM(object):
                 dvz[i, :] = np.random.exponential(1 / efl, size=x_data.shape[1])
             dvz[-1, :] = best_dv[:]
 
-            print dvz
-
-        # Returning the Centroids and the Clusters,i.e. the set of indeces for each cluster.
+        # Returning the Centroids and the Clusters best set-up found in one of the EM iterations...
+        # ..., however, the EM here stops at a local minima not the global.
         return best_mu_arr, best_clstr_tags_arr
 
     def get_params(self):
@@ -1145,16 +1152,14 @@ class StochSemisupEM(object):
 
         # Averaging all-total distance costs.
         sum_d = sum_d / (x_data.shape[0] * mu_arr.shape[0])
-        print "ML", ml_cost, ml_cnt # ml_cost / np.float(ml_cnt)
         if ml_cnt:
             ml_cost = ml_cost / np.float(ml_cnt)
-        print "CL", cl_cost, cl_cnt # cl_cost / np.float(cl_cnt)
         if cl_cnt:
             cl_cost = cl_cost / np.float(cl_cnt)
 
-        print 'dims', x_data.shape[1]
-        print 'sum_d, ml_cost, cl_cost', sum_d, ml_cost, cl_cost
-        print 'sum_d + ml_cost + cl_cost', sum_d + ml_cost + cl_cost
+        # print 'dims', x_data.shape[1]
+        # print 'sum_d, ml_cost, cl_cost', sum_d, ml_cost, cl_cost
+        print 'sum_d + ml_cost + cl_cost=', sum_d + ml_cost + cl_cost
 
         # Calculating and returning the Global J-Objective value for the current Spherical...
         # ...vMF-Mixture set-up.

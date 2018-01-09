@@ -112,10 +112,10 @@ init_centrs_arr = [0, 550, 1100]
 # pr.enable()
 
 print "Running HMRF Kmeans"
-"""
+
 hkmeans = sskm.HMRFKmeansSemiSup(
     k_clusters, must_lnk_con_arr, cannot_lnk_con_arr, init_centroids=init_centrs_arr,
-    ml_wg=1.0, cl_wg=1.0, max_iter=30, cvg=0.001, lrn_rate=0.03, ray_sigma=2.5, d_params=None,
+    ml_wg=1.0, cl_wg=1.0, max_iter=50, cvg=0.001, lrn_rate=0.03, ray_sigma=2.5, d_params=None,
     icm_max_i=1000, enable_norm=False
 )
 
@@ -136,7 +136,7 @@ res = ssEM.fit(copy.deepcopy(x_data_2d_arr))
 print res[1]
 print ssEM.get_params()
 
-
+"""
 
 
 # Prifilling - Ends
