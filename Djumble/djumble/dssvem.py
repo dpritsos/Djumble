@@ -34,7 +34,7 @@ class DSSVEM(object):
                  offset_dcoefs=None,  # Vector of offset distortion coefficients. None is implicit.
                  ml_wg=1.0,  # Must-link weighting coefficient.
                  cl_wg=1.0,   # Cannot-link weighting coefficient.
-                 fs_rnd_itrs=10, # Number of randome selection iterations.
+                 fs_rnd_itrs=10, # Number of random selection iterations.
                  max_iter=10,  # Max number of clustering iterations.
                  lrn_rate=0.001,  # Learning rate of the EM algorithm.
                  # sray_sigma=0.5,  # Not sure to be used 
@@ -1129,3 +1129,5 @@ class StochSemisupEM(object):
         # Calculating and returning the Global J-Objective value for the current Spherical...
         # ...vMF-Mixture set-up.
         return sum_d + (self.ml_wg * ml_cost) + (self.cl_wg * cl_cost)
+
+
