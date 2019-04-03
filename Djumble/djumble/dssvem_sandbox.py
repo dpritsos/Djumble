@@ -41,13 +41,24 @@ class DSSVEM(object):
                  # icm_max_i=10, 
                  # enable_norm=False  # Allowing normalization.
                  ):
-        pass
+        
+        pass = 
+
+
+    def fit(self):
+
+        ctr = 12
+
+        self.trg = (ctr - 1.0) / np.float(ctr)
 
     def GradientDescent(self):
 
+
+        trg = #
+
         next_x = 6  # We start the search at x=6
         gamma = 0.01  # Step size multiplier
-        precision = 0.00001  # Desired precision of result
+        precision = 0.0001  # Desired precision of result
         max_iters = 10000  # Maximum number of iterations
 
         # Derivative function
