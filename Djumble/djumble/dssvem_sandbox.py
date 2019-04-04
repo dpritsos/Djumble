@@ -42,19 +42,20 @@ class DSSVEM(object):
                  # enable_norm=False  # Allowing normalization.
                  ):
         
-        pass = 
+        self.W = np.array([np.random.rand()]*10)
 
 
     def fit(self):
 
         ctr = 12
 
-        self.trg = (ctr - 1.0) / np.float(ctr)
+        self.trg = (ctr - 1.0) / np.float32(ctr)
 
-    def GradientDescent(self):
+    def GradientDescent(self, X):
 
+        self.W
 
-        trg = #
+        df = lambda x: -(h * (1/(1+np.exp())) * () * () *  )
 
         next_x = 6  # We start the search at x=6
         gamma = 0.01  # Step size multiplier
